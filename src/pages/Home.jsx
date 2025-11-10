@@ -141,7 +141,7 @@ const Home = () => {
           </div>
 
           <h1 className="text-6xl md:text-8xl font-bold text-white mb-6 drop-shadow-2xl">
-            Upper Ichon
+            Jetler Egido
           </h1>
 
           <p className="text-2xl md:text-3xl text-cyan-50 font-bold mb-8 drop-shadow-lg max-w-3xl mx-auto leading-relaxed">
