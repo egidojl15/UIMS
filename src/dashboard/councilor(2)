@@ -1,0 +1,851 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Menu,
+  X,
+  FileText,
+  ShieldAlert,
+  User,
+  Search,
+  ChevronDown,
+  Check,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Download,
+  Printer,
+  Plus,
+  Eye,
+  Edit,
+  LogOut,
+} from "lucide-react";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from "recharts";
+
+// ————————————————————————————————————————
+// Mock seed data (dates as ISO strings; theme colors kept: indigo/gray/green/yellow)
+// ————————————————————————————————————————
+const seedComplaints = [
+  {
+    id: "C-0457",
+    complainant: "Juan Dela Cruz",
+    type: "Noise",
+    date: "2025-07-18",
+    status: "Resolved",
+    narrative: "Loud music at night.",
+    remarks: "Counseling done.",
+    actionTaken: "Visited complainant.",
+  },
+  {
+    id: "C-0458",
+    complainant: "Maria Lopez",
+    type: "Theft",
+    date: "2025-07-20",
+    status: "Ongoing",
+    narrative: "Lost cellphone at basketball court.",
+    remarks: "Under investigation.",
+    actionTaken: "Barangay police informed.",
+  },
+  {
+    id: "C-0459",
+    complainant: "Ramon Cruz",
+    type: "Dispute",
+    date: "2025-08-05",
+    status: "Pending",
+    narrative: "Neighbor boundary disagreement.",
+    remarks: "Awaiting mediation schedule.",
+    actionTaken: "Initial interview completed.",
+  },
+];
+
+const seedBlotters = [
+  {
+    id: "B-1281",
+    parties: "Pedro Santos vs. Mario Reyes",
+    summary: "Physical altercation",
+    status: "Ongoing",
+    date: "2025-07-16",
+    remarks: "Waiting for mediation.",
+    actionTaken: "Police notified.",
+  },
+  {
+    id: "B-1282",
+    parties: "Ana Cruz vs. Liza Ramos",
+    summary: "Verbal dispute",
+    status: "Resolved",
+    date: "2025-07-12",
+    remarks: "Mediation successful.",
+    actionTaken: "Barangay officials facilitated.",
+  },
+  {
+    id: "B-1283",
+    parties: "Carlo N. vs. Unknown",
+    summary: "Vandalism at court",
+    status: "Pending",
+    date: "2025-08-07",
+    remarks: "CCTV review pending.",
+    actionTaken: "Requested CCTV.",
+  },
+];
+
+// Theme-aligned status badges
+const statusStyles = {
+  Resolved: "bg-green-100 text-green-700",
+  Ongoing: "bg-yellow-100 text-yellow-700",
+  Pending: "bg-indigo-100 text-indigo-700",
+};
+
+// Chart colors (stay within theme family)
+const CHART_COLORS = {
+  Resolved: "#16a34a", // green-600
+  Ongoing: "#ca8a04", // yellow-600
+  Pending: "#4f46e5", // indigo-600
+};
+
+const Councilor = () => {
+  // layout
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard"); // dashboard | complaints | blotter | profile
+
+  // data & ui
+  const [complaints, setComplaints] = useState([]);
+  const [blotters, setBlotters] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // filters & sorting
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [sortKey, setSortKey] = useState("date"); // date | status | type
+  const [sortDir, setSortDir] = useState("desc"); // asc | desc
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  // pagination
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 6;
+
+  // modals
+  const [detailItem, setDetailItem] = useState(null); // complaint or blotter
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  // seed load simulation
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setComplaints(seedComplaints);
+      setBlotters(seedBlotters);
+      setLoading(false);
+    }, 600);
+    return () => clearTimeout(t);
+  }, []);
+
+  // derived filters
+  const filteredComplaints = useMemo(() => {
+    let list = [...complaints];
+    if (query) {
+      const q = query.toLowerCase();
+      list = list.filter(
+        (c) =>
+          c.complainant.toLowerCase().includes(q) ||
+          c.narrative.toLowerCase().includes(q) ||
+          c.type.toLowerCase().includes(q)
+      );
+    }
+    if (statusFilter !== "All") list = list.filter((c) => c.status === statusFilter);
+
+    // sort
+    list.sort((a, b) => {
+      if (sortKey === "date") {
+        const da = new Date(a.date).getTime();
+        const db = new Date(b.date).getTime();
+        return sortDir === "asc" ? da - db : db - da;
+      }
+      if (sortKey === "status") {
+        return sortDir === "asc"
+          ? a.status.localeCompare(b.status)
+          : b.status.localeCompare(a.status);
+      }
+      if (sortKey === "type") {
+        return sortDir === "asc"
+          ? a.type.localeCompare(b.type)
+          : b.type.localeCompare(a.type);
+      }
+      return 0;
+    });
+
+    return list;
+  }, [complaints, query, statusFilter, sortKey, sortDir]);
+
+  const filteredBlotters = useMemo(() => {
+    let list = [...blotters];
+    if (query) {
+      const q = query.toLowerCase();
+      list = list.filter(
+        (b) =>
+          b.parties.toLowerCase().includes(q) ||
+          b.summary.toLowerCase().includes(q)
+      );
+    }
+    if (statusFilter !== "All") list = list.filter((b) => b.status === statusFilter);
+
+    list.sort((a, b) => {
+      if (sortKey === "date") {
+        const da = new Date(a.date).getTime();
+        const db = new Date(b.date).getTime();
+        return sortDir === "asc" ? da - db : db - da;
+      }
+      if (sortKey === "status") {
+        return sortDir === "asc"
+          ? a.status.localeCompare(b.status)
+          : b.status.localeCompare(a.status);
+      }
+      return 0;
+    });
+
+    return list;
+  }, [blotters, query, statusFilter, sortKey, sortDir]);
+
+  // pagination slices
+  const pageData = (list) => list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = (list) => Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+
+  // charts data
+  const statusBreakdown = useMemo(() => {
+    const tally = { Resolved: 0, Ongoing: 0, Pending: 0 };
+    complaints.forEach((c) => (tally[c.status] = (tally[c.status] || 0) + 1));
+    blotters.forEach((b) => (tally[b.status] = (tally[b.status] || 0) + 1));
+    return Object.entries(tally).map(([name, value]) => ({ name, value }));
+  }, [complaints, blotters]);
+
+  const monthlyBlotters = useMemo(() => {
+    // fake buckets by month label for demo (JUL, AUG)
+    const buckets = { JUL: 0, AUG: 0 };
+    blotters.forEach((b) => {
+      const m = new Date(b.date).getMonth();
+      if (m === 6) buckets.JUL += 1; // July index 6
+      if (m === 7) buckets.AUG += 1; // August index 7
+    });
+    return [
+      { month: "JUL", count: buckets.JUL },
+      { month: "AUG", count: buckets.AUG },
+    ];
+  }, [blotters]);
+
+  // helpers
+  const badge = (status) => (
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}>
+      {status}
+    </span>
+  );
+
+
+
+  const handleAddMock = (type) => {
+    const idPrefix = type === "complaint" ? "C" : "B";
+    const now = new Date();
+    const iso = now.toISOString().slice(0, 10);
+    if (type === "complaint") {
+      setComplaints((s) => [
+        {
+          id: `${idPrefix}-${Math.floor(Math.random() * 9000) + 1000}`,
+          complainant: "New Complainant",
+          type: "Misc",
+          date: iso,
+          status: "Pending",
+          narrative: "Newly added complaint for demo.",
+          remarks: "—",
+          actionTaken: "—",
+        },
+        ...s,
+      ]);
+    } else {
+      setBlotters((s) => [
+        {
+          id: `${idPrefix}-${Math.floor(Math.random() * 9000) + 1000}`,
+          parties: "Party A vs Party B",
+          summary: "New blotter entry",
+          status: "Pending",
+          date: iso,
+          remarks: "—",
+          actionTaken: "—",
+        },
+        ...s,
+      ]);
+    }
+  };
+
+  const resetPaging = () => setPage(1);
+
+  // ————————————————————————————————————————
+  // UI Components
+  // ————————————————————————————————————————
+  const TopBar = () => (
+    <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-gray-200 px-4 md:px-6 py-3 print:hidden">
+      <div className="flex items-center gap-3">
+        <button className="lg:hidden p-2 rounded-lg hover:bg-gray-100" onClick={() => setSidebarOpen(true)}>
+          <Menu size={22} />
+        </button>
+        <h1 className="text-lg md:text-xl font-semibold capitalize">{activeTab}</h1>
+        <div className="ml-auto flex items-center gap-2">
+          {(activeTab === "complaints" || activeTab === "blotter") && (
+            <div className="hidden md:flex items-center bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm w-72">
+              <Search size={16} className="text-gray-400 mr-2" />
+              <input
+                value={query}
+                onChange={(e) => { setQuery(e.target.value); resetPaging(); }}
+                placeholder="Search..."
+                className="flex-1 outline-none text-sm"
+              />
+            </div>
+          )}
+
+          {/* Filter */}
+          {(activeTab === "complaints" || activeTab === "blotter") && (
+            <div className="relative">
+              <button
+                onClick={() => setFilterOpen((s) => !s)}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm shadow-sm"
+              >
+                <Filter size={16} /> {statusFilter}
+                <ChevronDown size={14} />
+              </button>
+              <AnimatePresence>
+                {filterOpen && (
+                  <motion.ul
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    className="absolute right-0 mt-2 w-40 bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden"
+                  >
+                    {["All", "Resolved", "Ongoing", "Pending"].map((opt) => (
+                      <li key={opt}>
+                        <button
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center justify-between ${statusFilter === opt ? "font-semibold" : ""}`}
+                          onClick={() => { setStatusFilter(opt); setFilterOpen(false); resetPaging(); }}
+                        >
+                          {opt}
+                          {statusFilter === opt && <Check size={16} className="text-indigo-600" />}
+                        </button>
+                      </li>
+                    ))}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* Sort */}
+          {(activeTab === "complaints" || activeTab === "blotter") && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+                className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm shadow-sm"
+                title="Toggle sort direction"
+              >
+                {sortDir === "asc" ? <SortAsc size={16} /> : <SortDesc size={16} />}
+              </button>
+              <div className="relative">
+                <button className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm shadow-sm flex items-center gap-2">
+                  Sort: {sortKey}
+                </button>
+                <div className="absolute hidden group-hover:block"></div>
+                <div className="absolute"></div>
+                {/* simple options inline for brevity */}
+                <div className="absolute right-0 mt-2 bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hidden">
+                  {/* kept for possible future */}
+                </div>
+              </div>
+              <select
+                className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm shadow-sm"
+                value={sortKey}
+                onChange={(e) => { setSortKey(e.target.value); resetPaging(); }}
+              >
+                <option value="date">date</option>
+                <option value="status">status</option>
+                {activeTab === "complaints" && <option value="type">type</option>}
+              </select>
+            </div>
+          )}
+
+          {/* Export & Print */}
+          {(activeTab === "complaints" || activeTab === "blotter") && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const rows = (activeTab === "complaints" ? filteredComplaints : filteredBlotters).map((r) => ({ ...r }));
+                  exportCSV(rows, `${activeTab}-${new Date().toISOString().slice(0,10)}.csv`);
+                }}
+                className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm shadow-sm hover:bg-gray-50"
+              >
+                <Download size={16} className="inline mr-1" /> CSV
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm shadow-sm hover:bg-gray-50"
+              >
+                <Printer size={16} className="inline mr-1" /> Print
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+
+  const Sidebar = () => (
+    <AnimatePresence>
+      {(sidebarOpen || typeof window === "undefined") && (
+        <motion.aside
+          initial={{ x: -260 }}
+          animate={{ x: 0 }}
+          exit={{ x: -260 }}
+          transition={{ type: "spring", stiffness: 80 }}
+          className="fixed lg:static top-0 left-0 h-full lg:h-auto w-64 bg-indigo-700 text-white shadow-xl z-20 print:hidden"
+        >
+          <div className="flex items-center justify-between p-4 border-b border-indigo-500 lg:hidden">
+            <h2 className="text-lg font-semibold">Menu</h2>
+            <button onClick={() => setSidebarOpen(false)} className="p-1 rounded hover:bg-indigo-600">
+              <X size={20} />
+            </button>
+          </div>
+          <nav className="mt-4 lg:mt-6 space-y-1 px-3 pb-6">
+            {[
+              { key: "dashboard", name: "Dashboard", icon: FileText },
+              { key: "complaints", name: "Complaint Records", icon: FileText },
+              { key: "blotter", name: "Blotter Report", icon: ShieldAlert },
+              { key: "profile", name: "My Profile", icon: User },
+            ].map((item) => (
+              <button
+                key={item.key}
+                onClick={() => { setActiveTab(item.key); setSidebarOpen(false); resetPaging(); }}
+                className={`flex items-center w-full gap-3 px-3 py-2 rounded-lg transition-all ${
+                  activeTab === item.key ? "bg-indigo-500 font-semibold" : "hover:bg-indigo-600"
+                }`}
+              >
+                <item.icon size={18} /> {item.name}
+              </button>
+            ))}
+            <div className="pt-4 mt-4 border-t border-indigo-600">
+              <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-indigo-600 w-full text-left">
+                <LogOut size={18} /> Logout
+              </button>
+            </div>
+          </nav>
+        </motion.aside>
+      )}
+    </AnimatePresence>
+  );
+
+  const Card = ({ children, onClick }) => (
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      className="bg-white rounded-2xl shadow p-4 hover:shadow-lg transition cursor-default"
+      onClick={onClick}
+    >
+      {children}
+    </motion.div>
+  );
+
+  const ListGrid = ({ items, type }) => (
+    <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {items.map((it) => (
+        <Card key={it.id} onClick={() => setDetailItem({ ...it, __type: type })}>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-base font-semibold">
+                {type === "complaint" ? it.complainant : it.parties}
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                {type === "complaint" ? it.narrative : it.summary}
+              </p>
+            </div>
+            {badge(it.status)}
+          </div>
+          <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+            <span>{type === "complaint" ? it.type : "Blotter"}</span>
+            <span>{it.date}</span>
+          </div>
+          <div className="flex gap-2 mt-3">
+            <button className="text-indigo-600 hover:underline text-sm inline-flex items-center gap-1"><Eye size={14}/> View</button>
+            <button className="text-gray-600 hover:underline text-sm inline-flex items-center gap-1"><Edit size={14}/> Edit</button>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const Pagination = ({ list }) => {
+    const pages = totalPages(list);
+    if (pages <= 1) return null;
+    return (
+      <div className="flex items-center gap-2 justify-center mt-6 print:hidden">
+        <button
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm shadow-sm disabled:opacity-50"
+          disabled={page === 1}
+        >
+          Prev
+        </button>
+        {Array.from({ length: pages }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setPage(i + 1)}
+            className={`px-3 py-1.5 rounded-lg border text-sm shadow-sm ${
+              page === i + 1 ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-gray-200"
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+        <button
+          onClick={() => setPage((p) => Math.min(pages, p + 1))}
+          className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm shadow-sm disabled:opacity-50"
+          disabled={page === pages}
+        >
+          Next
+        </button>
+      </div>
+    );
+  };
+
+  const DetailModal = () => (
+    <AnimatePresence>
+      {detailItem && (
+        <motion.div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-30 print:hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setDetailItem(null)}
+        >
+          <motion.div
+            className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 mx-4"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">{detailItem.__type === "complaint" ? "Complaint" : "Blotter"} Details</h3>
+              <button onClick={() => setDetailItem(null)} className="p-1 rounded hover:bg-gray-100"><X size={18}/></button>
+            </div>
+            <div className="space-y-2 text-sm">
+              {Object.entries(detailItem).filter(([k]) => k !== "__type").map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4">
+                  <span className="text-gray-500 capitalize">{k}</span>
+                  <span className="font-medium text-right max-w-[60%]">{String(v)}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  const AddModal = () => {
+    const [kind, setKind] = useState("complaint");
+    const [form, setForm] = useState({
+      complainant: "",
+      type: "Noise",
+      date: new Date().toISOString().slice(0, 10),
+      status: "Pending",
+      narrative: "",
+    });
+
+    const submit = () => {
+      if (kind === "complaint") {
+        setComplaints((s) => [
+          { id: `C-${Math.floor(Math.random()*9000)+1000}`, remarks: "—", actionTaken: "—", ...form },
+          ...s,
+        ]);
+      } else {
+        setBlotters((s) => [
+          {
+            id: `B-${Math.floor(Math.random()*9000)+1000}`,
+            parties: form.complainant || "Party A vs Party B",
+            summary: form.narrative || "New blotter",
+            status: form.status,
+            date: form.date,
+            remarks: "—",
+            actionTaken: "—",
+          },
+          ...s,
+        ]);
+      }
+      setShowAddModal(false);
+    };
+
+    return (
+      <AnimatePresence>
+        {showAddModal && (
+          <motion.div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-30 print:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowAddModal(false)}
+          >
+            <motion.div
+              className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 mx-4"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold">Add new</h3>
+                <button onClick={() => setShowAddModal(false)} className="p-1 rounded hover:bg-gray-100"><X size={18}/></button>
+              </div>
+              <div className="flex gap-2 mb-4">
+                <button onClick={() => setKind("complaint")} className={`px-3 py-1.5 rounded-lg text-sm border ${kind==='complaint' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-gray-200'}`}>Complaint</button>
+                <button onClick={() => setKind("blotter")} className={`px-3 py-1.5 rounded-lg text-sm border ${kind==='blotter' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-gray-200'}`}>Blotter</button>
+              </div>
+              <div className="grid gap-3">
+                <input className="border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder={kind==='complaint' ? "Complainant" : "Parties"} value={form.complainant} onChange={(e)=>setForm({ ...form, complainant: e.target.value })} />
+                <div className="grid grid-cols-2 gap-3">
+                  <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm" value={form.type} onChange={(e)=>setForm({ ...form, type: e.target.value })}>
+                    {['Noise','Theft','Dispute','Misc'].map(o=> <option key={o}>{o}</option>)}
+                  </select>
+                  <input type="date" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" value={form.date} onChange={(e)=>setForm({ ...form, date: e.target.value })} />
+                </div>
+                <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm" value={form.status} onChange={(e)=>setForm({ ...form, status: e.target.value })}>
+                  {['Pending','Ongoing','Resolved'].map(o=> <option key={o}>{o}</option>)}
+                </select>
+                <textarea className="border border-gray-200 rounded-lg px-3 py-2 text-sm" rows={3} placeholder="Narrative / Summary" value={form.narrative} onChange={(e)=>setForm({ ...form, narrative: e.target.value })} />
+              </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <button className="px-3 py-2 rounded-lg border border-gray-200 text-sm" onClick={()=>setShowAddModal(false)}>Cancel</button>
+                <button className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm" onClick={submit}>Save</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  };
+
+  const ProfileModal = () => (
+    <AnimatePresence>
+      {profileOpen && (
+        <motion.div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-30 print:hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setProfileOpen(false)}
+        >
+          <motion.div
+            className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 mx-4"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Edit Profile</h3>
+              <button onClick={() => setProfileOpen(false)} className="p-1 rounded hover:bg-gray-100"><X size={18}/></button>
+            </div>
+            <div className="grid gap-3 text-sm">
+              <input className="border border-gray-200 rounded-lg px-3 py-2" placeholder="Full name" defaultValue="Hon. Miguelito Pablo" />
+              <input className="border border-gray-200 rounded-lg px-3 py-2" placeholder="Username" defaultValue="miguelito.pablo" />
+              <input className="border border-gray-200 rounded-lg px-3 py-2" placeholder="Role" defaultValue="Barangay Councilor Member" />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button className="px-3 py-2 rounded-lg border border-gray-200 text-sm" onClick={()=>setProfileOpen(false)}>Cancel</button>
+              <button className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm" onClick={()=>setProfileOpen(false)}>Save</button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  const exportCSV = (rows, filename) => {
+    const headers = Object.keys(rows[0] || {}).join(",");
+    const body = rows.map((r) => 
+        Object.values(r)
+            .map((v) => `"${String(v).replaceAll('"', '""')}"`)
+            .join(",")
+    ).join("\n");  // Fix: Changed to "\n" for proper line breaks
+    
+    const csv = `${headers}\n${body}`;  // Fix: Added proper line break
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+};
+
+  // ————————————————————————————————————————
+  // Render
+  // ————————————————————————————————————————
+  const dashboardCards = (
+    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <Card>
+        <h3 className="text-sm text-gray-500">Total Complaints</h3>
+        <p className="text-3xl font-semibold mt-1">{complaints.length}</p>
+      </Card>
+      <Card>
+        <h3 className="text-sm text-gray-500">Total Blotters</h3>
+        <p className="text-3xl font-semibold mt-1">{blotters.length}</p>
+      </Card>
+      <Card>
+        <h3 className="text-sm text-gray-500">Pending Items</h3>
+        <p className="text-3xl font-semibold mt-1">{[...complaints, ...blotters].filter(i=>i.status==='Pending').length}</p>
+      </Card>
+    </div>
+  );
+
+  const dashboardCharts = (
+    <div className="grid lg:grid-cols-2 gap-6 mt-6">
+      <Card>
+        <h4 className="font-semibold mb-3">Status Breakdown (Complaints + Blotters)</h4>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie dataKey="value" data={statusBreakdown} outerRadius={90} label>
+                {statusBreakdown.map((e) => (
+                  <Cell key={e.name} fill={CHART_COLORS[e.name]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+      <Card>
+        <h4 className="font-semibold mb-3">Blotters per Month</h4>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={monthlyBlotters}>
+              <XAxis dataKey="month" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="count" fill="#4f46e5" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+    </div>
+  );
+
+  const emptyOrSkeleton = (
+    <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-28 bg-gray-200 rounded-2xl animate-pulse" />
+      ))}
+    </div>
+  );
+
+  const Content = () => (
+    <main className="flex-1 min-w-0">
+      <TopBar />
+      <div className="p-4 md:p-6">
+        {activeTab === "dashboard" && (
+          <>
+            {dashboardCards}
+            {dashboardCharts}
+          </>
+        )}
+
+        {activeTab === "complaints" && (
+          <>
+            {loading ? (
+              emptyOrSkeleton
+            ) : (
+              <>
+                <ListGrid items={pageData(filteredComplaints)} type="complaint" />
+                <Pagination list={filteredComplaints} />
+              </>
+            )}
+          </>
+        )}
+
+        {activeTab === "blotter" && (
+          <>
+            {loading ? (
+              emptyOrSkeleton
+            ) : (
+              <>
+                <ListGrid items={pageData(filteredBlotters)} type="blotter" />
+                <Pagination list={filteredBlotters} />
+              </>
+            )}
+          </>
+        )}
+
+        {activeTab === "profile" && (
+          <div className="max-w-xl">
+            <Card>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Hon. Miguelito Pablo</h3>
+                  <p className="text-sm text-gray-600">Barangay Councilor Member</p>
+                  <p className="text-sm text-gray-600 mt-1">Username: miguelito.pablo</p>
+                </div>
+                <button className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-sm" onClick={()=>setProfileOpen(true)}>Edit</button>
+              </div>
+            </Card>
+          </div>
+        )}
+      </div>
+
+      {/* Floating Action Button */}
+      {(activeTab === "complaints" || activeTab === "blotter") && (
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="fixed bottom-6 right-6 print:hidden shadow-lg rounded-full p-4 bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300"
+          title="Add"
+        >
+          <Plus />
+        </button>
+      )}
+
+      {/* Modals */}
+      <DetailModal />
+      <AddModal />
+      <ProfileModal />
+
+      {/* Custom Scrollbar (keeps theme) */}
+      <style>{`
+        * { scrollbar-width: thin; scrollbar-color: rgba(79,70,229,0.6) transparent; }
+        *::-webkit-scrollbar { height: 8px; width: 8px; }
+        *::-webkit-scrollbar-thumb { background: rgba(79,70,229,0.6); border-radius: 9999px; }
+        *::-webkit-scrollbar-track { background: transparent; }
+        @media print { .print\:hidden { display: none; } }
+      `}</style>
+    </main>
+  );
+
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <div className="hidden lg:block w-64 print:hidden">
+        <Sidebar />
+      </div>
+      {/* Drawer for mobile */}
+      <div className="lg:hidden">
+        <Sidebar />
+      </div>
+
+      {/* Main area */}
+      <Content />
+    </div>
+  );
+};
+
+export default Councilor;

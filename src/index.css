@@ -1,0 +1,28 @@
+/* src/index.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Your other custom CSS */
+
+/* Force table cells to wrap and prevent horizontal scrolling */
+.no-horizontal-scroll-table {
+  table-layout: fixed;
+  width: 100%;
+}
+.no-horizontal-scroll-table th,
+.no-horizontal-scroll-table td {
+  white-space: normal; /* allow wrapping */
+  word-break: break-word; /* break long words/ids */
+  overflow-wrap: anywhere; /* modern wrap for long strings */
+}
+
+/* Utility to hide scrollbars while preserving scroll behavior */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
