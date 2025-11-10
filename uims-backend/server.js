@@ -43,6 +43,10 @@ if (!fs.existsSync(uploadsDir)) {
   console.log("📁 Created uploads directory");
 }
 
+app.get("/", (req, res) => {
+  res.send("✅ Server is live!");
+});
+
 // ✅ ADD UPLOAD ROUTE
 app.post(
   "/api/upload/image",
@@ -554,8 +558,9 @@ app.post(
   }
 );
 
-// Start server
-app.listen(PORT, () => {
+console.log("✅ Reached end of server.js, about to start server...");
+
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🔗 API endpoints available at http://localhost:${PORT}/api`);
   console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
