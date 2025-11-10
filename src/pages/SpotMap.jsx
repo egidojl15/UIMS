@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { MapPin, Download, ZoomIn, ZoomOut, X } from "lucide-react";
-import { useMap } from "./MapContext";
 import { spotmapsAPI } from "../services/api";
 import jsPDF from "jspdf";
 
