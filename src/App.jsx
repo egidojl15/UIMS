@@ -21,7 +21,7 @@ import BhwDashboard from "./dashboard/BhwDashboard";
 import BrgyCouncilor from "./dashboard/BrgyCouncilor";
 import SecretaryDashboard from "./dashboard/SecretaryDashboard";
 import BarangayCaptainDashboard from "./dashboard/barangay_captain_dashboard";
-import Residents from "./pages/Residents";
+
 
 // Import the page components
 import ComplaintsPage from "./pages/Complaints";
@@ -29,7 +29,7 @@ import BlotterPage from "./pages/Blotter";
 import ActivityLogPage from "./pages/ActivityLogPage";
 import MyProfile from "./pages/MyProfile";
 // import User from './pages/UserManagement';
-import LogoutPage from "./pages/LogoutPage";
+
 import LogBookPage from "./pages/LogBookPage";
 import BhwMainDashboard from "./pages/BhwMainDashboard";
 import ManageResidentPage from "./pages/ManageResidentPage";
