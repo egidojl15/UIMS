@@ -9,12 +9,12 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs"); // ADD THIS LINE
 
 require("dotenv").config();
-const mysql2 = require("mysql2/promise");
+// const mysql2 = require("mysql2/promise");
 
-const urlDB =
-  "mysql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}";
+// const urlDB =
+//   "mysql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}";
 
-const connection = mysql.createConnection(urlDB);
+// const connection = mysql.createConnection(urlDB);
 
 // Import your existing middleware
 const verifyToken = require("./middleware/auth");
