@@ -2,7 +2,8 @@ import axios from "axios";
 
 // Create axios instance with base configuration
 const BASE_URL =
-  import.meta.env.VITE_API_URL || "uims-backend-production.up.railway.app/api";
+  import.meta.env.VITE_API_URL ||
+  "http://uims-backend-production.up.railway.app";
 
 const api = axios.create({
   baseURL: BASE_URL,
