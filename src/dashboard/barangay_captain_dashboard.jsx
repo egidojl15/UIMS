@@ -670,7 +670,7 @@ const BarangayCaptainDashboard = () => {
     { id: "blotter", label: "Blotter Records", icon: Shield },
     { id: "complaints", label: "Complaint Records", icon: AlertTriangle },
     { id: "users", label: "User Management", icon: UserCheck },
-    { id: "activity-logs", label: "Activity Logs", icon: ClockIcon },
+    { id: "activity-logs", label: "Activity Log", icon: ClockIcon },
   ];
 
   // Fetch notification counts
