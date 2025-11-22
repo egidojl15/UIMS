@@ -105,14 +105,14 @@ const CertificateRequests = () => {
     if (!selectedRequest) return;
     try {
       const updated = await requestsAPI.updateStatus(selectedRequest.id, {
-        status: "approved",
+        status: "processing",
         reschedule_date: rescheduleDate || null,
       });
 
       setRequests((prev) =>
         prev.map((r) =>
           r.id === selectedRequest.id
-            ? { ...r, ...updated, status: "approved" }
+            ? { ...r, ...updated, status: "processing" }
             : r
         )
       );
@@ -122,7 +122,7 @@ const CertificateRequests = () => {
       addNotification(
         "success",
         "Request Approved",
-        `Certificate request has been approved successfully${
+        `Certificate request has been processing successfully${
           rescheduleDate ? ` for ${rescheduleDate}` : ""
         }`
       );
@@ -192,7 +192,7 @@ const CertificateRequests = () => {
   const stats = {
     total: requests.length,
     pending: requests.filter((r) => r.status === "pending").length,
-    approved: requests.filter((r) => r.status === "approved").length,
+    processing: requests.filter((r) => r.status === "processing").length,
     rejected: requests.filter((r) => r.status === "rejected").length,
   };
 
@@ -200,7 +200,7 @@ const CertificateRequests = () => {
   const getStatusInfo = (status) => {
     const s = (status || "").toString().trim().toLowerCase();
 
-    if (s.includes("approve") || s === "approved") {
+    if (s.includes("approve") || s === "processing") {
       return {
         label: "Approved",
         color: "bg-green-50 text-green-700 border-green-200",
@@ -329,7 +329,7 @@ const CertificateRequests = () => {
               },
               {
                 label: "Approved",
-                value: stats.approved,
+                value: stats.processing,
                 icon: CheckCircle,
                 color: "from-green-500 to-emerald-500",
               },
@@ -389,7 +389,7 @@ const CertificateRequests = () => {
                 >
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
+                  <option value="processing">Approved</option>
                   <option value="rejected">Rejected</option>
                 </select>
                 <button
