@@ -243,7 +243,11 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
     const fetchLogs = async () => {
       try {
         const data = await logbookAPI.getAll();
-        setLogbooks(data);
+        console.log("Logbook API response:", data);
+
+        // ✅ Handle both response formats
+        const logsArray = Array.isArray(data) ? data : data?.data || [];
+        setLogbooks(logsArray);
       } catch (err) {
         console.error("Failed to load logbooks:", err);
 
@@ -267,7 +271,7 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
           });
         }
 
-        setLogbooks([]);
+        setLogbooks([]); // ✅ Always set to empty array on error
       }
     };
 
@@ -389,16 +393,16 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
   };
 
   const filteredLogbooks = selectedMonth
-    ? logbooks.filter((log) => {
+    ? (logbooks || []).filter((log) => {
         const logDate = new Date(log.date_logged);
         const logMonth = `${logDate.getFullYear()}-${String(
           logDate.getMonth() + 1
         ).padStart(2, "0")}`;
         return logMonth === selectedMonth;
       })
-    : logbooks;
+    : logbooks || []; // ✅ Always ensure it's an array
 
-  const searchFilteredLogbooks = filteredLogbooks.filter((log) => {
+  const searchFilteredLogbooks = (filteredLogbooks || []).filter((log) => {
     const matchesSearch =
       log.visitor_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
