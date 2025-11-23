@@ -1184,21 +1184,31 @@ export const logbookAPI = {
     }
   },
 
-  // In api.js - update the usersAPI.update method
-  update: async (id, userData) => {
-    const formData = new FormData();
-    Object.entries(userData).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) {
-        formData.append(key, value);
-      }
-    });
+  update: async (id, formData) => {
+    try {
+      console.log("Updating logbook entry:", id, formData);
+      const response = await api.put(`/logbook/${id}`, formData);
 
-    // Use the admin endpoint for user updates
-    return (
-      await api.put(`/users/admin/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-    ).data;
+      if (!response.data.success) {
+        throw new Error(
+          response.data.message || "Failed to update logbook entry"
+        );
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Logbook update error:", error);
+
+      if (error.response?.status === 404) {
+        throw new Error("Logbook entry not found");
+      } else if (error.response?.status === 401) {
+        throw new Error("Authentication token required");
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+
+      throw error;
+    }
   },
 
   delete: async (id) => {
@@ -1228,6 +1238,7 @@ export const logbookAPI = {
     }
   },
 };
+
 // Activity Logs API
 export const activityAPI = {
   getAll: async (params) => {
