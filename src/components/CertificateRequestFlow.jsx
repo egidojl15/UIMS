@@ -170,7 +170,14 @@ const ResidentVerificationModal = ({ open, onClose, onVerified }) => {
   );
 };
 
-const RequestFormModal = ({ open, onClose, requesterType, residentData }) => {
+const RequestFormModal = ({
+  open,
+  onClose,
+  requesterType,
+  residentData,
+  onSuccess, // ← NEW PROP
+  onError, // ← NEW PROP
+}) => {
   const [certTypes, setCertTypes] = useState([]);
   const [formData, setFormData] = useState({
     cert_type_id: "",
@@ -181,6 +188,7 @@ const RequestFormModal = ({ open, onClose, requesterType, residentData }) => {
     address: "",
   });
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState(""); // ← NEW STATE
 
   useEffect(() => {
     if (open) {
@@ -225,12 +233,16 @@ const RequestFormModal = ({ open, onClose, requesterType, residentData }) => {
       setCertTypes(response.data.data || []);
     } catch (err) {
       console.error("Failed to load certificate types:", err);
+      if (onError) {
+        onError("Failed to load certificates", "Please try again.");
+      }
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setSubmitError("");
 
     try {
       const payload = {
@@ -245,15 +257,30 @@ const RequestFormModal = ({ open, onClose, requesterType, residentData }) => {
       };
 
       await api.post("/requests", payload);
-      alert("Request submitted successfully!");
+
+      // ✅ SUCCESS - Use NotificationSystem instead of alert
+      if (onSuccess) {
+        onSuccess(
+          "Request Submitted Successfully!",
+          "Your certificate request has been processed and will be reviewed by barangay staff."
+        );
+      }
+
+      // Trigger custom event for parent components
       window.dispatchEvent(new Event("requests:created"));
+
+      // Close the modal
       onClose();
     } catch (err) {
       console.error("Submit error:", err);
-      alert(
-        "Failed to submit request: " +
-          (err.response?.data?.message || err.message)
-      );
+
+      // ❌ ERROR - Use NotificationSystem instead of alert
+      const errorMessage =
+        err.response?.data?.message || err.message || "Submission failed";
+      if (onError) {
+        onError("Submission Failed", errorMessage);
+      }
+      setSubmitError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -378,18 +405,26 @@ const RequestFormModal = ({ open, onClose, requesterType, residentData }) => {
           />
         </div>
 
+        {/* Error display */}
+        {submitError && (
+          <div className="p-3 bg-red-100 text-red-800 rounded-md text-sm border border-red-200">
+            {submitError}
+          </div>
+        )}
+
         <div className="flex justify-end gap-2 pt-4">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-gray-100 rounded-md"
+            className="px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+            disabled={loading}
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"
+            className="px-4 py-2 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-md disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 font-semibold disabled:cursor-not-allowed"
           >
             {loading ? "Submitting..." : "Submit Request"}
           </button>
@@ -404,6 +439,8 @@ const CertificateRequestFlow = ({
   className = "",
   onClose = null,
   isOpen = false,
+  onSuccess, // ← NEW PROP
+  onError, // ← NEW PROP
 }) => {
   const [step, setStep] = useState("closed"); // 'choice', 'verify', 'form'
   const [requesterType, setRequesterType] = useState(null);
@@ -444,7 +481,7 @@ const CertificateRequestFlow = ({
       {!onClose && (
         <button
           onClick={() => setStep("choice")}
-          className={`px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 ${className}`}
+          className={`px-4 py-2 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-md hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 font-semibold ${className}`}
         >
           {buttonText}
         </button>
@@ -462,20 +499,20 @@ const CertificateRequestFlow = ({
           <div className="space-y-3">
             <button
               onClick={() => handleTypeSelect("resident")}
-              className="w-full p-4 text-left border-2 border-blue-500 rounded-lg hover:bg-blue-50"
+              className="w-full p-4 text-left border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition-all duration-300"
             >
-              <h4 className="font-semibold">Resident</h4>
-              <p className="text-sm text-gray-600">
+              <h4 className="font-semibold text-blue-700">🏠 Resident</h4>
+              <p className="text-sm text-gray-600 mt-1">
                 You are a registered resident. Access all certificate types.
               </p>
             </button>
 
             <button
               onClick={() => handleTypeSelect("non-resident")}
-              className="w-full p-4 text-left border-2 border-gray-300 rounded-lg hover:bg-gray-50"
+              className="w-full p-4 text-left border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-300"
             >
-              <h4 className="font-semibold">Non-Resident</h4>
-              <p className="text-sm text-gray-600">
+              <h4 className="font-semibold text-gray-700">👤 Non-Resident</h4>
+              <p className="text-sm text-gray-600 mt-1">
                 You are not a registered resident. Limited certificate types
                 available.
               </p>
@@ -495,6 +532,8 @@ const CertificateRequestFlow = ({
         onClose={handleClose}
         requesterType={requesterType}
         residentData={residentData}
+        onSuccess={onSuccess} // ← PASS DOWN
+        onError={onError} // ← PASS DOWN
       />
     </>
   );

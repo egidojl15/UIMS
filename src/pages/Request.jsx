@@ -45,6 +45,16 @@ const Request = () => {
     ]);
   };
 
+  // Handle success from CertificateRequestFlow
+  const handleRequestSuccess = (title = "Request Submitted Successfully!", message = "Your certificate request has been processed.") => {
+    addSuccessNotification(title, message);
+  };
+
+  // Handle error from CertificateRequestFlow
+  const handleRequestError = (title = "Submission Failed", message = "Please try again.") => {
+    addErrorNotification(title, message);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] relative overflow-hidden">
       {/* Floating background particles */}
@@ -109,6 +119,8 @@ const Request = () => {
               <CertificateRequestFlow
                 buttonText="Start Certificate Request"
                 className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-2xl hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 group flex items-center gap-3"
+                onSuccess={handleRequestSuccess}
+                onError={handleRequestError}
               />
             </div>
 
@@ -185,13 +197,13 @@ const Request = () => {
         </div>
       </main>
 
-      {/* Notification System - Add this at the end */}
+      {/* Notification System - Positioned at the VERY END to ensure highest z-index */}
       <NotificationSystem
         notifications={notifications}
         onRemove={handleRemoveNotification}
       />
 
-      {/* Animations */}
+      {/* CSS to HIDE CertificateRequestFlow's default modal - CRITICAL! */}
       <style jsx>{`
         @keyframes fadeIn {
           from {
@@ -220,6 +232,26 @@ const Request = () => {
         }
         .animate-float {
           animation: float 6s ease-in-out infinite;
+        }
+
+        /* HIDE CertificateRequestFlow's DEFAULT MODAL */
+        [class*="modal"],
+        [class*="Modal"],
+        [class*="popup"],
+        [class*="Popup"],
+        [class*="toast"],
+        [class*="Toast"],
+        .MuiDialog-root,
+        .ant-modal,
+        div[role="dialog"],
+        div[aria-modal="true"] {
+          display: none !important;
+        }
+
+        /* ENSURE NotificationSystem has highest z-index */
+        div[class*="NotificationSystem"],
+        div[data-notification] {
+          z-index: 999999999 !important;
         }
       `}</style>
     </div>
