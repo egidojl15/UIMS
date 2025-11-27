@@ -45,13 +45,11 @@ const Request = () => {
     ]);
   };
 
-  // Handle success from CertificateRequestFlow
-  const handleRequestSuccess = (title = "Request Submitted Successfully!", message = "Your certificate request has been processed.") => {
+  const handleRequestSuccess = (title, message) => {
     addSuccessNotification(title, message);
   };
 
-  // Handle error from CertificateRequestFlow
-  const handleRequestError = (title = "Submission Failed", message = "Please try again.") => {
+  const handleRequestError = (title, message) => {
     addErrorNotification(title, message);
   };
 
@@ -197,13 +195,13 @@ const Request = () => {
         </div>
       </main>
 
-      {/* Notification System - Positioned at the VERY END to ensure highest z-index */}
+      {/* Notification System */}
       <NotificationSystem
         notifications={notifications}
         onRemove={handleRemoveNotification}
       />
 
-      {/* CSS to HIDE CertificateRequestFlow's default modal - CRITICAL! */}
+      {/* ONLY ANIMATIONS - NO MODAL HIDING */}
       <style jsx>{`
         @keyframes fadeIn {
           from {
@@ -232,26 +230,6 @@ const Request = () => {
         }
         .animate-float {
           animation: float 6s ease-in-out infinite;
-        }
-
-        /* HIDE CertificateRequestFlow's DEFAULT MODAL */
-        [class*="modal"],
-        [class*="Modal"],
-        [class*="popup"],
-        [class*="Popup"],
-        [class*="toast"],
-        [class*="Toast"],
-        .MuiDialog-root,
-        .ant-modal,
-        div[role="dialog"],
-        div[aria-modal="true"] {
-          display: none !important;
-        }
-
-        /* ENSURE NotificationSystem has highest z-index */
-        div[class*="NotificationSystem"],
-        div[data-notification] {
-          z-index: 999999999 !important;
         }
       `}</style>
     </div>
