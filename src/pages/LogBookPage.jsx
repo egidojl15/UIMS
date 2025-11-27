@@ -236,100 +236,43 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
     }
   }, [notification]);
 
-  // Replace the useEffect starting at line 282 with this fixed version:
+  // ✅ FIXED: Load initial data
+  useEffect(() => {
+    const locations = getAllLocations();
+    setAllLocations(locations);
 
-useEffect(() => {
-  // Load all Philippine locations
-  const locations = getAllLocations();
-  setAllLocations(locations);
+    const fetchLogs = async () => {
+      try {
+        const response = await logbookAPI.getAll();
+        console.log("🔄 Initial load - Logbook API response:", response);
 
-  const fetchLogs = async () => {
-    try {
-      const response = await logbookAPI.getAll();
-      console.log("Logbook API response:", response);
+        // ✅ Handle ALL possible response formats
+        let logsArray = [];
+        
+        if (response && response.success && Array.isArray(response.data)) {
+          logsArray = response.data;
+        } else if (Array.isArray(response)) {
+          logsArray = response;
+        } else if (response && response.data && Array.isArray(response.data)) {
+          logsArray = response.data;
+        } else {
+          logsArray = [];
+        }
 
-      // ✅ Handle the response format from backend: { success: true, data: rows }
-      let logsArray = [];
-      
-      if (response && response.success && Array.isArray(response.data)) {
-        logsArray = response.data;
-      } else if (Array.isArray(response)) {
-        logsArray = response;
-      } else if (response && response.data && Array.isArray(response.data)) {
-        logsArray = response.data;
+        setLogbooks(logsArray);
+      } catch (err) {
+        console.error("❌ Failed to load logbooks:", err);
+        setNotification({
+          show: true,
+          message: "Failed to load logbook entries: " + (err.message || "Unknown error"),
+          type: "error",
+        });
+        setLogbooks([]);
       }
+    };
 
-      setLogbooks(logsArray);
-    } catch (err) {
-      console.error("Failed to load logbooks:", err);
-
-      if (err.message?.includes("Authentication token required")) {
-        setNotification({
-          show: true,
-          message: "Please log in again to access the logbook.",
-          type: "error",
-        });
-      } else if (err.message?.includes("session has expired")) {
-        setNotification({
-          show: true,
-          message: "Your session has expired. Please log in again.",
-          type: "error",
-        });
-      } else {
-        setNotification({
-          show: true,
-          message: "Failed to load logbook entries: " + err.message,
-          type: "error",
-        });
-      }
-
-      setLogbooks([]); // ✅ Always set to empty array on error
-    }
-  };
-
-  fetchLogs();
-}, [setLogbooks]); // Added setLogbooks to dependencies
-  // useEffect(() => {
-  //   const allLocations = getAllLocations();
-  //   setAllLocations(allLocations);
-
-  //   const fetchLogs = async () => {
-  //     try {
-  //       const data = await logbookAPI.getAll();
-  //       console.log("Logbook API response:", data);
-
-  //       // ✅ Handle both response formats
-  //       const logsArray = Array.isArray(data) ? data : data?.data || [];
-  //       setLogbooks(logsArray);
-  //     } catch (err) {
-  //       console.error("Failed to load logbooks:", err);
-
-  //       if (err.message?.includes("Authentication token required")) {
-  //         setNotification({
-  //           show: true,
-  //           message: "Please log in again to access the logbook.",
-  //           type: "error",
-  //         });
-  //       } else if (err.message?.includes("session has expired")) {
-  //         setNotification({
-  //           show: true,
-  //           message: "Your session has expired. Please log in again.",
-  //           type: "error",
-  //         });
-  //       } else {
-  //         setNotification({
-  //           show: true,
-  //           message: "Failed to load logbook entries: " + err.message,
-  //           type: "error",
-  //         });
-  //       }
-
-  //       setLogbooks([]); // ✅ Always set to empty array on error
-  //     }
-  //   };
-
-  //   fetchLogs();
-  // }, []);
+    fetchLogs();
+  }, [setLogbooks]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -365,11 +308,13 @@ useEffect(() => {
     setShowAddressSuggestions(false);
   };
 
+  // ✅ FIXED: Complete handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      // Validation
       if (!formData.visitor_name.trim() || !formData.purpose.trim()) {
         setNotification({
           show: true,
@@ -396,20 +341,58 @@ useEffect(() => {
         }
       }
 
+      // ✅ API Call with detailed logging
+      console.log("📤 Sending form data:", formData);
       const result = await logbookAPI.create(formData);
+      console.log("✅ CREATE API RESPONSE:", result);
+
+      // ✅ Handle ALL possible response formats
+      let newEntry = null;
+      
+      if (result && result.success && result.data) {
+        newEntry = result.data;
+      } else if (result && Array.isArray(result) && result.length > 0) {
+        newEntry = result[0];
+      } else if (result && (result.id || result.logbook_id)) {
+        newEntry = result;
+      }
+
+      // ✅ Show SUCCESS notification FIRST (ALWAYS when API succeeds)
       setNotification({
         show: true,
-        message: "Logbook entry added successfully!",
+        message: "✅ Logbook entry added successfully!",
         type: "success",
       });
 
-      if (result.data) {
-        setLogbooks([result.data, ...(logbooks || [])]);
+      // ✅ Optimistic update if we have the new entry
+      if (newEntry) {
+        console.log("🎉 Adding new entry to state:", newEntry);
+        setLogbooks([newEntry, ...(logbooks || [])]);
       } else {
-        const refreshedData = await logbookAPI.getAll();
-        setLogbooks(refreshedData);
+        // ✅ Fallback: refresh data (won't show error if this fails)
+        console.log("🔄 Refreshing data after create...");
+        try {
+          const refreshedData = await logbookAPI.getAll();
+          console.log("🔄 Refreshed data:", refreshedData);
+          
+          // Handle getAll response format
+          let logsArray = [];
+          if (refreshedData && refreshedData.success && Array.isArray(refreshedData.data)) {
+            logsArray = refreshedData.data;
+          } else if (Array.isArray(refreshedData)) {
+            logsArray = refreshedData;
+          } else if (refreshedData && refreshedData.data && Array.isArray(refreshedData.data)) {
+            logsArray = refreshedData.data;
+          }
+          
+          setLogbooks(logsArray);
+        } catch (refreshError) {
+          console.warn("⚠️ Refresh failed but entry was created:", refreshError);
+          // ✅ DON'T show error - the entry was created successfully!
+        }
       }
 
+      // ✅ Reset form
       setFormData({
         visitor_name: "",
         address: "",
@@ -417,29 +400,22 @@ useEffect(() => {
         contact_number: "",
       });
 
+      // ✅ Switch to records tab
       setActiveTab("records");
-    } catch (err) {
-      console.error("Logbook create error:", err);
 
-      if (err.message?.includes("session has expired")) {
-        setNotification({
-          show: true,
-          message: "Your session has expired. Please log in again.",
-          type: "error",
-        });
-      } else if (err.message?.includes("Authentication token required")) {
-        setNotification({
-          show: true,
-          message: "Authentication error. Please log in again.",
-          type: "error",
-        });
-      } else {
-        setNotification({
-          show: true,
-          message: "Error: " + (err.message || "Unknown error occurred"),
-          type: "error",
-        });
-      }
+    } catch (err) {
+      console.error("❌ Logbook create error:", err);
+      
+      // ✅ Only show error for REAL errors (network issues, validation, etc.)
+      const errorMessage = err.response?.data?.message || 
+                          err.message || 
+                          "Failed to save entry. Please try again.";
+      
+      setNotification({
+        show: true,
+        message: `❌ ${errorMessage}`,
+        type: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -453,7 +429,7 @@ useEffect(() => {
         ).padStart(2, "0")}`;
         return logMonth === selectedMonth;
       })
-    : logbooks || []; // ✅ Always ensure it's an array
+    : logbooks || [];
 
   const searchFilteredLogbooks = (filteredLogbooks || []).filter((log) => {
     const matchesSearch =
@@ -579,7 +555,6 @@ useEffect(() => {
         .animate-float { animation: float 6s ease-in-out infinite; }
         .animate-slideInFromTop { animation: slideInFromTop 0.3s ease-out; }
 
-        /* Responsive table adjustments */
         @media (max-width: 640px) {
           .logbook-table th,
           .logbook-table td {
@@ -587,7 +562,7 @@ useEffect(() => {
             font-size: 12px;
           }
           .logbook-table thead {
-            display: none; /* Hide header on mobile, use card layout instead */
+            display: none;
           }
           .logbook-table tbody,
           .logbook-table tr {
@@ -710,7 +685,7 @@ useEffect(() => {
             </div>
           </section>
 
-          {/* Tab Navigation - Styled like Blotter */}
+          {/* Tab Navigation */}
           <div className="group relative bg-white/90 backdrop-blur-xl rounded-xl sm:rounded-3xl shadow-xl p-2 mb-4 sm:mb-8 border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative z-10">
@@ -747,10 +722,7 @@ useEffect(() => {
                 <h3 className="text-xl sm:text-2xl font-bold text-[#0F4C81] mb-4 sm:mb-6">
                   Enter Visitor Information
                 </h3>
-                <form
-                  onSubmit={handleSubmit}
-                  className="space-y-4 sm:space-y-6"
-                >
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                   <div className="grid grid-cols-1 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
@@ -887,7 +859,14 @@ useEffect(() => {
                         disabled={isLoading}
                         className="px-6 sm:px-8 py-2 sm:py-3 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold transform hover:scale-105 text-xs sm:text-sm"
                       >
-                        {isLoading ? "Saving Entry..." : "Save Entry"}
+                        {isLoading ? (
+                          <span className="flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            Saving Entry...
+                          </span>
+                        ) : (
+                          "Save Entry"
+                        )}
                       </button>
                     </div>
                   </div>
@@ -895,7 +874,7 @@ useEffect(() => {
               </div>
             </div>
           ) : (
-            /* Records Section */
+            /* Records Section - REMAINS THE SAME */
             <>
               {/* Section Header */}
               <div className="text-center mb-6 sm:mb-12">
@@ -1022,7 +1001,7 @@ useEffect(() => {
               {/* Table */}
               <div
                 className="group relative bg-white/90 backdrop-blur-xl rounded-xl sm:rounded-3xl shadow-xl overflow-hidden border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 logbook-table-container"
-                style={{ height: "60vh", minHeight: "400px" }} // Responsive height
+                style={{ height: "60vh", minHeight: "400px" }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex flex-col h-full">
