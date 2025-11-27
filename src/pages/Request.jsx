@@ -1,15 +1,49 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CertificateRequestFlow from "../components/CertificateRequestFlow";
+import NotificationSystem from "../components/NotificationSystem";
 
 const Request = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 300);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleRemoveNotification = (id) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const addSuccessNotification = (title, message = null) => {
+    const notifId = Date.now();
+    setNotifications((prev) => [
+      ...prev,
+      {
+        id: notifId,
+        type: "success",
+        title,
+        message,
+        autoDismiss: true,
+      },
+    ]);
+  };
+
+  const addErrorNotification = (title, message = null) => {
+    const notifId = Date.now();
+    setNotifications((prev) => [
+      ...prev,
+      {
+        id: notifId,
+        type: "error",
+        title,
+        message,
+        autoDismiss: false,
+      },
+    ]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] relative overflow-hidden">
@@ -65,7 +99,7 @@ const Request = () => {
                 Start Your Request
               </h2>
               <p className="text-gray-600 text-lg">
-                Click below to begin. You’ll verify your identity and choose
+                Click below to begin. You'll verify your identity and choose
                 your certificate type.
               </p>
             </div>
@@ -122,7 +156,7 @@ const Request = () => {
                   <span className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-full flex items-center justify-center font-bold text-sm">
                     5
                   </span>
-                  <div>You’ll be notified when your certificate is ready.</div>
+                  <div>You'll be notified when your certificate is ready.</div>
                 </li>
               </ol>
             </div>
@@ -150,6 +184,12 @@ const Request = () => {
           </div>
         </div>
       </main>
+
+      {/* Notification System - Add this at the end */}
+      <NotificationSystem
+        notifications={notifications}
+        onRemove={handleRemoveNotification}
+      />
 
       {/* Animations */}
       <style jsx>{`
