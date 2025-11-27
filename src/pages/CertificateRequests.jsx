@@ -798,172 +798,142 @@ const CertificateRequests = () => {
         </div>
       )}
 
-      {/* ✅ COMPLETE VIEW DETAILS MODAL */}
+      {/* ✅ FIXED COMPLETE VIEW DETAILS MODAL - SHOWS ALL DATA */}
       {showViewModal && selectedRequest && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
-          <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 max-w-6xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-6xl w-full max-h-[95vh] overflow-y-auto shadow-2xl">
             {/* Header */}
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h3 className="text-xl sm:text-2xl font-bold text-[#0F4C81] flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                  <FileText size={20} className="text-white" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-7 h-7 text-white" />
                 </div>
-                Request Details - REQ-{selectedRequest.id}
-              </h3>
+                <div>
+                  <h2 className="text-2xl font-bold text-[#0F4C81]">
+                    Request Details
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    REQ-{selectedRequest.id}
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => setShowViewModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-300"
+                className="p-2 hover:bg-gray-100 rounded-2xl transition-all duration-300"
               >
-                <X size={20} />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Request ID & Status Banner */}
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-4 sm:p-6 border border-blue-200 mb-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex flex-col">
-                  <div className="text-xs text-gray-500 mb-1">Request ID</div>
-                  <div className="text-2xl sm:text-3xl font-bold text-[#0F4C81]">
-                    REQ-{selectedRequest.id}
+            {/* Status Banner */}
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 mb-8 border-l-4 border-blue-500">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span className="text-sm font-medium text-gray-600">
+                    Status
+                  </span>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
+                        getStatusInfo(selectedRequest.status).color
+                      }`}
+                    >
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          getStatusInfo(selectedRequest.status).dot
+                        }`}
+                      ></div>
+                      {getStatusInfo(selectedRequest.status).label}
+                    </span>
                   </div>
                 </div>
-                <div className="flex-shrink-0">
-                  <div className="text-xs text-gray-500 mb-1 text-right sm:text-left">
-                    Status
-                  </div>
-                  <span
-                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
-                      getStatusInfo(selectedRequest.status).color
-                    }`}
-                  >
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        getStatusInfo(selectedRequest.status).dot
-                      }`}
-                    ></div>
-                    {getStatusInfo(selectedRequest.status).label}
-                  </span>
+                <div className="text-right">
+                  <span className="text-sm text-gray-500">Created</span>
+                  <p className="font-semibold text-gray-900">
+                    {new Date(selectedRequest.created_at).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
-              {selectedRequest.status === "rejected" &&
-                selectedRequest.rejection_reason && (
-                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <div className="flex items-center gap-2 text-sm font-medium text-red-800">
-                      <AlertCircle size={16} />
-                      <span>Rejection Reason:</span>
-                    </div>
-                    <p className="mt-2 text-sm text-red-700 bg-red-100/50 p-3 rounded-lg border-l-4 border-red-400">
-                      {selectedRequest.rejection_reason}
-                    </p>
-                  </div>
-                )}
             </div>
 
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Left Column */}
+            {/* Main Content - 2 Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Left Column - Requester Info */}
               <div className="space-y-6">
-                {/* Requester Information */}
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl p-6">
-                  <h4 className="font-bold text-[#0F4C81] mb-4 flex items-center gap-2 text-lg">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                  <h3 className="font-bold text-blue-800 mb-6 flex items-center gap-2">
                     <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                     Requester Information
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                        Full Name
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                          Full Name
+                        </label>
+                        <div className="bg-white p-4 rounded-xl border shadow-sm">
+                          <p className="font-semibold text-lg text-gray-900">
+                            {selectedRequest.requester_name || "N/A"}
+                          </p>
+                        </div>
                       </div>
-                      <div className="font-semibold text-gray-900 text-lg">
-                        {selectedRequest.requester_name || "N/A"}
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                          Type
+                        </label>
+                        <div className="bg-white p-4 rounded-xl border shadow-sm">
+                          <span
+                            className={`inline-block px-4 py-2 rounded-full text-sm font-semibold ${
+                              selectedRequest.requester_type === "resident"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {selectedRequest.requester_type === "resident"
+                              ? "🏠 Resident"
+                              : "👤 Non-Resident"}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                        Type
-                      </div>
-                      <span
-                        className={`inline-block text-xs px-3 py-1.5 rounded-full font-semibold ${
-                          selectedRequest.requester_type === "resident"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {selectedRequest.requester_type === "resident"
-                          ? "🏠 Registered Resident"
-                          : "👤 Non-Resident"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-blue-200">
+
                     {selectedRequest.contact_number && (
                       <div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                          Contact Number
-                        </div>
-                        <div className="font-semibold text-gray-900 flex items-center gap-2">
-                          <Phone size={16} className="text-blue-500" />
-                          {selectedRequest.contact_number}
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                          Contact
+                        </label>
+                        <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
+                          <Phone className="w-5 h-5 text-blue-500" />
+                          <span className="font-semibold">
+                            {selectedRequest.contact_number}
+                          </span>
                         </div>
                       </div>
                     )}
+
                     {selectedRequest.email && (
                       <div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                          Email Address
-                        </div>
-                        <div className="font-semibold text-gray-900 flex items-center gap-2 break-all">
-                          <Mail size={16} className="text-blue-500" />
-                          {selectedRequest.email}
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                          Email
+                        </label>
+                        <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
+                          <Mail className="w-5 h-5 text-blue-500" />
+                          <span className="font-semibold break-all">
+                            {selectedRequest.email}
+                          </span>
                         </div>
                       </div>
                     )}
-                  </div>
-                  {selectedRequest.address && (
-                    <div className="mt-6 pt-6 border-t border-blue-200">
-                      <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                        Address
-                      </div>
-                      <div className="font-semibold text-gray-900 bg-white rounded-xl p-4 border border-gray-200">
-                        {selectedRequest.address}
-                      </div>
-                    </div>
-                  )}
-                </div>
 
-                {/* Certificate Information */}
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-6">
-                  <h4 className="font-bold text-purple-800 mb-4 flex items-center gap-2 text-lg">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                    Certificate Details
-                  </h4>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                        Certificate Type
-                      </div>
-                      <div className="inline-flex items-center gap-3 p-4 bg-white rounded-xl border border-purple-200">
-                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <FileText size={20} className="text-white" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 text-lg">
-                            {selectedRequest.certificate_type || "N/A"}
-                          </div>
-                          <div className="text-sm text-purple-600">
-                            Certificate Request
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    {selectedRequest.purpose && (
+                    {selectedRequest.address && (
                       <div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                          Purpose of Request
-                        </div>
-                        <div className="bg-white rounded-xl p-4 border border-gray-200">
-                          <p className="text-sm text-gray-700 leading-relaxed">
-                            {selectedRequest.purpose}
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                          Address
+                        </label>
+                        <div className="bg-white p-4 rounded-xl border shadow-sm">
+                          <p className="font-semibold text-gray-900 whitespace-pre-wrap">
+                            {selectedRequest.address}
                           </p>
                         </div>
                       </div>
@@ -972,146 +942,153 @@ const CertificateRequests = () => {
                 </div>
               </div>
 
-              {/* Right Column */}
+              {/* Right Column - Certificate & Timeline */}
               <div className="space-y-6">
-                {/* Request Timeline */}
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6">
-                  <h4 className="font-bold text-green-800 mb-4 flex items-center gap-2 text-lg">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    Request Timeline
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-white rounded-xl border-l-4 border-green-400">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                          <Clock size={16} className="text-green-600" />
+                <div className="bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl p-6 border border-purple-200">
+                  <h3 className="font-bold text-purple-800 mb-6 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                    Certificate Details
+                  </h3>
+
+                  <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-xl border shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-8 h-8 text-white" />
                         </div>
-                        <div>
-                          <div className="font-semibold text-gray-900">
-                            Request Submitted
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {new Date(
-                              selectedRequest.created_at
-                            ).toLocaleString("en-US", {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true,
-                            })}
-                          </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-lg text-gray-900 mb-1">
+                            {selectedRequest.certificate_type || "N/A"}
+                          </h4>
+                          <p className="text-sm text-purple-600">
+                            Certificate Request
+                          </p>
                         </div>
-                      </div>
-                      <div className="text-xs font-medium text-green-600 bg-green-100 px-3 py-1 rounded-full">
-                        START
                       </div>
                     </div>
 
-                    {selectedRequest.updated_at &&
-                      selectedRequest.updated_at !==
-                        selectedRequest.created_at && (
-                        <div className="flex items-center justify-between p-4 bg-white rounded-xl border-l-4 border-blue-400">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                              <RefreshCw
-                                size={16}
-                                className="text-blue-600 animate-spin"
-                              />
-                            </div>
-                            <div>
-                              <div className="font-semibold text-gray-900">
-                                Last Updated
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {new Date(
-                                  selectedRequest.updated_at
-                                ).toLocaleString("en-US", {
-                                  month: "long",
-                                  day: "numeric",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-xs font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-                            UPDATED
-                          </div>
+                    {selectedRequest.purpose && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-3 block">
+                          Purpose
+                        </label>
+                        <div className="bg-white p-4 rounded-xl border shadow-sm">
+                          <p className="text-gray-700 leading-relaxed">
+                            {selectedRequest.purpose}
+                          </p>
                         </div>
-                      )}
+                      </div>
+                    )}
 
                     {selectedRequest.reschedule_date && (
-                      <div className="flex items-center justify-between p-4 bg-white rounded-xl border-l-4 border-yellow-400">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                            <Calendar size={16} className="text-yellow-600" />
-                          </div>
-                          <div>
-                            <div className="font-semibold text-gray-900">
-                              Scheduled For
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {new Date(
-                                selectedRequest.reschedule_date
-                              ).toLocaleDateString("en-US", {
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-xs font-medium text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">
-                          SCHEDULED
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-3 block">
+                          Scheduled Date
+                        </label>
+                        <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
+                          <Calendar className="w-5 h-5 text-green-500" />
+                          <span className="font-semibold text-green-700">
+                            {new Date(
+                              selectedRequest.reschedule_date
+                            ).toLocaleDateString("en-US", {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </span>
                         </div>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* System Information */}
-                {selectedRequest.resident_id && (
-                  <div className="bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-200 rounded-2xl p-6">
-                    <h4 className="font-bold text-indigo-800 mb-4 flex items-center gap-2 text-lg">
-                      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
-                      System Information
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-                          Resident ID
-                        </div>
-                        <div className="font-mono bg-white rounded-lg p-2 border border-indigo-200 text-indigo-900">
-                          {selectedRequest.resident_id}
-                        </div>
+                {/* Timeline */}
+                <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-6 border border-green-200">
+                  <h3 className="font-bold text-green-800 mb-6 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    Timeline
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 p-4 bg-white rounded-xl border-l-4 border-green-400">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Clock className="w-5 h-5 text-green-600" />
                       </div>
-                      <div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-                          Request Type
-                        </div>
-                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-white rounded-lg border border-indigo-200 text-sm font-medium text-indigo-800">
-                          <Database size={14} />
-                          Database Verified
-                        </span>
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900">
+                          Request Submitted
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {new Date(selectedRequest.created_at).toLocaleString(
+                            "en-US",
+                            {
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            }
+                          )}
+                        </p>
                       </div>
                     </div>
+
+                    {selectedRequest.updated_at &&
+                      selectedRequest.updated_at !==
+                        selectedRequest.created_at && (
+                        <div className="flex items-center gap-4 p-4 bg-white rounded-xl border-l-4 border-blue-400">
+                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <RefreshCw className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold text-gray-900">
+                              Last Updated
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {new Date(
+                                selectedRequest.updated_at
+                              ).toLocaleString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
+            {/* Rejection Reason */}
+            {selectedRequest.status === "rejected" &&
+              selectedRequest.rejection_reason && (
+                <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200 mb-8">
+                  <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Rejection Reason
+                  </h3>
+                  <div className="bg-white p-5 rounded-xl border-l-4 border-red-400">
+                    <p className="text-red-800 leading-relaxed">
+                      {selectedRequest.rejection_reason}
+                    </p>
+                  </div>
+                </div>
+              )}
+
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50 rounded-b-2xl p-6">
+            <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t bg-gradient-to-r from-gray-50 to-blue-50 rounded-b-3xl p-6">
               <button
                 onClick={() => setShowViewModal(false)}
-                className="flex-1 py-3 px-6 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2"
+                className="flex-1 py-3 px-6 border-2 border-gray-300 rounded-2xl text-lg font-semibold text-gray-700 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm"
               >
-                <X size={18} />
-                Close Details
+                <X className="w-5 h-5" />
+                Close
               </button>
               {selectedRequest.status === "pending" && (
                 <>
@@ -1120,9 +1097,9 @@ const CertificateRequests = () => {
                       setShowViewModal(false);
                       handleApprove(selectedRequest);
                     }}
-                    className="flex-1 py-3 px-6 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 flex items-center justify-center gap-2"
+                    className="flex-1 py-3 px-6 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-2xl text-lg font-semibold hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
                   >
-                    <CheckCircle size={18} />
+                    <CheckCircle className="w-5 h-5" />
                     Approve Request
                   </button>
                   <button
@@ -1130,9 +1107,9 @@ const CertificateRequests = () => {
                       setShowViewModal(false);
                       handleReject(selectedRequest);
                     }}
-                    className="flex-1 py-3 px-6 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 flex items-center justify-center gap-2"
+                    className="flex-1 py-3 px-6 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-2xl text-lg font-semibold hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
                   >
-                    <X size={18} />
+                    <X className="w-5 h-5" />
                     Reject Request
                   </button>
                 </>
