@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { logbookAPI } from "../services/api";
+import api from "../services/api";
+
 import {
   CheckCircle,
   AlertCircle,
