@@ -236,47 +236,100 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
     }
   }, [notification]);
 
-  useEffect(() => {
-    const allLocations = getAllLocations();
-    setAllLocations(allLocations);
+  // Replace the useEffect starting at line 282 with this fixed version:
 
-    const fetchLogs = async () => {
-      try {
-        const data = await logbookAPI.getAll();
-        console.log("Logbook API response:", data);
+useEffect(() => {
+  // Load all Philippine locations
+  const locations = getAllLocations();
+  setAllLocations(locations);
 
-        // ✅ Handle both response formats
-        const logsArray = Array.isArray(data) ? data : data?.data || [];
-        setLogbooks(logsArray);
-      } catch (err) {
-        console.error("Failed to load logbooks:", err);
+  const fetchLogs = async () => {
+    try {
+      const response = await logbookAPI.getAll();
+      console.log("Logbook API response:", response);
 
-        if (err.message?.includes("Authentication token required")) {
-          setNotification({
-            show: true,
-            message: "Please log in again to access the logbook.",
-            type: "error",
-          });
-        } else if (err.message?.includes("session has expired")) {
-          setNotification({
-            show: true,
-            message: "Your session has expired. Please log in again.",
-            type: "error",
-          });
-        } else {
-          setNotification({
-            show: true,
-            message: "Failed to load logbook entries: " + err.message,
-            type: "error",
-          });
-        }
-
-        setLogbooks([]); // ✅ Always set to empty array on error
+      // ✅ Handle the response format from backend: { success: true, data: rows }
+      let logsArray = [];
+      
+      if (response && response.success && Array.isArray(response.data)) {
+        logsArray = response.data;
+      } else if (Array.isArray(response)) {
+        logsArray = response;
+      } else if (response && response.data && Array.isArray(response.data)) {
+        logsArray = response.data;
       }
-    };
 
-    fetchLogs();
-  }, []);
+      setLogbooks(logsArray);
+    } catch (err) {
+      console.error("Failed to load logbooks:", err);
+
+      if (err.message?.includes("Authentication token required")) {
+        setNotification({
+          show: true,
+          message: "Please log in again to access the logbook.",
+          type: "error",
+        });
+      } else if (err.message?.includes("session has expired")) {
+        setNotification({
+          show: true,
+          message: "Your session has expired. Please log in again.",
+          type: "error",
+        });
+      } else {
+        setNotification({
+          show: true,
+          message: "Failed to load logbook entries: " + err.message,
+          type: "error",
+        });
+      }
+
+      setLogbooks([]); // ✅ Always set to empty array on error
+    }
+  };
+
+  fetchLogs();
+}, [setLogbooks]); // Added setLogbooks to dependencies
+  // useEffect(() => {
+  //   const allLocations = getAllLocations();
+  //   setAllLocations(allLocations);
+
+  //   const fetchLogs = async () => {
+  //     try {
+  //       const data = await logbookAPI.getAll();
+  //       console.log("Logbook API response:", data);
+
+  //       // ✅ Handle both response formats
+  //       const logsArray = Array.isArray(data) ? data : data?.data || [];
+  //       setLogbooks(logsArray);
+  //     } catch (err) {
+  //       console.error("Failed to load logbooks:", err);
+
+  //       if (err.message?.includes("Authentication token required")) {
+  //         setNotification({
+  //           show: true,
+  //           message: "Please log in again to access the logbook.",
+  //           type: "error",
+  //         });
+  //       } else if (err.message?.includes("session has expired")) {
+  //         setNotification({
+  //           show: true,
+  //           message: "Your session has expired. Please log in again.",
+  //           type: "error",
+  //         });
+  //       } else {
+  //         setNotification({
+  //           show: true,
+  //           message: "Failed to load logbook entries: " + err.message,
+  //           type: "error",
+  //         });
+  //       }
+
+  //       setLogbooks([]); // ✅ Always set to empty array on error
+  //     }
+  //   };
+
+  //   fetchLogs();
+  // }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
