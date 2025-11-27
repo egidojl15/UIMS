@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CertificateRequestFlow from "../components/CertificateRequestFlow";
-import NotificationSystem from "../components/NotificationSystem";
 
 const Request = () => {
   const navigate = useNavigate();
@@ -12,27 +11,6 @@ const Request = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const [notifications, setNotifications] = useState([]);
-
-  // Notification handlers
-  const handleRemoveNotification = (id) => {
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
-  };
-
-  const addNotification = useCallback(
-    (type, title, message = "", autoDismiss = true) => {
-      const newNotification = {
-        id: Date.now() + Math.random(),
-        type,
-        title,
-        message,
-        autoDismiss,
-        timestamp: new Date(),
-      };
-      setNotifications((prev) => [...prev, newNotification]);
-    },
-    []
-  );
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] relative overflow-hidden">
       {/* Floating background particles */}
@@ -170,11 +148,6 @@ const Request = () => {
               </p>
             </div>
           </div>
-          {/* Notification System */}
-          <NotificationSystem
-            notifications={notifications}
-            onRemove={handleRemoveNotification}
-          />
         </div>
       </main>
 
