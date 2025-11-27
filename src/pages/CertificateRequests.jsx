@@ -16,6 +16,7 @@ import {
   Mail,
   Calendar,
   Database,
+  User,
 } from "lucide-react";
 import { requestsAPI } from "../services/api";
 import CertificateRequestFlow from "../components/CertificateRequestFlow";
@@ -798,7 +799,7 @@ const CertificateRequests = () => {
         </div>
       )}
 
-      {/* ✅ FIXED COMPLETE VIEW DETAILS MODAL - SHOWS ALL DATA */}
+      {/* ✅ COMPLETE VIEW DETAILS MODAL WITH REGISTRATION INFO */}
       {showViewModal && selectedRequest && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-6xl w-full max-h-[95vh] overflow-y-auto shadow-2xl">
@@ -898,30 +899,74 @@ const CertificateRequests = () => {
                       </div>
                     </div>
 
-                    {selectedRequest.contact_number && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">
-                          Contact
-                        </label>
-                        <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
-                          <Phone className="w-5 h-5 text-blue-500" />
-                          <span className="font-semibold">
-                            {selectedRequest.contact_number}
-                          </span>
+                    {/* REQUEST CONTACT INFO */}
+                    <div className="pt-6 border-t border-blue-200">
+                      <h4 className="font-semibold text-blue-800 mb-4 flex items-center gap-2">
+                        📞 Request Contact Information
+                      </h4>
+                      {selectedRequest.contact_number && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">
+                            Contact Number
+                          </label>
+                          <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
+                            <Phone className="w-5 h-5 text-blue-500" />
+                            <span className="font-semibold">
+                              {selectedRequest.contact_number}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                      {selectedRequest.email && (
+                        <div className="mt-4">
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">
+                            Email Address
+                          </label>
+                          <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
+                            <Mail className="w-5 h-5 text-blue-500" />
+                            <span className="font-semibold break-all">
+                              {selectedRequest.email}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
-                    {selectedRequest.email && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">
-                          Email
-                        </label>
-                        <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
-                          <Mail className="w-5 h-5 text-blue-500" />
-                          <span className="font-semibold break-all">
-                            {selectedRequest.email}
-                          </span>
+                    {/* REGISTRATION INFO - NEW SECTION */}
+                    {(selectedRequest.registered_phone ||
+                      selectedRequest.registered_email) && (
+                      <div className="pt-6 border-t border-blue-200">
+                        <h4 className="font-semibold text-green-800 mb-4 flex items-center gap-2">
+                          <Database className="w-5 h-5" />
+                          <span>Registration Account Information</span>
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {selectedRequest.registered_phone && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                Registered Phone
+                              </label>
+                              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200 flex items-center gap-3">
+                                <Phone className="w-5 h-5 text-green-600" />
+                                <span className="font-semibold text-green-800">
+                                  {selectedRequest.registered_phone}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          {selectedRequest.registered_email && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                Registered Email
+                              </label>
+                              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200 flex items-center gap-3">
+                                <Mail className="w-5 h-5 text-green-600" />
+                                <span className="font-semibold text-green-800 break-all">
+                                  {selectedRequest.registered_email}
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
