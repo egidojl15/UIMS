@@ -1030,6 +1030,11 @@ const CertificateRequests = () => {
           animation: float 6s ease-in-out infinite;
         }
       `}</style>
+      {/* Notification System */}
+      <NotificationSystem
+        notifications={notifications}
+        onRemove={handleRemoveNotification}
+      />
     </div>
   );
 };
