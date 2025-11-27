@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CertificateRequestFlow from "../components/CertificateRequestFlow";
-import NotificationSystem from "../components/NotificationSystem";
 
 const Request = () => {
   const navigate = useNavigate();
@@ -11,40 +10,6 @@ const Request = () => {
     const timer = setTimeout(() => setIsVisible(true), 300);
     return () => clearTimeout(timer);
   }, []);
-  // Add notification functions
-  const removeNotification = useCallback((id) => {
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
-  }, []);
-
-  const addNotification = useCallback(
-    (type, title, message = "", action = null, autoDismiss = true) => {
-      const newNotification = {
-        id: Date.now() + Math.random(),
-        type,
-        title,
-        message,
-        action,
-        autoDismiss,
-        timestamp: new Date(),
-      };
-      setNotifications((prev) => [...prev, newNotification]);
-    },
-    []
-  );
-  // Listen for request creation success
-  useEffect(() => {
-    const handleRequestCreated = () => {
-      addNotification(
-        "success",
-        "Request Submitted",
-        "Your certificate request has been submitted successfully"
-      );
-    };
-
-    window.addEventListener("requests:created", handleRequestCreated);
-    return () =>
-      window.removeEventListener("requests:created", handleRequestCreated);
-  }, [addNotification]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] relative overflow-hidden">
@@ -185,12 +150,6 @@ const Request = () => {
           </div>
         </div>
       </main>
-
-      {/* Add Notification System */}
-      <NotificationSystem
-        notifications={notifications}
-        onRemove={removeNotification}
-      />
 
       {/* Animations */}
       <style jsx>{`

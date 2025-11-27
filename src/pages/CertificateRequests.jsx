@@ -1003,28 +1003,6 @@ const CertificateRequests = () => {
                 </>
               )}
             </div>
-            <NotificationSystem
-              notifications={notifications}
-              onRemove={removeNotification}
-            />
-
-            <style jsx>{`
-              @keyframes float {
-                0%,
-                100% {
-                  transform: translateY(0) rotate(0deg);
-                }
-                33% {
-                  transform: translateY(-10px) rotate(120deg);
-                }
-                66% {
-                  transform: translateY(5px) rotate(240deg);
-                }
-              }
-              .animate-float {
-                animation: float 6s ease-in-out infinite;
-              }
-            `}</style>
           </div>
         </div>
       )}
