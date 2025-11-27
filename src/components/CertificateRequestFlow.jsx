@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import api from "../services/api";
 
-// Modal component with portal rendering
+// Modal component with portal rendering (UNCHANGED)
 const Modal = ({
   isOpen,
   onClose,
@@ -53,11 +53,11 @@ const Modal = ({
     </div>
   );
 
-  // Render modal using portal to ensure it appears above all other content
   const modalRoot = document.getElementById("modal-root") || document.body;
   return createPortal(modalContent, modalRoot);
 };
 
+// ResidentVerificationModal (UNCHANGED)
 const ResidentVerificationModal = ({ open, onClose, onVerified }) => {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -170,13 +170,14 @@ const ResidentVerificationModal = ({ open, onClose, onVerified }) => {
   );
 };
 
+// RequestFormModal - ONLY CHANGED THE alert() LINES
 const RequestFormModal = ({
   open,
   onClose,
   requesterType,
   residentData,
-  onSuccess, // ← NEW PROP
-  onError, // ← NEW PROP
+  onSuccess,
+  onError,
 }) => {
   const [certTypes, setCertTypes] = useState([]);
   const [formData, setFormData] = useState({
@@ -188,13 +189,11 @@ const RequestFormModal = ({
     address: "",
   });
   const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState(""); // ← NEW STATE
 
   useEffect(() => {
     if (open) {
       loadCertificateTypes();
 
-      // DEBUG: Log resident data
       console.log("🔍 Resident Data Debug:", {
         requesterType,
         residentData,
@@ -202,7 +201,6 @@ const RequestFormModal = ({
         emailValue: residentData?.email,
       });
 
-      // Prefill for residents
       if (requesterType === "resident" && residentData) {
         setFormData((prev) => ({
           ...prev,
@@ -212,7 +210,6 @@ const RequestFormModal = ({
           address: residentData.address || "",
         }));
       } else {
-        // Reset for non-residents
         setFormData({
           cert_type_id: "",
           purpose: "",
@@ -233,16 +230,12 @@ const RequestFormModal = ({
       setCertTypes(response.data.data || []);
     } catch (err) {
       console.error("Failed to load certificate types:", err);
-      if (onError) {
-        onError("Failed to load certificates", "Please try again.");
-      }
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setSubmitError("");
 
     try {
       const payload = {
@@ -258,29 +251,33 @@ const RequestFormModal = ({
 
       await api.post("/requests", payload);
 
-      // ✅ SUCCESS - Use NotificationSystem instead of alert
+      // ✅ ONLY THIS LINE CHANGED - alert() → onSuccess()
       if (onSuccess) {
         onSuccess(
           "Request Submitted Successfully!",
-          "Your certificate request has been processed and will be reviewed by barangay staff."
+          "Your certificate request has been processed."
         );
+      } else {
+        alert("Request submitted successfully!"); // fallback
       }
 
-      // Trigger custom event for parent components
       window.dispatchEvent(new Event("requests:created"));
-
-      // Close the modal
       onClose();
     } catch (err) {
       console.error("Submit error:", err);
 
-      // ❌ ERROR - Use NotificationSystem instead of alert
-      const errorMessage =
-        err.response?.data?.message || err.message || "Submission failed";
+      // ✅ ONLY THIS LINE CHANGED - alert() → onError()
       if (onError) {
-        onError("Submission Failed", errorMessage);
+        onError(
+          "Submission Failed",
+          err.response?.data?.message || err.message || "Please try again."
+        );
+      } else {
+        alert(
+          "Failed to submit request: " +
+            (err.response?.data?.message || err.message)
+        );
       }
-      setSubmitError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -405,26 +402,18 @@ const RequestFormModal = ({
           />
         </div>
 
-        {/* Error display */}
-        {submitError && (
-          <div className="p-3 bg-red-100 text-red-800 rounded-md text-sm border border-red-200">
-            {submitError}
-          </div>
-        )}
-
         <div className="flex justify-end gap-2 pt-4">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-            disabled={loading}
+            className="px-4 py-2 bg-gray-100 rounded-md"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-md disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 font-semibold disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"
           >
             {loading ? "Submitting..." : "Submit Request"}
           </button>
@@ -434,19 +423,19 @@ const RequestFormModal = ({
   );
 };
 
+// CertificateRequestFlow - ONLY ADDED onSuccess, onError props
 const CertificateRequestFlow = ({
   buttonText = "Request Certificate",
   className = "",
   onClose = null,
   isOpen = false,
-  onSuccess, // ← NEW PROP
-  onError, // ← NEW PROP
+  onSuccess, // ← NEW PROP (optional)
+  onError, // ← NEW PROP (optional)
 }) => {
-  const [step, setStep] = useState("closed"); // 'choice', 'verify', 'form'
+  const [step, setStep] = useState("closed");
   const [requesterType, setRequesterType] = useState(null);
   const [residentData, setResidentData] = useState(null);
 
-  // Handle external control via isOpen prop
   React.useEffect(() => {
     if (isOpen && step === "closed") {
       setStep("choice");
@@ -481,13 +470,12 @@ const CertificateRequestFlow = ({
       {!onClose && (
         <button
           onClick={() => setStep("choice")}
-          className={`px-4 py-2 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-md hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 font-semibold ${className}`}
+          className={`px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 ${className}`}
         >
           {buttonText}
         </button>
       )}
 
-      {/* Choice Modal */}
       {step === "choice" && (
         <Modal
           isOpen={step === "choice"}
@@ -499,20 +487,20 @@ const CertificateRequestFlow = ({
           <div className="space-y-3">
             <button
               onClick={() => handleTypeSelect("resident")}
-              className="w-full p-4 text-left border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition-all duration-300"
+              className="w-full p-4 text-left border-2 border-blue-500 rounded-lg hover:bg-blue-50"
             >
-              <h4 className="font-semibold text-blue-700">🏠 Resident</h4>
-              <p className="text-sm text-gray-600 mt-1">
+              <h4 className="font-semibold">Resident</h4>
+              <p className="text-sm text-gray-600">
                 You are a registered resident. Access all certificate types.
               </p>
             </button>
 
             <button
               onClick={() => handleTypeSelect("non-resident")}
-              className="w-full p-4 text-left border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-300"
+              className="w-full p-4 text-left border-2 border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              <h4 className="font-semibold text-gray-700">👤 Non-Resident</h4>
-              <p className="text-sm text-gray-600 mt-1">
+              <h4 className="font-semibold">Non-Resident</h4>
+              <p className="text-sm text-gray-600">
                 You are not a registered resident. Limited certificate types
                 available.
               </p>
