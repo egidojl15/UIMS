@@ -936,7 +936,7 @@ const BarangayInfo = () => {
         expected_completion: projectFormData.expected_completion,
         start_date: projectFormData.start_date,
         contractor: projectFormData.contractor,
-        category: infrastructure, // Add this required field
+        category: projectFormData.infrastructure, // Add this required field
         location: projectFormData.location,
         implementing_office: projectFormData.implementing_office,
         source_of_fund: projectFormData.source_of_fund,
@@ -987,7 +987,7 @@ const BarangayInfo = () => {
         expected_completion: projectFormData.expected_completion,
         start_date: projectFormData.start_date,
         contractor: projectFormData.contractor,
-        category: infrastructure, // Add this required field
+        category: projectFormData.infrastructure, // Add this required field
         location: projectFormData.location,
         implementing_office: projectFormData.implementing_office,
         source_of_fund: projectFormData.source_of_fund,
