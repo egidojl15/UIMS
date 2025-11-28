@@ -1098,76 +1098,147 @@ export const loginsAPI = {
     }
   },
 };
-// ✅ SIMPLIFIED AND FIXED logbookAPI
+// REPLACE the logbookAPI section in your api.js with this corrected version:
+
 export const logbookAPI = {
   create: async (formData) => {
     try {
-      console.log("📤 Creating logbook entry:", formData);
+      console.log("Creating logbook entry:", formData);
       const response = await api.post("/logbook", formData);
-      console.log("✅ Create response:", response.data);
 
-      // Backend always returns: { success: true, data: {...}, message: "..." }
+      if (!response.data.success) {
+        throw new Error(
+          response.data.message || "Failed to create logbook entry"
+        );
+      }
+
       return response.data;
     } catch (error) {
-      console.error("❌ Logbook create error:", error);
+      console.error("Logbook create error:", error);
+
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        throw new Error("Authentication token required");
+      } else if (error.response?.status === 403) {
+        throw new Error("Your session has expired. Please log in again.");
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+
       throw error;
     }
   },
 
   getAll: async () => {
     try {
-      console.log("📥 Fetching all logbook entries");
+      console.log("Fetching all logbook entries");
       const response = await api.get("/logbook");
-      console.log("✅ GetAll response:", response.data);
 
-      // Backend always returns: { success: true, data: [...] }
-      return response.data;
+      if (!response.data.success) {
+        throw new Error(
+          response.data.message || "Failed to fetch logbook entries"
+        );
+      }
+
+      return response.data.data || [];
     } catch (error) {
-      console.error("❌ Logbook getAll error:", error);
+      console.error("Logbook getAll error:", error);
+
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        throw new Error("Authentication token required");
+      } else if (error.response?.status === 403) {
+        throw new Error("Your session has expired. Please log in again.");
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+
       throw error;
     }
   },
 
   getById: async (id) => {
     try {
-      console.log("📥 Fetching logbook entry:", id);
+      console.log("Fetching logbook entry:", id);
       const response = await api.get(`/logbook/${id}`);
-      console.log("✅ GetById response:", response.data);
 
-      // Backend always returns: { success: true, data: {...} }
-      return response.data;
+      if (!response.data.success) {
+        throw new Error(
+          response.data.message || "Failed to fetch logbook entry"
+        );
+      }
+
+      return response.data.data;
     } catch (error) {
-      console.error("❌ Logbook getById error:", error);
+      console.error("Logbook getById error:", error);
+
+      if (error.response?.status === 404) {
+        throw new Error("Logbook entry not found");
+      } else if (error.response?.status === 401) {
+        throw new Error("Authentication token required");
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+
       throw error;
     }
   },
 
   update: async (id, formData) => {
     try {
-      console.log("📤 Updating logbook entry:", id, formData);
+      console.log("Updating logbook entry:", id, formData);
       const response = await api.put(`/logbook/${id}`, formData);
-      console.log("✅ Update response:", response.data);
+
+      if (!response.data.success) {
+        throw new Error(
+          response.data.message || "Failed to update logbook entry"
+        );
+      }
 
       return response.data;
     } catch (error) {
-      console.error("❌ Logbook update error:", error);
+      console.error("Logbook update error:", error);
+
+      if (error.response?.status === 404) {
+        throw new Error("Logbook entry not found");
+      } else if (error.response?.status === 401) {
+        throw new Error("Authentication token required");
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+
       throw error;
     }
   },
 
   delete: async (id) => {
     try {
-      console.log("🗑️ Deleting logbook entry:", id);
+      console.log("Deleting logbook entry:", id);
       const response = await api.delete(`/logbook/${id}`);
-      console.log("✅ Delete response:", response.data);
+
+      if (!response.data.success) {
+        throw new Error(
+          response.data.message || "Failed to delete logbook entry"
+        );
+      }
 
       return response.data;
     } catch (error) {
-      console.error("❌ Logbook delete error:", error);
+      console.error("Logbook delete error:", error);
+
+      if (error.response?.status === 404) {
+        throw new Error("Logbook entry not found");
+      } else if (error.response?.status === 401) {
+        throw new Error("Authentication token required");
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+
       throw error;
     }
   },
 };
+
 // Activity Logs API
 export const activityAPI = {
   getAll: async (params) => {

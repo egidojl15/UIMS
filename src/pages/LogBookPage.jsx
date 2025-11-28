@@ -222,36 +222,6 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // ✅ ADD THESE HANDLER FUNCTIONS HERE (after state declarations)
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Handle address suggestions
-    if (name === "address" && value.trim().length > 0) {
-      const filtered = allLocations.filter((location) =>
-        location.toLowerCase().includes(value.toLowerCase())
-      );
-      setAddressSuggestions(filtered.slice(0, 10)); // Limit to 10 suggestions
-      setShowAddressSuggestions(true);
-    } else if (name === "address") {
-      setAddressSuggestions([]);
-      setShowAddressSuggestions(false);
-    }
-  };
-
-  const handleAddressSelect = (suggestion) => {
-    setFormData((prev) => ({
-      ...prev,
-      address: suggestion,
-    }));
-    setShowAddressSuggestions(false);
-    setAddressSuggestions([]);
-  };
-
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 300);
     return () => clearTimeout(timer);
@@ -267,30 +237,37 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
     }
   }, [notification]);
 
-  // ✅ REPLACE the initial data loading useEffect (around line 266)
+  // ✅ FIXED: Load initial data
   useEffect(() => {
     const locations = getAllLocations();
     setAllLocations(locations);
 
     const fetchLogs = async () => {
       try {
-        console.log("📥 Loading logbook entries...");
         const response = await logbookAPI.getAll();
-        console.log("✅ API Response:", response);
+        console.log("🔄 Initial load - Logbook API response:", response);
 
-        // ✅ SIMPLIFIED: Backend always returns { success: true, data: [...] }
+        // ✅ Handle ALL possible response formats
+        let logsArray = [];
+
         if (response && response.success && Array.isArray(response.data)) {
-          console.log(`✅ Loaded ${response.data.length} logbook entries`);
-          setLogbooks(response.data);
+          logsArray = response.data;
+        } else if (Array.isArray(response)) {
+          logsArray = response;
+        } else if (response && response.data && Array.isArray(response.data)) {
+          logsArray = response.data;
         } else {
-          console.warn("⚠️ Unexpected response format:", response);
-          setLogbooks([]);
+          logsArray = [];
         }
+
+        setLogbooks(logsArray);
       } catch (err) {
         console.error("❌ Failed to load logbooks:", err);
         setNotification({
           show: true,
-          message: "Failed to load logbook entries",
+          message:
+            "Failed to load logbook entries: " +
+            (err.message || "Unknown error"),
           type: "error",
         });
         setLogbooks([]);
@@ -300,7 +277,41 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
     fetchLogs();
   }, [setLogbooks]);
 
-  // ✅ REPLACE the handleSubmit function (around line 334)
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "contact_number") {
+      let cleanNumber = value.replace(/\D/g, "");
+      if (cleanNumber.length > 11) {
+        cleanNumber = cleanNumber.slice(0, 11);
+      }
+      setFormData({ ...formData, [name]: cleanNumber });
+    } else if (name === "address") {
+      setFormData({ ...formData, [name]: value });
+
+      if (value.trim().length > 0) {
+        const filtered = allLocations
+          .filter((location) =>
+            location.toLowerCase().includes(value.toLowerCase())
+          )
+          .slice(0, 8);
+
+        setAddressSuggestions(filtered);
+        setShowAddressSuggestions(true);
+      } else {
+        setShowAddressSuggestions(false);
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleAddressSelect = (selectedAddress) => {
+    setFormData({ ...formData, address: selectedAddress });
+    setShowAddressSuggestions(false);
+  };
+
+  // ✅ FIXED: Complete handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -333,32 +344,65 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
         }
       }
 
-      // ✅ API Call
-      console.log("📤 Submitting form data:", formData);
+      // ✅ API Call with detailed logging
+      console.log("📤 Sending form data:", formData);
       const result = await logbookAPI.create(formData);
-      console.log("✅ CREATE SUCCESS:", result);
+      console.log("✅ CREATE API RESPONSE:", result);
 
-      // ✅ Show success notification
+      // ✅ Handle ALL possible response formats
+      let newEntry = null;
+
+      if (result && result.success && result.data) {
+        newEntry = result.data;
+      } else if (result && Array.isArray(result) && result.length > 0) {
+        newEntry = result[0];
+      } else if (result && (result.id || result.logbook_id)) {
+        newEntry = result;
+      }
+
+      // ✅ Show SUCCESS notification FIRST (ALWAYS when API succeeds)
       setNotification({
         show: true,
         message: "✅ Logbook entry added successfully!",
         type: "success",
       });
 
-      // ✅ Update state with new entry (backend returns { success: true, data: {...} })
-      if (result && result.success && result.data) {
-        console.log("🎉 Adding new entry to state:", result.data);
-        setLogbooks([result.data, ...(logbooks || [])]);
+      // ✅ Optimistic update if we have the new entry
+      if (newEntry) {
+        console.log("🎉 Adding new entry to state:", newEntry);
+        setLogbooks([newEntry, ...(logbooks || [])]);
       } else {
-        // Fallback: refresh all data
-        console.log("🔄 Refreshing all data...");
-        const refreshedData = await logbookAPI.getAll();
-        if (
-          refreshedData &&
-          refreshedData.success &&
-          Array.isArray(refreshedData.data)
-        ) {
-          setLogbooks(refreshedData.data);
+        // ✅ Fallback: refresh data (won't show error if this fails)
+        console.log("🔄 Refreshing data after create...");
+        try {
+          const refreshedData = await logbookAPI.getAll();
+          console.log("🔄 Refreshed data:", refreshedData);
+
+          // Handle getAll response format
+          let logsArray = [];
+          if (
+            refreshedData &&
+            refreshedData.success &&
+            Array.isArray(refreshedData.data)
+          ) {
+            logsArray = refreshedData.data;
+          } else if (Array.isArray(refreshedData)) {
+            logsArray = refreshedData;
+          } else if (
+            refreshedData &&
+            refreshedData.data &&
+            Array.isArray(refreshedData.data)
+          ) {
+            logsArray = refreshedData.data;
+          }
+
+          setLogbooks(logsArray);
+        } catch (refreshError) {
+          console.warn(
+            "⚠️ Refresh failed but entry was created:",
+            refreshError
+          );
+          // ✅ DON'T show error - the entry was created successfully!
         }
       }
 
@@ -375,7 +419,7 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
     } catch (err) {
       console.error("❌ Logbook create error:", err);
 
-      // ✅ Show error notification
+      // ✅ Only show error for REAL errors (network issues, validation, etc.)
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
