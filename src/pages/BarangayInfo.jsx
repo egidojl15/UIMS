@@ -932,15 +932,15 @@ const BarangayInfo = () => {
       const createData = {
         title: projectFormData.title,
         status: projectFormData.status,
-        budget: projectFormData.budget,
-        expected_completion: projectFormData.expected_completion,
-        start_date: projectFormData.start_date,
+        budget: projectFormData.budget || null, // Convert empty string to null
+        expected_completion: projectFormData.expected_completion || null,
+        start_date: projectFormData.start_date || null,
         contractor: projectFormData.contractor,
-        category: projectFormData.infrastructure, // Add this required field
-        location: projectFormData.location,
-        implementing_office: projectFormData.implementing_office,
-        source_of_fund: projectFormData.source_of_fund,
-        description: projectFormData.description,
+        category: projectFormData.category || "infrastructure", // FIXED: was undefined variable
+        location: projectFormData.location || null,
+        implementing_office: projectFormData.implementing_office || null,
+        source_of_fund: projectFormData.source_of_fund || null,
+        description: projectFormData.description || null,
       };
 
       console.log("📤 Sending create data:", createData);
@@ -959,6 +959,7 @@ const BarangayInfo = () => {
         implementing_office: "",
         source_of_fund: "",
         status: "planning",
+        category: "infrastructure",
       });
       addNotification({
         type: "success",
@@ -979,19 +980,19 @@ const BarangayInfo = () => {
     if (!projectFormData.title.trim() || !editingProject) return;
 
     try {
-      // Prepare the data in the format expected by the backend
+      // Prepare the data with null for empty values instead of undefined
       const updateData = {
         title: projectFormData.title,
         status: projectFormData.status,
-        budget: projectFormData.budget,
-        expected_completion: projectFormData.expected_completion,
-        start_date: projectFormData.start_date,
+        budget: projectFormData.budget || null, // Convert empty string to null
+        expected_completion: projectFormData.expected_completion || null,
+        start_date: projectFormData.start_date || null,
         contractor: projectFormData.contractor,
-        category: projectFormData.infrastructure, // Add this required field
-        location: projectFormData.location,
-        implementing_office: projectFormData.implementing_office,
-        source_of_fund: projectFormData.source_of_fund,
-        description: projectFormData.description,
+        category: projectFormData.category || "infrastructure", // FIXED: was undefined variable
+        location: projectFormData.location || null,
+        implementing_office: projectFormData.implementing_office || null,
+        source_of_fund: projectFormData.source_of_fund || null,
+        description: projectFormData.description || null,
       };
 
       console.log("📤 Sending update data:", updateData);
@@ -1015,6 +1016,7 @@ const BarangayInfo = () => {
         implementing_office: "",
         source_of_fund: "",
         status: "planning",
+        category: "infrastructure",
       });
       addNotification({
         type: "success",
