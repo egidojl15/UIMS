@@ -1547,6 +1547,7 @@ export const notificationsAPI = {
 };
 
 // Projects API
+// Projects API - FIXED VERSION
 export const projectsAPI = {
   getAll: async (status = null) => {
     try {
@@ -1569,22 +1570,46 @@ export const projectsAPI = {
 
   create: async (projectData) => {
     try {
-      const response = await api.post("/projects", projectData);
+      // Clean the data before sending
+      const cleanData = {};
+      Object.keys(projectData).forEach((key) => {
+        const value = projectData[key];
+        cleanData[key] =
+          value === "" || value === undefined || value === null ? null : value;
+      });
+
+      // Ensure category has a value
+      if (!cleanData.category) {
+        cleanData.category = "infrastructure";
+      }
+
+      console.log("📤 Creating project with cleaned data:", cleanData);
+
+      const response = await api.post("/projects", cleanData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
     }
   },
 
-  // In your projectsAPI update function
-  update: async (id, data) => {
+  update: async (id, projectData) => {
     try {
-      // Clean the data - convert empty strings to null
+      // Clean the data - convert undefined/empty values to null
       const cleanData = {};
-      Object.keys(data).forEach((key) => {
-        cleanData[key] = data[key] === "" ? null : data[key];
+      Object.keys(projectData).forEach((key) => {
+        const value = projectData[key];
+        cleanData[key] =
+          value === "" || value === undefined || value === null ? null : value;
       });
 
+      // Ensure category has a value
+      if (!cleanData.category) {
+        cleanData.category = "infrastructure";
+      }
+
+      console.log("📤 Updating project with cleaned data:", cleanData);
+
+      // ✅ FIXED: Use the api instance instead of direct fetch
       const response = await api.put(`/projects/${id}`, cleanData);
       return response.data;
     } catch (error) {
@@ -1602,7 +1627,6 @@ export const projectsAPI = {
     }
   },
 
-  // Add project update/progress
   addUpdate: async (projectId, updateData) => {
     try {
       const response = await api.post(
