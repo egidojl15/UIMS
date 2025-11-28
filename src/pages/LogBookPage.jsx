@@ -222,6 +222,36 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // ✅ ADD THESE HANDLER FUNCTIONS HERE (after state declarations)
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Handle address suggestions
+    if (name === "address" && value.trim().length > 0) {
+      const filtered = allLocations.filter((location) =>
+        location.toLowerCase().includes(value.toLowerCase())
+      );
+      setAddressSuggestions(filtered.slice(0, 10)); // Limit to 10 suggestions
+      setShowAddressSuggestions(true);
+    } else if (name === "address") {
+      setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
+    }
+  };
+
+  const handleAddressSelect = (suggestion) => {
+    setFormData((prev) => ({
+      ...prev,
+      address: suggestion,
+    }));
+    setShowAddressSuggestions(false);
+    setAddressSuggestions([]);
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 300);
     return () => clearTimeout(timer);
