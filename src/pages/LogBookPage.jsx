@@ -200,13 +200,44 @@ const FileTextIcon = () => (
   </svg>
 );
 
-const LogbookPage = ({ logbooks, setLogbooks }) => {
+const LogbookPage = () => {
   const [formData, setFormData] = useState({
     visitor_name: "",
     address: "",
     purpose: "",
     contact_number: "",
   });
+
+  // ADD this function after your states, inside the component:
+  const loadLogbooks = async () => {
+    try {
+      console.log("🔄 Loading logbooks...");
+      const response = await logbookAPI.getAll();
+      console.log("📊 Logbook API response:", response);
+
+      // Handle the response format from backend
+      if (response && response.success) {
+        setLogbooks(response.data || []);
+      } else if (Array.isArray(response)) {
+        setLogbooks(response);
+      } else if (response && response.data && Array.isArray(response.data)) {
+        setLogbooks(response.data);
+      } else {
+        setLogbooks([]);
+      }
+    } catch (err) {
+      console.error("❌ Failed to load logbooks:", err);
+      setNotification({
+        show: true,
+        message:
+          "Failed to load logbook entries: " + (err.message || "Unknown error"),
+        type: "error",
+      });
+      setLogbooks([]);
+    }
+  };
+
+  const [logbooks, setLogbooks] = useState([]); // ADD this line
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("add");
   const [addressSuggestions, setAddressSuggestions] = useState([]);
@@ -275,7 +306,7 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
     };
 
     fetchLogs();
-  }, [setLogbooks]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -317,7 +348,7 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
     setIsLoading(true);
 
     try {
-      // Validation
+      // Validation (keep your existing validation)
       if (!formData.visitor_name.trim() || !formData.purpose.trim()) {
         setNotification({
           show: true,
@@ -344,67 +375,40 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
         }
       }
 
-      // ✅ API Call with detailed logging
+      // ✅ Simple API Call
       console.log("📤 Sending form data:", formData);
-      const result = await logbookAPI.create(formData);
-      console.log("✅ CREATE API RESPONSE:", result);
+      await logbookAPI.create(formData);
 
-      // ✅ Handle ALL possible response formats
-      let newEntry = null;
-
-      if (result && result.success && result.data) {
-        newEntry = result.data;
-      } else if (result && Array.isArray(result) && result.length > 0) {
-        newEntry = result[0];
-      } else if (result && (result.id || result.logbook_id)) {
-        newEntry = result;
-      }
-
-      // ✅ Show SUCCESS notification FIRST (ALWAYS when API succeeds)
+      // ✅ Show SUCCESS notification
       setNotification({
         show: true,
         message: "✅ Logbook entry added successfully!",
         type: "success",
       });
 
-      // ✅ Optimistic update if we have the new entry
-      if (newEntry) {
-        console.log("🎉 Adding new entry to state:", newEntry);
-        setLogbooks([newEntry, ...(logbooks || [])]);
-      } else {
-        // ✅ Fallback: refresh data (won't show error if this fails)
-        console.log("🔄 Refreshing data after create...");
-        try {
-          const refreshedData = await logbookAPI.getAll();
-          console.log("🔄 Refreshed data:", refreshedData);
+      // ✅ Refresh data from server (SIMPLIFIED)
+      const refreshedData = await logbookAPI.getAll();
+      console.log("🔄 Refreshed data:", refreshedData);
 
-          // Handle getAll response format
-          let logsArray = [];
-          if (
-            refreshedData &&
-            refreshedData.success &&
-            Array.isArray(refreshedData.data)
-          ) {
-            logsArray = refreshedData.data;
-          } else if (Array.isArray(refreshedData)) {
-            logsArray = refreshedData;
-          } else if (
-            refreshedData &&
-            refreshedData.data &&
-            Array.isArray(refreshedData.data)
-          ) {
-            logsArray = refreshedData.data;
-          }
-
-          setLogbooks(logsArray);
-        } catch (refreshError) {
-          console.warn(
-            "⚠️ Refresh failed but entry was created:",
-            refreshError
-          );
-          // ✅ DON'T show error - the entry was created successfully!
-        }
+      // Handle getAll response format
+      let logsArray = [];
+      if (
+        refreshedData &&
+        refreshedData.success &&
+        Array.isArray(refreshedData.data)
+      ) {
+        logsArray = refreshedData.data;
+      } else if (Array.isArray(refreshedData)) {
+        logsArray = refreshedData;
+      } else if (
+        refreshedData &&
+        refreshedData.data &&
+        Array.isArray(refreshedData.data)
+      ) {
+        logsArray = refreshedData.data;
       }
+
+      setLogbooks(logsArray);
 
       // ✅ Reset form
       setFormData({
@@ -418,8 +422,6 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
       setActiveTab("records");
     } catch (err) {
       console.error("❌ Logbook create error:", err);
-
-      // ✅ Only show error for REAL errors (network issues, validation, etc.)
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
@@ -436,16 +438,18 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
   };
 
   const filteredLogbooks = selectedMonth
-    ? (logbooks || []).filter((log) => {
+    ? logbooks.filter((log) => {
+        // REMOVE optional chaining
         const logDate = new Date(log.date_logged);
         const logMonth = `${logDate.getFullYear()}-${String(
           logDate.getMonth() + 1
         ).padStart(2, "0")}`;
         return logMonth === selectedMonth;
       })
-    : logbooks || [];
+    : logbooks; // REMOVE optional chaining
 
-  const searchFilteredLogbooks = (filteredLogbooks || []).filter((log) => {
+  const searchFilteredLogbooks = filteredLogbooks.filter((log) => {
+    // REMOVE optional chaining
     const matchesSearch =
       log.visitor_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -455,21 +459,25 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
   });
 
   const stats = {
-    total: logbooks?.length || 0,
+    total: logbooks.length || 0, // REMOVE the optional chaining (?.) since logbooks is now always an array
     today:
-      logbooks?.filter(
+      logbooks.filter(
+        // REMOVE the optional chaining
         (l) =>
           new Date(l.date_logged).toDateString() === new Date().toDateString()
       ).length || 0,
+    // ... do the same for thisWeek and thisMonth (remove ?. from logbooks)
     thisWeek:
-      logbooks?.filter((l) => {
+      logbooks.filter((l) => {
+        // REMOVE ?.
         const date = new Date(l.date_logged);
         const now = new Date();
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         return date >= weekAgo;
       }).length || 0,
     thisMonth:
-      logbooks?.filter((l) => {
+      logbooks.filter((l) => {
+        // REMOVE ?.
         const date = new Date(l.date_logged);
         const now = new Date();
         return (
@@ -478,7 +486,6 @@ const LogbookPage = ({ logbooks, setLogbooks }) => {
         );
       }).length || 0,
   };
-
   const handlePrint = () => {
     const printContents = document.getElementById("printArea").innerHTML;
     const newWindow = window.open("", "", "width=900,height=650");
