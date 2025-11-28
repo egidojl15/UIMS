@@ -1585,19 +1585,11 @@ export const projectsAPI = {
         cleanData[key] = data[key] === "" ? null : data[key];
       });
 
-      const response = await fetch(`${API_URL}/projects/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-        body: JSON.stringify(cleanData),
-      });
-
-      return await response.json();
+      const response = await api.put(`/projects/${id}`, cleanData);
+      return response.data;
     } catch (error) {
-      console.error("Update project API error:", error);
-      throw error;
+      console.error("❌ Project update API error:", error);
+      throw error.response?.data || error;
     }
   },
 
