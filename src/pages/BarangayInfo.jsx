@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import { formatDateForInput } from "./ManageResidentsPage"; // Adjust path if needed
+import { formatDateForInput } from "./ManageResidentPage"; // Adjust path if needed
 import {
   Bell,
   Calendar,
