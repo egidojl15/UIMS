@@ -397,7 +397,9 @@ const BarangayInfo = () => {
     implementing_office: "",
     source_of_fund: "",
     status: "planning",
+    category: "infrastructure",
   });
+
   const [projectSearch, setProjectSearch] = useState("");
   const [filteredProjects, setFilteredProjects] = useState([]);
 
@@ -925,8 +927,25 @@ const BarangayInfo = () => {
       });
       return;
     }
+
     try {
-      await projectsAPI.create(projectFormData);
+      const createData = {
+        title: projectFormData.title,
+        status: projectFormData.status,
+        budget: projectFormData.budget,
+        expected_completion: projectFormData.expected_completion,
+        start_date: projectFormData.start_date,
+        contractor: projectFormData.contractor,
+        category: infrastructure, // Add this required field
+        location: projectFormData.location,
+        implementing_office: projectFormData.implementing_office,
+        source_of_fund: projectFormData.source_of_fund,
+        description: projectFormData.description,
+      };
+
+      console.log("📤 Sending create data:", createData);
+
+      await projectsAPI.create(createData);
       await loadProjects();
       setShowCreateProjectModal(false);
       setProjectFormData({
@@ -947,22 +966,41 @@ const BarangayInfo = () => {
         message: "Project created successfully",
       });
     } catch (e) {
-      console.error("Error creating project:", e);
+      console.error("❌ Error creating project:", e);
       addNotification({
         type: "error",
         title: "Failed",
-        message: "Failed to create project",
+        message: e.message || "Failed to create project",
       });
     }
   };
 
   const handleEditProject = async () => {
     if (!projectFormData.title.trim() || !editingProject) return;
+
     try {
+      // Prepare the data in the format expected by the backend
+      const updateData = {
+        title: projectFormData.title,
+        status: projectFormData.status,
+        budget: projectFormData.budget,
+        expected_completion: projectFormData.expected_completion,
+        start_date: projectFormData.start_date,
+        contractor: projectFormData.contractor,
+        category: infrastructure, // Add this required field
+        location: projectFormData.location,
+        implementing_office: projectFormData.implementing_office,
+        source_of_fund: projectFormData.source_of_fund,
+        description: projectFormData.description,
+      };
+
+      console.log("📤 Sending update data:", updateData);
+
       await projectsAPI.update(
         editingProject.project_id || editingProject.id,
-        projectFormData
+        updateData
       );
+
       await loadProjects();
       setShowEditProjectModal(false);
       setEditingProject(null);
@@ -984,11 +1022,11 @@ const BarangayInfo = () => {
         message: "Project updated successfully",
       });
     } catch (e) {
-      console.error("Error editing project:", e);
+      console.error("❌ Error editing project:", e);
       addNotification({
         type: "error",
         title: "Failed",
-        message: "Failed to update project",
+        message: e.message || "Failed to update project",
       });
     }
   };
@@ -1026,6 +1064,7 @@ const BarangayInfo = () => {
       implementing_office: p.implementing_office || "",
       source_of_fund: p.source_of_fund || "",
       status: p.status || "planning",
+      category: p.category || "infrastructure", // Add this line
     });
     setShowEditProjectModal(true);
   };
@@ -2645,6 +2684,29 @@ const BarangayInfo = () => {
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* ADDED: Category Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Category
+              </label>
+              <select
+                value={projectFormData.category || "infrastructure"}
+                onChange={(e) =>
+                  setProjectFormData({
+                    ...projectFormData,
+                    category: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
+              >
+                <option value="infrastructure">Infrastructure</option>
+                <option value="health">Health</option>
+                <option value="education">Education</option>
+                <option value="environment">Environment</option>
+                <option value="social">Social Services</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Budget (₱)
@@ -2662,6 +2724,8 @@ const BarangayInfo = () => {
                 placeholder="₱0.00"
               />
             </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Status
@@ -2681,8 +2745,6 @@ const BarangayInfo = () => {
                 <option value="completed">Completed</option>
               </select>
             </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Implementing Office
@@ -2700,6 +2762,8 @@ const BarangayInfo = () => {
                 placeholder="Office name"
               />
             </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Source of Fund
@@ -2836,6 +2900,29 @@ const BarangayInfo = () => {
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* ADDED: Category Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Category
+              </label>
+              <select
+                value={projectFormData.category || "infrastructure"}
+                onChange={(e) =>
+                  setProjectFormData({
+                    ...projectFormData,
+                    category: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
+              >
+                <option value="infrastructure">Infrastructure</option>
+                <option value="health">Health</option>
+                <option value="education">Education</option>
+                <option value="environment">Environment</option>
+                <option value="social">Social Services</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Budget (₱)
@@ -2852,6 +2939,8 @@ const BarangayInfo = () => {
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
               />
             </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Status
@@ -2871,8 +2960,6 @@ const BarangayInfo = () => {
                 <option value="completed">Completed</option>
               </select>
             </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Implementing Office
@@ -2889,6 +2976,8 @@ const BarangayInfo = () => {
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
               />
             </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Source of Fund
