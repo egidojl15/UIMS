@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import { formatDateForInput } from "./ManageResidentsPage"; // Adjust path if needed
 import {
   Bell,
   Calendar,
@@ -933,8 +934,9 @@ const BarangayInfo = () => {
         title: projectFormData.title,
         status: projectFormData.status,
         budget: projectFormData.budget || null, // Convert empty string to null
-        expected_completion: projectFormData.expected_completion || null,
-        start_date: projectFormData.start_date || null,
+        expected_completion:
+          formatDateForInput(projectFormData.expected_completion) || null,
+        start_date: formatDateForInput(projectFormData.start_date) || null,
         contractor: projectFormData.contractor,
         category: projectFormData.category || "infrastructure", // FIXED: was undefined variable
         location: projectFormData.location || null,
@@ -985,8 +987,9 @@ const BarangayInfo = () => {
         title: projectFormData.title,
         status: projectFormData.status,
         budget: projectFormData.budget || null, // Convert empty string to null
-        expected_completion: projectFormData.expected_completion || null,
-        start_date: projectFormData.start_date || null,
+        expected_completion:
+          formatDateForInput(projectFormData.expected_completion) || null,
+        start_date: formatDateForInput(projectFormData.start_date) || null,
         contractor: projectFormData.contractor,
         category: projectFormData.category || "infrastructure", // FIXED: was undefined variable
         location: projectFormData.location || null,
@@ -1060,8 +1063,8 @@ const BarangayInfo = () => {
       description: p.description || "",
       location: p.location || "",
       contractor: p.contractor || "",
-      start_date: p.start_date || "",
-      expected_completion: p.expected_completion || "",
+      start_date: formatDateForInput(p.start_date) || "",
+      expected_completion: formatDateForInput(p.expected_completion) || "",
       budget: p.budget || "",
       implementing_office: p.implementing_office || "",
       source_of_fund: p.source_of_fund || "",
@@ -2518,7 +2521,7 @@ const BarangayInfo = () => {
                           Start Date
                         </p>
                         <p className="text-sm text-gray-700">
-                          {p.start_date || "Not specified"}
+                          {formatDateForInput(p.start_date) || "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -2532,7 +2535,8 @@ const BarangayInfo = () => {
                           Expected Completion
                         </p>
                         <p className="text-sm text-gray-700">
-                          {p.expected_completion || "Not specified"}
+                          {formatDateForInput(p.expected_completion) ||
+                            "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -2666,7 +2670,7 @@ const BarangayInfo = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CalendarInput
               label="Start Date"
-              value={projectFormData.start_date}
+              value={formatDateForInput(projectFormData.start_date)}
               onChange={(e) =>
                 setProjectFormData({
                   ...projectFormData,
@@ -2676,7 +2680,7 @@ const BarangayInfo = () => {
             />
             <CalendarInput
               label="Expected Completion"
-              value={projectFormData.expected_completion}
+              value={formatDateForInput(projectFormData.expected_completion)}
               onChange={(e) =>
                 setProjectFormData({
                   ...projectFormData,
@@ -2882,7 +2886,7 @@ const BarangayInfo = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CalendarInput
               label="Start Date"
-              value={projectFormData.start_date}
+              value={formatDateForInput(projectFormData.start_date)}
               onChange={(e) =>
                 setProjectFormData({
                   ...projectFormData,
@@ -2892,7 +2896,7 @@ const BarangayInfo = () => {
             />
             <CalendarInput
               label="Expected Completion"
-              value={projectFormData.expected_completion}
+              value={formatDateForInput(projectFormData.expected_completion)}
               onChange={(e) =>
                 setProjectFormData({
                   ...projectFormData,
