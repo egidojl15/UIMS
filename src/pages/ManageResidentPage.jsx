@@ -3122,26 +3122,33 @@ const ManageResidentsPage = () => {
     setResidentToDelete(resident);
   };
 
-  // Update the proceedDelete function in ManageResidentsPage.jsx
+  // ✅ FIXED proceedDelete function
   const proceedDelete = async (newAddress) => {
     if (!residentToDelete) return;
     const id = residentToDelete.resident_id;
 
     try {
-      // handleResidentDelete now returns true/false based on API success
-      const deleteSuccessful = await handleResidentDelete(id, newAddress);
+      // ✅ CLEAN: Uses the new softDelete method
+      const result = await residentsAPI.softDelete(id, {
+        new_address: newAddress,
+      });
+      const deleteSuccessful = result.success;
 
       if (deleteSuccessful) {
-        // SUCCESS: Trigger a full refresh of the list from the server
         await fetchResidents();
         addNotification(
           "success",
           "Resident Deactivated",
-          `${residentToDelete.first_name} ${residentToDelete.last_name} has been deactivated successfully. New address: ${newAddress}`
+          `${residentToDelete.first_name} ${
+            residentToDelete.last_name
+          } has been deactivated successfully. ${
+            newAddress
+              ? `New address: ${newAddress}`
+              : "No new address provided"
+          }`
         );
       }
 
-      // Close the confirmation modal by resetting the state variable
       setResidentToDelete(null);
     } catch (error) {
       console.error("Error deactivating resident:", error);
@@ -3151,8 +3158,6 @@ const ManageResidentsPage = () => {
         "Failed to deactivate resident. Please try again."
       );
     }
-
-    // NOTE: The line `setShowDeleteConfirmation(false);` is now removed.
   };
 
   // Add these helper functions:
