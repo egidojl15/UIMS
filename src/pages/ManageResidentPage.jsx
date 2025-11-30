@@ -560,7 +560,7 @@ const ViewResidentModal = ({
             <div className="flex-shrink-0 flex justify-center md:justify-start">
               {selectedResident.photo_url ? (
                 <img
-                  src={`https://uims-backend-production.up.railway.app/api/residents/photo${selectedResident.photo_url}`}
+                  src={`https://uims-backend-production.up.railway.app/api/residents/photo/${selectedResident.photo_url}`}
                   alt="Resident"
                   className="w-48 h-48 rounded-full object-cover border-4 border-[#B3DEF8]"
                 />
@@ -717,7 +717,7 @@ const EditResidentModal = ({
     editResident?.photo_url
       ? isAbsoluteUrl(editResident.photo_url)
         ? editResident.photo_url
-        : `https://uims-backend-production.up.railway.app/api/residents/photo${editResident.photo_url}`
+        : `https://uims-backend-production.up.railway.app/api/residents/photo/${editResident.photo_url}`
       : null
   );
 
