@@ -195,20 +195,20 @@ export const residentsAPI = {
     }
   },
 
-  // Check for delete or deactivate
-  deactivate: async (id, data = {}) => {
-    try {
-      let url = `/residents/${id}`;
-      if (data.new_address && data.new_address.trim()) {
-        const encodedAddress = encodeURIComponent(data.new_address.trim());
-        url += `?new_address=${encodedAddress}`;
-      }
-      const response = await api.delete(url);
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  },
+  // // Check for delete or deactivate
+  // deactivate: async (id, data = {}) => {
+  //   try {
+  //     let url = `/residents/${id}`;
+  //     if (data.new_address && data.new_address.trim()) {
+  //       const encodedAddress = encodeURIComponent(data.new_address.trim());
+  //       url += `?new_address=${encodedAddress}`;
+  //     }
+  //     const response = await api.delete(url);
+  //     return response.data;
+  //   } catch (error) {
+  //     throw error.response?.data || error;
+  //   }
+  // },
 
   // --- NEW REPORT-SPECIFIC FUNCTIONS START ---
   getCategoryCounts: async () => {

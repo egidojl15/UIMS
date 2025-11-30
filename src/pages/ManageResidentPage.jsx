@@ -2178,26 +2178,34 @@ const ManageResidentsPage = () => {
   };
 
   // Standalone handle resident delete
-  const standaloneHandleResidentDelete = async (residentId) => {
+  const standaloneHandleResidentDelete = async (
+    residentId,
+    newAddress = ""
+  ) => {
     try {
-      const result = await residentsAPI.delete(residentId);
+      const result = await residentsAPI.delete(residentId, newAddress);
+
       if (result.success) {
         standaloneAddNotification(
           "success",
           "Success",
-          "Resident deleted successfully"
+          "Resident moved to inactive residents"
         );
         standaloneFetchResidents();
       } else {
         standaloneAddNotification(
           "error",
           "Error",
-          "Failed to delete resident"
+          "Failed to move resident to inactive list"
         );
       }
     } catch (error) {
-      console.error("Error deleting resident:", error);
-      standaloneAddNotification("error", "Error", "Failed to delete resident");
+      console.error("Error deactivating resident:", error);
+      standaloneAddNotification(
+        "error",
+        "Error",
+        "Failed to move resident to inactive list"
+      );
     }
   };
 
@@ -3450,7 +3458,7 @@ const ManageResidentsPage = () => {
                         <button
                           className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors duration-200"
                           onClick={() => confirmDelete(r)}
-                          title="Delete Resident"
+                          title="Deactivate Resident"
                         >
                           <Trash2 size={18} />
                         </button>
