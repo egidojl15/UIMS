@@ -18,6 +18,7 @@ import {
   householdsAPI,
   logUserActivity,
 } from "../services/api";
+
 import ReportGenerator from "../components/ReportGenerator";
 import NotificationSystem from "../components/NotificationSystem";
 
@@ -560,9 +561,13 @@ const ViewResidentModal = ({
             <div className="flex-shrink-0 flex justify-center md:justify-start">
               {selectedResident.photo_url ? (
                 <img
-                  src={`https://uims-backend-production.up.railway.app/api/residents/photo/${selectedResident.photo_url}`}
+                  src={`https://uims-backend-production.up.railway.app${selectedResident.photo_url}`}
                   alt="Resident"
                   className="w-48 h-48 rounded-full object-cover border-4 border-[#B3DEF8]"
+                  onError={(e) => {
+                    e.target.src = "/placeholder-avatar.png"; // Fallback image (add this asset to your public folder)
+                    console.error("Image load failed:", e.target.src);
+                  }}
                 />
               ) : (
                 <div className="w-48 h-48 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm border-4 border-[#B3DEF8]">
@@ -717,9 +722,10 @@ const EditResidentModal = ({
     editResident?.photo_url
       ? isAbsoluteUrl(editResident.photo_url)
         ? editResident.photo_url
-        : `https://uims-backend-production.up.railway.app/api/residents/photo/${editResident.photo_url}`
+        : `https://uims-backend-production.up.railway.app${editResident.photo_url}` // FIXED: Correct base URL + photo_url
       : null
   );
+  const [isUpdating, setIsUpdating] = useState(false); // NEW: Loading state for update button
 
   // Helper function to calculate age
   const calculateAge = (birthdate) => {
@@ -762,14 +768,19 @@ const EditResidentModal = ({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsUpdating(true); // NEW: Show loading
     const age = calculateAge(editResident.date_of_birth);
-    handleResidentEdit(editResident.resident_id, {
-      ...editResident,
-      is_senior_citizen: age >= 60 ? 1 : 0,
-      photo_file: photoFile,
-    });
+    try {
+      await handleResidentEdit(editResident.resident_id, {
+        ...editResident,
+        is_senior_citizen: age >= 60 ? 1 : 0,
+        photo_file: photoFile,
+      });
+    } finally {
+      setIsUpdating(false); // NEW: End loading
+    }
   };
 
   return (
@@ -992,8 +1003,8 @@ const EditResidentModal = ({
                       return true;
                     })
                     .map((resident) => {
-                      const fullName = `${resident.first_name} ${
-                        resident.middle_name || ""
+                      const fullName = `${resident.first_name}${
+                        resident.middle_name ? " " + resident.middle_name : ""
                       } ${resident.last_name} ${resident.suffix || ""}`.trim();
                       return (
                         <option key={resident.resident_id} value={fullName}>
@@ -1232,9 +1243,11 @@ const EditResidentModal = ({
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                disabled={isUpdating} // NEW: Disable during update
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Update Resident
+                {isUpdating ? "Updating..." : "Update Resident"} // NEW: Loading
+                text
               </button>
             </div>
           </form>
@@ -2833,7 +2846,6 @@ const ManageResidentsPage = () => {
       throw error;
     }
   };
-
   const handleGenerate4PsReport = async (filters) => {
     try {
       const response = await reportsAPI.generate4PsMembers(filters);
@@ -2869,7 +2881,6 @@ const ManageResidentsPage = () => {
       throw error;
     }
   };
-
   const handleGenerateTotalResidentsReport = async (filters) => {
     try {
       console.log("Frontend - Total Residents Report filters:", filters);
@@ -2907,7 +2918,6 @@ const ManageResidentsPage = () => {
       throw error;
     }
   };
-
   const handleGenerateRegisteredVotersReport = async (filters) => {
     try {
       const response = await reportsAPI.generateRegisteredVoters(filters);
@@ -2943,7 +2953,6 @@ const ManageResidentsPage = () => {
       throw error;
     }
   };
-
   const handleGenerateSeniorCitizensReport = async (filters) => {
     try {
       const response = await reportsAPI.generateSeniorCitizens(filters);
@@ -2962,7 +2971,7 @@ const ManageResidentsPage = () => {
             { key: "purok", label: "Purok", type: "text" },
             { key: "civil_status", label: "Civil Status", type: "text" },
             { key: "contact_number", label: "Contact", type: "text" },
-            { key: "is_pwd", label: "PWD", type: "text" },
+            // { key: "is_pwd", label: "PWD", type: "text" },
           ]);
           addNotification(
             "success",
@@ -2980,7 +2989,6 @@ const ManageResidentsPage = () => {
       throw error;
     }
   };
-
   const generateReportFile = (data, title, columns) => {
     // Import jsPDF dynamically
     import("jspdf")
@@ -3117,7 +3125,6 @@ const ManageResidentsPage = () => {
       return false;
     }
   };
-
   const confirmDelete = (resident) => {
     setResidentToDelete(resident);
   };
@@ -3633,7 +3640,6 @@ const ManageResidentsPage = () => {
           editResident={editResident}
           setEditResident={setEditResident}
           handleResidentEdit={handleResidentEdit}
-          onClose={closeEditModal}
           purokOptions={purokOptions}
           households={households}
           residents={residents}
@@ -3646,7 +3652,6 @@ const ManageResidentsPage = () => {
           setResidentForm={setResidentForm}
           handleResidentSubmit={handleResidentSubmit}
           setShowResidentForm={setShowResidentForm}
-          onClose={closeAddModal}
           purokOptions={purokOptions}
           households={households}
         />
