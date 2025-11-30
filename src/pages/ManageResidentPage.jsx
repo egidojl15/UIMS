@@ -129,7 +129,7 @@ const InactiveResidentsModal = ({
     setLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:5000/api/residents/inactive",
+        "https://uims-backend-production.up.railway.app/api/residents/inactive",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
