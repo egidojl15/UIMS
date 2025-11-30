@@ -1451,7 +1451,7 @@ const AddResidentModal = ({
               <input
                 type="date"
                 name="date_of_birth"
-                value={residentForm.date_of_birth}
+                value={formatDateForInput(residentForm.date_of_birth)}
                 onChange={(e) => {
                   const newBirthdate = e.target.value;
                   setResidentForm({
