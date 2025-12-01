@@ -1171,7 +1171,7 @@ const BarangayInfo = () => {
         }
 
         const uploadResponse = await fetch(
-          "http://localhost:5000/api/upload/image",
+          "https://uims-backend-production.up.railway.app/api/uploads/image",
           {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },

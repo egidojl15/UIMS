@@ -296,7 +296,7 @@ const Officials = ({ editable = false }) => {
         }
 
         const uploadResponse = await fetch(
-          "http://localhost:5000/api/upload/image",
+          "https://uims-backend-production.up.railway.app/api/uploads/images",
           {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
