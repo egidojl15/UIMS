@@ -850,34 +850,42 @@ const Officials = ({ editable = false }) => {
                   </select>
                 </div>
 
-                {/* Term Start & End */}
-                <div className="grid grid-cols-2 gap-4">
+                {/* Term Years - Now as numbers */}
+                <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold text-[#0F4C81] mb-2">
-                      Term Start
+                      Term Start Year *
                     </label>
                     <input
                       type="number"
+                      min="1900"
+                      max="2100"
+                      step="1"
                       value={formData.term_start}
                       onChange={(e) =>
                         setFormData({ ...formData, term_start: e.target.value })
                       }
                       className="w-full px-4 py-3 bg-white/50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
-                      placeholder="e.g., 2023"
+                      placeholder="YYYY"
+                      required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-[#0F4C81] mb-2">
-                      Term End
+                      Term End Year *
                     </label>
                     <input
                       type="number"
+                      min="1900"
+                      max="2100"
+                      step="1"
                       value={formData.term_end}
                       onChange={(e) =>
                         setFormData({ ...formData, term_end: e.target.value })
                       }
                       className="w-full px-4 py-3 bg-white/50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
-                      placeholder="e.g., 2026"
+                      placeholder="YYYY"
+                      required
                     />
                   </div>
                 </div>
