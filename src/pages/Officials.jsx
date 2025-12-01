@@ -857,7 +857,7 @@ const Officials = ({ editable = false }) => {
                       Term Start
                     </label>
                     <input
-                      type="text"
+                      type="number"
                       value={formData.term_start}
                       onChange={(e) =>
                         setFormData({ ...formData, term_start: e.target.value })
@@ -871,7 +871,7 @@ const Officials = ({ editable = false }) => {
                       Term End
                     </label>
                     <input
-                      type="text"
+                      type="number"
                       value={formData.term_end}
                       onChange={(e) =>
                         setFormData({ ...formData, term_end: e.target.value })
