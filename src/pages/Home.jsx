@@ -286,7 +286,9 @@ const Home = () => {
                     <span className="font-medium text-[#06172E]">
                       Population:
                     </span>
-                    <span className="font-bold text-[#0F4C81]">50,000</span>
+                    <span className="font-bold text-[#0F4C81]">
+                      {dashboardData.residents.total}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center p-3 rounded-lg bg-gradient-to-r from-[#B3DEF8]/10 to-transparent">
                     <span className="font-medium text-[#06172E]">
