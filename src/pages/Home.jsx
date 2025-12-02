@@ -18,6 +18,7 @@ import { announcementsAPI, eventsAPI } from "../services/api";
 const Home = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [events, setEvents] = useState([]);
+  const [population, setPopulation] = useState(0); // ← NEW: Population state
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -28,6 +29,7 @@ const Home = () => {
   }, []);
 
   // Fetch announcements and events from API
+  // Fetch announcements, events, and population from API
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,10 +44,35 @@ const Home = () => {
         const eventsData =
           eventsRes.events ?? eventsRes.data ?? eventsRes ?? [];
         setEvents(eventsData.slice(0, 3));
+
+        // NEW: Fetch population (same as BhwMainDashboard)
+        const populationRes = await fetch(
+          `${
+            import.meta.env.VITE_API_URL ||
+            "https://uims-backend-production.up.railway.app"
+          }/api/residents/category-counts`,
+          {
+            headers: {
+              Authorization: `Bearer ${
+                localStorage.getItem("authToken") ||
+                localStorage.getItem("token") ||
+                ""
+              }`,
+            },
+          }
+        );
+        if (populationRes.ok) {
+          const populationData = await populationRes.json();
+          setPopulation(populationData.data?.total_members || 0);
+        } else {
+          console.warn("Population fetch failed — defaulting to 0");
+          setPopulation(0);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
         setAnnouncements([]);
         setEvents([]);
+        setPopulation(0);
       } finally {
         setLoading(false);
       }
@@ -287,7 +314,7 @@ const Home = () => {
                       Population:
                     </span>
                     <span className="font-bold text-[#0F4C81]">
-                      {dashboardData.residents.total}
+                      {loading ? "Loading..." : population.toLocaleString()}{" "}
                     </span>
                   </div>
                   <div className="flex justify-between items-center p-3 rounded-lg bg-gradient-to-r from-[#B3DEF8]/10 to-transparent">
