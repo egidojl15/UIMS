@@ -19,6 +19,9 @@ import {
   logUserActivity,
 } from "../services/api";
 
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
 import ReportGenerator from "../components/ReportGenerator";
 import NotificationSystem from "../components/NotificationSystem";
 
@@ -2917,6 +2920,7 @@ const ManageResidentsPage = () => {
       throw error;
     }
   };
+
   const handleGenerateRegisteredVotersReport = async (filters) => {
     try {
       const response = await reportsAPI.generateRegisteredVoters(filters);
@@ -3025,6 +3029,7 @@ const ManageResidentsPage = () => {
       console.error("Report error:", error);
     }
   };
+
   const handleGenerateSeniorCitizensReport = async (filters) => {
     try {
       const response = await reportsAPI.generateSeniorCitizens(filters);
