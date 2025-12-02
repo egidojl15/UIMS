@@ -50,7 +50,7 @@ const Home = () => {
           `${
             import.meta.env.VITE_API_URL ||
             "https://uims-backend-production.up.railway.app"
-          }/api/residents/category-counts`,
+          }/residents/category-counts`,
           {
             headers: {
               Authorization: `Bearer ${
