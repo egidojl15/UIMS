@@ -3011,13 +3011,6 @@ const ManageResidentsPage = () => {
             align: "center",
           });
 
-          // Add barangay header
-          doc.setFontSize(14);
-          doc.setFont(undefined, "bold");
-          doc.text("BARANGAY HEALTH RECORDS", pageWidth / 2, 30, {
-            align: "center",
-          });
-
           // Add title
           doc.setFontSize(11);
           doc.setFont(undefined, "normal");
