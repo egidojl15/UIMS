@@ -11,7 +11,6 @@ import {
   FileText,
   Download,
 } from "lucide-react";
-
 import { useOutletContext } from "react-router-dom";
 import {
   residentsAPI,
@@ -22,8 +21,6 @@ import {
 
 import ReportGenerator from "../components/ReportGenerator";
 import NotificationSystem from "../components/NotificationSystem";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 
 const educationalAttainmentOptions = [
   { value: "", label: "Select Educational Attainment" },
@@ -2998,17 +2995,17 @@ const ManageResidentsPage = () => {
           });
 
           // Footer (optional)
-          // const pageCount = doc.internal.getNumberOfPages();
-          // for (let i = 1; i <= pageCount; i++) {
-          //   doc.setPage(i);
-          //   doc.setFontSize(10);
-          //   doc.text(
-          //     `Page ${i} of ${pageCount}`,
-          //     pageWidth / 2,
-          //     doc.internal.pageSize.height - 10,
-          //     { align: "center" }
-          //   );
-          // }
+          const pageCount = doc.internal.getNumberOfPages();
+          for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(10);
+            doc.text(
+              `Page ${i} of ${pageCount}`,
+              pageWidth / 2,
+              doc.internal.pageSize.height - 10,
+              { align: "center" }
+            );
+          }
 
           doc.save("Registered_Voters_Report.pdf");
 
