@@ -19,9 +19,6 @@ import {
   logUserActivity,
 } from "../services/api";
 
-import jsPDF from "jspdf";
-import "jspdf-autotable";
-
 import ReportGenerator from "../components/ReportGenerator";
 import NotificationSystem from "../components/NotificationSystem";
 
@@ -2920,7 +2917,6 @@ const ManageResidentsPage = () => {
       throw error;
     }
   };
-
   const handleGenerateRegisteredVotersReport = async (filters) => {
     try {
       const response = await reportsAPI.generateRegisteredVoters(filters);
@@ -2932,87 +2928,14 @@ const ManageResidentsPage = () => {
           };
         } else {
           // Generate actual report file
-          const doc = new jsPDF();
-          const pageWidth = doc.internal.pageSize.width;
-
-          // LOGO + OFFICIAL HEADER (Copy-paste this block)
-          const logoUrl = "/images/UIMS.png";
-          doc.addImage(logoUrl, "PNG", 14, 10, 28, 28); // Upper left logo
-
-          doc.setFontSize(16);
-          doc.setFont("helvetica", "bold");
-          doc.text("Republic of the Philippines", 50, 15);
-          doc.text("Province of Southern Leyte", 50, 22);
-          doc.text("Municipality of Macrohon", 50, 29);
-
-          doc.setFontSize(18);
-          doc.text("BARANGAY OFFICIAL REPORT", pageWidth / 2, 42, {
-            align: "center",
-          });
-
-          doc.setFontSize(14);
-          doc.setFont("helvetica", "normal");
-          doc.text("Registered Voters Report", pageWidth / 2, 52, {
-            align: "center",
-          });
-          doc.setFontSize(11);
-          doc.text(
-            `Generated on: ${new Date().toLocaleDateString("en-PH")}`,
-            pageWidth / 2,
-            59,
-            { align: "center" }
-          );
-
-          // Table data
-          const tableData = response.data.map((item) => [
-            item.full_name ||
-              `${item.first_name} ${item.middle_name || ""} ${
-                item.last_name
-              }`.trim(),
-            item.age || calculateAge(item.date_of_birth),
-            item.gender || "N/A",
-            item.purok || "N/A",
-            item.civil_status || "N/A",
-            item.contact_number || "N/A",
+          generateReportFile(response.data, "Registered Voters Report", [
+            { key: "full_name", label: "Full Name", type: "text" },
+            { key: "age", label: "Age", type: "number" },
+            { key: "gender", label: "Gender", type: "text" },
+            { key: "purok", label: "Purok", type: "text" },
+            { key: "civil_status", label: "Civil Status", type: "text" },
+            { key: "contact_number", label: "Contact", type: "text" },
           ]);
-
-          autoTable(doc, {
-            head: [
-              [
-                "Full Name",
-                "Age",
-                "Gender",
-                "Purok",
-                "Civil Status",
-                "Contact",
-              ],
-            ],
-            body: tableData,
-            startY: 65,
-            theme: "striped",
-            headStyles: {
-              fillColor: [15, 76, 129],
-              textColor: [255, 255, 255],
-            },
-            styles: { fontSize: 10, cellPadding: 4 },
-            margin: { left: 14, right: 14 },
-          });
-
-          // Footer (optional)
-          const pageCount = doc.internal.getNumberOfPages();
-          for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(10);
-            doc.text(
-              `Page ${i} of ${pageCount}`,
-              pageWidth / 2,
-              doc.internal.pageSize.height - 10,
-              { align: "center" }
-            );
-          }
-
-          doc.save("Registered_Voters_Report.pdf");
-
           addNotification(
             "success",
             "Report Generated",
@@ -3026,10 +2949,9 @@ const ManageResidentsPage = () => {
         "Report Failed",
         error.message || "Failed to generate registered voters report"
       );
-      console.error("Report error:", error);
+      throw error;
     }
   };
-
   const handleGenerateSeniorCitizensReport = async (filters) => {
     try {
       const response = await reportsAPI.generateSeniorCitizens(filters);
