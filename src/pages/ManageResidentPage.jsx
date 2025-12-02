@@ -11,6 +11,7 @@ import {
   FileText,
   Download,
 } from "lucide-react";
+
 import { useOutletContext } from "react-router-dom";
 import {
   residentsAPI,
@@ -21,6 +22,8 @@ import {
 
 import ReportGenerator from "../components/ReportGenerator";
 import NotificationSystem from "../components/NotificationSystem";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const educationalAttainmentOptions = [
   { value: "", label: "Select Educational Attainment" },
