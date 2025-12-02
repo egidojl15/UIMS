@@ -324,8 +324,10 @@ const Home = () => {
                     <span className="font-bold text-[#0F4C81]">1981</span>
                   </div>
                   <div className="flex justify-between items-center p-3 rounded-lg bg-gradient-to-r from-[#B3DEF8]/10 to-transparent">
-                    <span className="font-medium text-[#06172E]">Area:</span>
-                    <span className="font-bold text-[#0F4C81]">12.2 km²</span>
+                    <span className="font-medium text-[#06172E]">
+                      Estimated Area Size:
+                    </span>
+                    <span className="font-bold text-[#0F4C81]">1.08 km²</span>
                   </div>
                 </div>
 
