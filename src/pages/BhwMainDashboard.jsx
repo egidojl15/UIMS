@@ -275,19 +275,36 @@ const BhwMainDashboard = () => {
   const generateRecentActivities = (residents, health, referrals) => {
     const activities = [];
 
+    console.log("📊 Generating activities from:", {
+      residents: residents?.length,
+      health: health?.length,
+      referrals: referrals?.length,
+    });
+
     // Recent residents (last 3)
     if (residents && residents.length > 0) {
+      console.log("Sample resident data:", residents[0]);
+
       const recent = residents
         .filter((r) => {
-          // Filter out residents with invalid or missing created_at dates
-          if (!r.created_at) return false;
-          const date = new Date(r.created_at);
-          return !isNaN(date.getTime()) && date.getFullYear() >= 2000;
+          // More lenient filtering - just check if date exists and is parseable
+          if (!r.created_at && !r.registered_date) return false;
+          const dateStr = r.created_at || r.registered_date;
+          const date = new Date(dateStr);
+          const isValid = !isNaN(date.getTime());
+          return isValid;
         })
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .sort((a, b) => {
+          const dateA = new Date(a.created_at || a.registered_date);
+          const dateB = new Date(b.created_at || b.registered_date);
+          return dateB - dateA;
+        })
         .slice(0, 3);
 
+      console.log("Filtered residents:", recent.length);
+
       recent.forEach((r) => {
+        const dateStr = r.created_at || r.registered_date;
         activities.push({
           type: "resident",
           icon: Users,
@@ -295,22 +312,26 @@ const BhwMainDashboard = () => {
           bg: "bg-blue-50",
           title: "New Resident Added",
           description: `${r.first_name} ${r.last_name}`,
-          timestamp: new Date(r.created_at).getTime(),
-          time: formatTimeAgo(r.created_at),
+          timestamp: new Date(dateStr).getTime(),
+          time: formatTimeAgo(dateStr),
         });
       });
     }
 
     // Recent health records (last 2)
     if (health && health.length > 0) {
+      console.log("Sample health data:", health[0]);
+
       const recent = health
         .filter((h) => {
           if (!h.created_at) return false;
           const date = new Date(h.created_at);
-          return !isNaN(date.getTime()) && date.getFullYear() >= 2000;
+          return !isNaN(date.getTime());
         })
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 2);
+
+      console.log("Filtered health records:", recent.length);
 
       recent.forEach((h) => {
         activities.push({
@@ -328,14 +349,18 @@ const BhwMainDashboard = () => {
 
     // Recent referrals (last 2)
     if (referrals && referrals.length > 0) {
+      console.log("Sample referral data:", referrals[0]);
+
       const recent = referrals
         .filter((r) => {
           if (!r.referral_date) return false;
           const date = new Date(r.referral_date);
-          return !isNaN(date.getTime()) && date.getFullYear() >= 2000;
+          return !isNaN(date.getTime());
         })
         .sort((a, b) => new Date(b.referral_date) - new Date(a.referral_date))
         .slice(0, 2);
+
+      console.log("Filtered referrals:", recent.length);
 
       recent.forEach((r) => {
         activities.push({
@@ -351,11 +376,12 @@ const BhwMainDashboard = () => {
       });
     }
 
+    console.log("Total activities generated:", activities.length);
     setRecentActivities(
       activities.sort((a, b) => b.timestamp - a.timestamp).slice(0, 7)
     );
   };
-  
+
   const formatTimeAgo = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
