@@ -688,10 +688,14 @@ const ViewResidentModal = ({
                 </p>
               </div>
               <div>
-                <p className="text-gray-500">Household</p>
-                <p className="font-semibold">
-                  {selectedResident.household_id
-                    ? `Household #${selectedResident.household_id}`
+                <label className="block text-sm font-medium text-gray-700">
+                  Household
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {resident.household_number
+                    ? `Household #${resident.household_number}`
+                    : resident.household_id
+                    ? `Household #${resident.household_id} (Legacy ID)`
                     : "Not assigned"}
                 </p>
               </div>

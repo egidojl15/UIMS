@@ -1012,61 +1012,98 @@ const ManageHouseholdsPage = () => {
                 </h3>
                 {viewingMembers.members && viewingMembers.members.length > 0 ? (
                   <div className="space-y-4">
-                    {viewingMembers.members.map((member, index) => (
-                      <div
-                        key={member.resident_id || index}
-                        className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-[#0F4C81] rounded-full flex items-center justify-center text-white font-bold">
-                              {member.first_name?.charAt(0)?.toUpperCase() ||
-                                "?"}
-                            </div>
-                            <div>
-                              <h3 className="font-semibold text-lg">
-                                {`${member.first_name || ""} ${
-                                  member.middle_name
-                                    ? member.middle_name + " "
-                                    : ""
-                                }${member.last_name || ""} ${
-                                  member.suffix &&
-                                  member.suffix !== "0" &&
-                                  member.suffix !== 0
-                                    ? member.suffix
-                                    : ""
-                                }`
-                                  .replace(/\s+/g, " ")
-                                  .trim()}
-                                {member.is_head && (
-                                  <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
-                                    Head
-                                  </span>
+                    {viewingMembers.members.map((member) => {
+                      // Build full name properly (no more "DelaCruz0" or double spaces)
+                      const fullName = [
+                        member.first_name?.trim(),
+                        member.middle_name?.trim(),
+                        member.last_name?.trim(),
+                        // Only show suffix if it's a real string and not "0" or 0
+                        member.suffix &&
+                        member.suffix !== "0" &&
+                        member.suffix !== 0 &&
+                        String(member.suffix).trim()
+                          ? String(member.suffix).trim()
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" ");
+
+                      // Safe age calculation (handles invalid dates)
+                      const calculateAge = (dob) => {
+                        if (!dob) return "N/A";
+                        const birth = new Date(dob);
+                        const today = new Date();
+                        if (isNaN(birth)) return "N/A";
+                        let age = today.getFullYear() - birth.getFullYear();
+                        const m = today.getMonth() - birth.getMonth();
+                        if (
+                          m < 0 ||
+                          (m === 0 && today.getDate() < birth.getDate())
+                        )
+                          age--;
+                        return age < 0 ? "N/A" : age;
+                      };
+
+                      return (
+                        <div
+                          key={member.resident_id}
+                          className="border border-gray-200 rounded-lg p-5 hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-center justify-between">
+                            {/* Left: Avatar + Name + Details */}
+                            <div className="flex items-center space-x-4">
+                              <div className="w-14 h-14 bg-[#0F4C81] rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
+                                {fullName.charAt(0) || "?"}
+                              </div>
+
+                              <div>
+                                <h3 className="font-semibold text-lg text-gray-900 flex items-center gap-2">
+                                  {fullName || "Name not set"}
+                                  {member.is_head && (
+                                    <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                                      Head of Household
+                                    </span>
+                                  )}
+                                </h3>
+
+                                <p className="text-gray-600 text-sm">
+                                  {member.gender || "—"} •{" "}
+                                  {member.civil_status || "—"}
+                                </p>
+
+                                {(member.contact_number || member.email) && (
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    {member.contact_number &&
+                                      `📞 ${member.contact_number}`}
+                                    {member.contact_number &&
+                                      member.email &&
+                                      " • "}
+                                    {member.email && `✉️ ${member.email}`}
+                                  </p>
                                 )}
-                              </h3>
-                              <p className="text-gray-600">
-                                {member.gender} • {member.civil_status}
+                              </div>
+                            </div>
+
+                            {/* Right: Age + Purok */}
+                            <div className="text-right text-sm">
+                              <p className="font-medium text-gray-700">
+                                Age:{" "}
+                                <span className="text-gray-900">
+                                  {calculateAge(member.date_of_birth)}
+                                </span>
                               </p>
-                              <p className="text-sm text-gray-500">
-                                {member.contact_number &&
-                                  `Contact: ${member.contact_number}`}
-                                {member.email && ` • Email: ${member.email}`}
+                              <p className="text-gray-600">
+                                Purok:{" "}
+                                <span className="font-medium">
+                                  {member.purok || "N/A"}
+                                </span>
                               </p>
                             </div>
-                          </div>
-                          <div className="text-right text-sm text-gray-500">
-                            <p>
-                              Age:{" "}
-                              {member.date_of_birth
-                                ? new Date().getFullYear() -
-                                  new Date(member.date_of_birth).getFullYear()
-                                : "N/A"}
-                            </p>
-                            <p>Purok: {member.purok || "N/A"}</p>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
