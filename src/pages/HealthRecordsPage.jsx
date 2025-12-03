@@ -43,51 +43,115 @@ const ViewHealthRecordModal = ({
   ).toLocaleDateString("en-US");
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white rounded-xl w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-hidden border border-gray-200">
+        {/* Modal Header */}
+        <div className="bg-white border-b border-gray-100 px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <h2 className="text-xl font-semibold text-gray-800">
                 Health Record Details
               </h2>
             </div>
             <button
               onClick={() => setSelectedHealthRecord(null)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors"
             >
-              <X
-                size={24}
-                className="group-hover:rotate-90 transition-transform duration-300"
-              />
+              <X size={20} />
             </button>
           </div>
+          <div className="mt-2">
+            <p className="text-sm text-gray-500">
+              Record ID:{" "}
+              <span className="font-medium text-gray-700">
+                {selectedHealthRecord.health_record_id}
+              </span>
+            </p>
+          </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div className="space-y-4 text-sm">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-gray-500">Record ID</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.health_record_id}
-                </p>
+
+        {/* Modal Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Resident Information */}
+            <div className="space-y-4">
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-blue-700 mb-3">
+                  Resident Information
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-gray-500">Resident Name</p>
+                    <p className="font-medium text-gray-900">{residentName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Resident ID</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedHealthRecord.resident_id}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-gray-500">Resident ID</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.resident_id}
-                </p>
+
+              {/* Vital Signs */}
+              <div className="bg-green-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-green-700 mb-3">
+                  Vital Signs
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-500">Blood Type</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedHealthRecord.blood_type || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Height</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedHealthRecord.height
+                        ? `${selectedHealthRecord.height} cm`
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Weight</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedHealthRecord.weight
+                        ? `${selectedHealthRecord.weight} kg`
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Heart Rate</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedHealthRecord.heart_rate
+                        ? `${selectedHealthRecord.heart_rate} bpm`
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Pulse Rate</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedHealthRecord.pulse_rate
+                        ? `${selectedHealthRecord.pulse_rate} bpm`
+                        : "N/A"}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="md:col-span-2">
-                <p className="text-gray-500">Resident Name</p>
-                <p className="font-semibold">{residentName}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">PhilHealth Member</p>
-                <div className="flex items-center">
+            </div>
+
+            {/* Medical Information */}
+            <div className="space-y-4">
+              {/* Insurance Status */}
+              <div className="bg-purple-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-purple-700 mb-3">
+                  Insurance Status
+                </h3>
+                <div className="flex items-center gap-2">
                   <span
-                    className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold mr-2 ${
+                    className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-medium ${
                       selectedHealthRecord.is_philhealth
                         ? "bg-green-500"
                         : "bg-gray-400"
@@ -95,80 +159,58 @@ const ViewHealthRecordModal = ({
                   >
                     {selectedHealthRecord.is_philhealth ? "✓" : "✗"}
                   </span>
-                  <span className="font-semibold">
+                  <span className="font-medium text-gray-900">
+                    PhilHealth Member:{" "}
                     {selectedHealthRecord.is_philhealth ? "Yes" : "No"}
                   </span>
                 </div>
               </div>
-              <div>
-                <p className="text-gray-500">Blood Type</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.blood_type || "N/A"}
+
+              {/* Medical Conditions */}
+              <div className="bg-yellow-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-yellow-700 mb-3">
+                  Medical Conditions
+                </h3>
+                <p className="text-sm text-gray-700 whitespace-pre-line">
+                  {selectedHealthRecord.medical_conditions || "None reported"}
                 </p>
               </div>
-              <div>
-                <p className="text-gray-500">Height</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.height
-                    ? `${selectedHealthRecord.height} cm`
-                    : "N/A"}
+
+              {/* Allergies */}
+              <div className="bg-red-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-red-700 mb-3">
+                  Allergies
+                </h3>
+                <p className="text-sm text-gray-700 whitespace-pre-line">
+                  {selectedHealthRecord.allergies || "None reported"}
                 </p>
               </div>
-              <div>
-                <p className="text-gray-500">Weight</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.weight
-                    ? `${selectedHealthRecord.weight} kg`
-                    : "N/A"}
-                </p>
+
+              {/* Emergency Contact */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  Emergency Contact
+                </h3>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-xs text-gray-500">Contact Name</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedHealthRecord.emergency_contact_name || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Contact Number</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedHealthRecord.emergency_contact_number || "N/A"}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-gray-500">Heart Rate</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.heart_rate
-                    ? `${selectedHealthRecord.heart_rate} bpm`
-                    : "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Pulse Rate</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.pulse_rate
-                    ? `${selectedHealthRecord.pulse_rate} bpm`
-                    : "N/A"}
-                </p>
-              </div>
-              <div className="md:col-span-2">
-                <p className="text-gray-500">Medical Conditions</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.medical_conditions || "None"}
-                </p>
-              </div>
-              <div className="md:col-span-2">
-                <p className="text-gray-500">Allergies</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.allergies || "None"}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Emergency Contact Name</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.emergency_contact_name || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Emergency Contact Number</p>
-                <p className="font-semibold">
-                  {selectedHealthRecord.emergency_contact_number || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Created At</p>
-                <p className="font-semibold">{createdAt}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Updated At</p>
-                <p className="font-semibold">{updatedAt}</p>
+
+              {/* Record Metadata */}
+              <div className="text-xs text-gray-500 space-y-1 pt-2">
+                <p>Created: {createdAt}</p>
+                <p>Last Updated: {updatedAt}</p>
               </div>
             </div>
           </div>
@@ -184,11 +226,10 @@ const EditHealthRecordModal = ({
   handleHealthRecordEdit,
   residents,
 }) => {
-  const [emergencyContactType, setEmergencyContactType] = useState("manual"); // 'manual' or 'household'
+  const [emergencyContactType, setEmergencyContactType] = useState("manual");
   const [householdMembers, setHouseholdMembers] = useState([]);
   const [selectedHouseholdId, setSelectedHouseholdId] = useState("");
 
-  // Fetch household members when resident is selected
   useEffect(() => {
     if (editHealthRecord && editHealthRecord.resident_id) {
       const selectedResident = residents.find(
@@ -227,364 +268,402 @@ const EditHealthRecordModal = ({
   if (!editHealthRecord) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white rounded-xl w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-hidden border border-gray-200">
+        {/* Modal Header */}
+        <div className="bg-white border-b border-gray-100 px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <h2 className="text-xl font-semibold text-gray-800">
                 Edit Health Record
               </h2>
             </div>
             <button
               type="button"
               onClick={() => setEditHealthRecord(null)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors"
             >
-              <X
-                size={24}
-                className="group-hover:rotate-90 transition-transform duration-300"
-              />
+              <X size={20} />
             </button>
           </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+
+        {/* Modal Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <form
             onSubmit={(e) =>
               handleHealthRecordEdit(e, editHealthRecord.health_record_id)
             }
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            className="space-y-6"
           >
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Resident *
-              </label>
-              <select
-                name="resident_id"
-                value={editHealthRecord.resident_id}
-                onChange={(e) => {
-                  const selectedResidentId = e.target.value;
-                  const selectedResident = residents.find(
-                    (r) => r.resident_id == selectedResidentId
-                  );
-                  setEditHealthRecord({
-                    ...editHealthRecord,
-                    resident_id: selectedResidentId,
-                    emergency_contact_name: selectedResident
-                      ? `${selectedResident.first_name} ${
-                          selectedResident.middle_name || ""
-                        } ${selectedResident.last_name}`.trim()
-                      : "",
-                    emergency_contact_number: selectedResident
-                      ? selectedResident.contact_number || ""
-                      : "",
-                  });
-                  // Reset emergency contact selection when resident changes
-                  setEmergencyContactType("manual");
-                }}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-                required
-              >
-                <option value="">Select Resident</option>
-                {residents.map((r) => (
-                  <option key={r.resident_id} value={r.resident_id}>
-                    {r.first_name} {r.middle_name || ""} {r.last_name} (ID:{" "}
-                    {r.resident_id})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                PhilHealth Member
-              </label>
-              <input
-                type="checkbox"
-                name="is_philhealth"
-                checked={editHealthRecord.is_philhealth || false}
-                onChange={(e) =>
-                  setEditHealthRecord({
-                    ...editHealthRecord,
-                    is_philhealth: e.target.checked,
-                  })
-                }
-                className="mt-1 h-4 w-4 rounded border-gray-300 text-[#58A1D3] focus:ring-[#58A1D3]"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Blood Type
-              </label>
-              <select
-                name="blood_type"
-                value={editHealthRecord.blood_type || ""}
-                onChange={(e) =>
-                  setEditHealthRecord({
-                    ...editHealthRecord,
-                    blood_type: e.target.value,
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-              >
-                <option value="">Select Blood Type</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Height (cm)
-              </label>
-              <input
-                type="number"
-                name="height"
-                value={editHealthRecord.height || ""}
-                onChange={(e) =>
-                  setEditHealthRecord({
-                    ...editHealthRecord,
-                    height: e.target.value,
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-                placeholder="e.g., 170"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Weight (kg)
-              </label>
-              <input
-                type="number"
-                name="weight"
-                value={editHealthRecord.weight || ""}
-                onChange={(e) =>
-                  setEditHealthRecord({
-                    ...editHealthRecord,
-                    weight: e.target.value,
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-                placeholder="e.g., 65"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Heart Rate (bpm)
-              </label>
-              <input
-                type="number"
-                name="heart_rate"
-                value={editHealthRecord.heart_rate || ""}
-                onChange={(e) =>
-                  setEditHealthRecord({
-                    ...editHealthRecord,
-                    heart_rate: e.target.value,
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-                placeholder="e.g., 72"
-                min="40"
-                max="200"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Pulse Rate (bpm)
-              </label>
-              <input
-                type="number"
-                name="pulse_rate"
-                value={editHealthRecord.pulse_rate || ""}
-                onChange={(e) =>
-                  setEditHealthRecord({
-                    ...editHealthRecord,
-                    pulse_rate: e.target.value,
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-                placeholder="e.g., 70"
-                min="40"
-                max="200"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Medical Conditions
-              </label>
-              <textarea
-                name="medical_conditions"
-                value={editHealthRecord.medical_conditions || ""}
-                onChange={(e) =>
-                  setEditHealthRecord({
-                    ...editHealthRecord,
-                    medical_conditions: e.target.value,
-                  })
-                }
-                rows="3"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-                placeholder="Enter any known medical conditions"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Allergies
-              </label>
-              <textarea
-                name="allergies"
-                value={editHealthRecord.allergies || ""}
-                onChange={(e) =>
-                  setEditHealthRecord({
-                    ...editHealthRecord,
-                    allergies: e.target.value,
-                  })
-                }
-                rows="3"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-                placeholder="Enter any known allergies"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Emergency Contact Selection
-              </label>
-              <div className="flex space-x-4 mb-3">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="emergencyContactType"
-                    value="manual"
-                    checked={emergencyContactType === "manual"}
-                    onChange={(e) => setEmergencyContactType(e.target.value)}
-                    className="mr-2"
-                  />
-                  <span className="text-sm">Manual Input</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="emergencyContactType"
-                    value="household"
-                    checked={emergencyContactType === "household"}
-                    onChange={(e) => setEmergencyContactType(e.target.value)}
-                    className="mr-2"
-                  />
-                  <span className="text-sm">Select from Household Members</span>
-                </label>
-              </div>
-            </div>
-
-            {emergencyContactType === "household" &&
-              householdMembers.length > 0 && (
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Select Emergency Contact
+            {/* Resident Selection */}
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-blue-700 mb-3">
+                Resident Information
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Resident *
                   </label>
                   <select
-                    value={editHealthRecord.emergency_contact_name || ""}
+                    name="resident_id"
+                    value={editHealthRecord.resident_id}
                     onChange={(e) => {
-                      const selectedMember = householdMembers.find(
-                        (m) =>
-                          `${m.first_name} ${m.middle_name || ""} ${
-                            m.last_name
-                          }`.trim() === e.target.value
+                      const selectedResidentId = e.target.value;
+                      const selectedResident = residents.find(
+                        (r) => r.resident_id == selectedResidentId
                       );
                       setEditHealthRecord({
                         ...editHealthRecord,
-                        emergency_contact_name: e.target.value,
-                        emergency_contact_number: selectedMember
-                          ? selectedMember.contact_number || ""
+                        resident_id: selectedResidentId,
+                        emergency_contact_name: selectedResident
+                          ? `${selectedResident.first_name} ${
+                              selectedResident.middle_name || ""
+                            } ${selectedResident.last_name}`.trim()
+                          : "",
+                        emergency_contact_number: selectedResident
+                          ? selectedResident.contact_number || ""
                           : "",
                       });
+                      setEmergencyContactType("manual");
                     }}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
                   >
-                    <option value="">Select a household member</option>
-                    {householdMembers.map((member) => (
-                      <option
-                        key={member.resident_id}
-                        value={`${member.first_name} ${
-                          member.middle_name || ""
-                        } ${member.last_name}`.trim()}
-                      >
-                        {member.first_name} {member.middle_name || ""}{" "}
-                        {member.last_name} {member.is_head ? "(Head)" : ""} -{" "}
-                        {member.contact_number || "No contact"}
+                    <option value="">Select a resident...</option>
+                    {residents.map((r) => (
+                      <option key={r.resident_id} value={r.resident_id}>
+                        {r.first_name} {r.middle_name || ""} {r.last_name} (ID:{" "}
+                        {r.resident_id})
                       </option>
                     ))}
                   </select>
                 </div>
-              )}
 
-            {emergencyContactType === "manual" && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Emergency Contact Name
-                  </label>
+                <div className="flex items-center">
                   <input
-                    type="text"
-                    name="emergency_contact_name"
-                    value={editHealthRecord.emergency_contact_name || ""}
+                    type="checkbox"
+                    name="is_philhealth"
+                    checked={editHealthRecord.is_philhealth || false}
                     onChange={(e) =>
                       setEditHealthRecord({
                         ...editHealthRecord,
-                        emergency_contact_name: e.target.value,
+                        is_philhealth: e.target.checked,
                       })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-                    placeholder="e.g., John Doe"
+                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Emergency Contact Number
+                  <label className="ml-2 text-sm text-gray-700">
+                    PhilHealth Member
                   </label>
-                  <input
-                    type="tel"
-                    name="emergency_contact_number"
-                    value={editHealthRecord.emergency_contact_number || ""}
+                </div>
+              </div>
+            </div>
+
+            {/* Vital Signs */}
+            <div className="bg-green-50 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-green-700 mb-3">
+                Vital Signs
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Blood Type
+                  </label>
+                  <select
+                    name="blood_type"
+                    value={editHealthRecord.blood_type || ""}
                     onChange={(e) =>
                       setEditHealthRecord({
                         ...editHealthRecord,
-                        emergency_contact_number: e.target.value,
+                        blood_type: e.target.value,
                       })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-                    placeholder="e.g., +63 912 345 6789"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="">Select blood type</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Height (cm)
+                  </label>
+                  <input
+                    type="number"
+                    name="height"
+                    value={editHealthRecord.height || ""}
+                    onChange={(e) =>
+                      setEditHealthRecord({
+                        ...editHealthRecord,
+                        height: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g., 170"
                   />
                 </div>
-              </>
-            )}
 
-            {emergencyContactType === "household" &&
-              householdMembers.length === 0 &&
-              selectedHouseholdId && (
-                <div className="md:col-span-2">
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                    <p className="text-sm text-yellow-800">
-                      No household members found for this resident's household.
-                    </p>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Weight (kg)
+                  </label>
+                  <input
+                    type="number"
+                    name="weight"
+                    value={editHealthRecord.weight || ""}
+                    onChange={(e) =>
+                      setEditHealthRecord({
+                        ...editHealthRecord,
+                        weight: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g., 65"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Heart Rate (bpm)
+                  </label>
+                  <input
+                    type="number"
+                    name="heart_rate"
+                    value={editHealthRecord.heart_rate || ""}
+                    onChange={(e) =>
+                      setEditHealthRecord({
+                        ...editHealthRecord,
+                        heart_rate: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g., 72"
+                    min="40"
+                    max="200"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Pulse Rate (bpm)
+                  </label>
+                  <input
+                    type="number"
+                    name="pulse_rate"
+                    value={editHealthRecord.pulse_rate || ""}
+                    onChange={(e) =>
+                      setEditHealthRecord({
+                        ...editHealthRecord,
+                        pulse_rate: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g., 70"
+                    min="40"
+                    max="200"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Medical Information */}
+            <div className="bg-yellow-50 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-yellow-700 mb-3">
+                Medical Information
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Medical Conditions
+                  </label>
+                  <textarea
+                    name="medical_conditions"
+                    value={editHealthRecord.medical_conditions || ""}
+                    onChange={(e) =>
+                      setEditHealthRecord({
+                        ...editHealthRecord,
+                        medical_conditions: e.target.value,
+                      })
+                    }
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    placeholder="Enter any known medical conditions..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Allergies
+                  </label>
+                  <textarea
+                    name="allergies"
+                    value={editHealthRecord.allergies || ""}
+                    onChange={(e) =>
+                      setEditHealthRecord({
+                        ...editHealthRecord,
+                        allergies: e.target.value,
+                      })
+                    }
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    placeholder="Enter any known allergies..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Emergency Contact */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">
+                Emergency Contact
+              </h3>
+
+              <div className="mb-4">
+                <div className="flex space-x-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="emergencyContactType"
+                      value="manual"
+                      checked={emergencyContactType === "manual"}
+                      onChange={(e) => setEmergencyContactType(e.target.value)}
+                      className="h-4 w-4 text-blue-600"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      Manual Input
+                    </span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="emergencyContactType"
+                      value="household"
+                      checked={emergencyContactType === "household"}
+                      onChange={(e) => setEmergencyContactType(e.target.value)}
+                      className="h-4 w-4 text-blue-600"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      Select from Household
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {emergencyContactType === "manual" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Name
+                    </label>
+                    <input
+                      type="text"
+                      name="emergency_contact_name"
+                      value={editHealthRecord.emergency_contact_name || ""}
+                      onChange={(e) =>
+                        setEditHealthRecord({
+                          ...editHealthRecord,
+                          emergency_contact_name: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                      placeholder="e.g., John Doe"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Number
+                    </label>
+                    <input
+                      type="tel"
+                      name="emergency_contact_number"
+                      value={editHealthRecord.emergency_contact_number || ""}
+                      onChange={(e) =>
+                        setEditHealthRecord({
+                          ...editHealthRecord,
+                          emergency_contact_number: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                      placeholder="e.g., +63 912 345 6789"
+                    />
                   </div>
                 </div>
+              ) : (
+                <div>
+                  {householdMembers.length > 0 ? (
+                    <>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Select Household Member
+                      </label>
+                      <select
+                        value={editHealthRecord.emergency_contact_name || ""}
+                        onChange={(e) => {
+                          const selectedMember = householdMembers.find(
+                            (m) =>
+                              `${m.first_name} ${m.middle_name || ""} ${
+                                m.last_name
+                              }`.trim() === e.target.value
+                          );
+                          setEditHealthRecord({
+                            ...editHealthRecord,
+                            emergency_contact_name: e.target.value,
+                            emergency_contact_number: selectedMember
+                              ? selectedMember.contact_number || ""
+                              : "",
+                          });
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                      >
+                        <option value="">Select a household member...</option>
+                        {householdMembers.map((member) => (
+                          <option
+                            key={member.resident_id}
+                            value={`${member.first_name} ${
+                              member.middle_name || ""
+                            } ${member.last_name}`.trim()}
+                          >
+                            {member.first_name} {member.middle_name || ""}{" "}
+                            {member.last_name} {member.is_head ? "(Head)" : ""}{" "}
+                            - {member.contact_number || "No contact"}
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  ) : selectedHouseholdId ? (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                      <p className="text-sm text-yellow-800">
+                        No household members found for this resident's
+                        household.
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
               )}
-            <div className="md:col-span-2 flex justify-end space-x-3 pt-4 border-t">
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => setEditHealthRecord(null)}
-                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#58A1D3] text-white rounded-lg hover:bg-[#0F4C81] transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium"
               >
                 Update Health Record
               </button>
