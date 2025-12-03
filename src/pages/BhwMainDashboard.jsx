@@ -278,6 +278,12 @@ const BhwMainDashboard = () => {
     // Recent residents (last 3)
     if (residents && residents.length > 0) {
       const recent = residents
+        .filter((r) => {
+          // Filter out residents with invalid or missing created_at dates
+          if (!r.created_at) return false;
+          const date = new Date(r.created_at);
+          return !isNaN(date.getTime()) && date.getFullYear() >= 2000;
+        })
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 3);
 
@@ -298,6 +304,11 @@ const BhwMainDashboard = () => {
     // Recent health records (last 2)
     if (health && health.length > 0) {
       const recent = health
+        .filter((h) => {
+          if (!h.created_at) return false;
+          const date = new Date(h.created_at);
+          return !isNaN(date.getTime()) && date.getFullYear() >= 2000;
+        })
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 2);
 
@@ -318,6 +329,11 @@ const BhwMainDashboard = () => {
     // Recent referrals (last 2)
     if (referrals && referrals.length > 0) {
       const recent = referrals
+        .filter((r) => {
+          if (!r.referral_date) return false;
+          const date = new Date(r.referral_date);
+          return !isNaN(date.getTime()) && date.getFullYear() >= 2000;
+        })
         .sort((a, b) => new Date(b.referral_date) - new Date(a.referral_date))
         .slice(0, 2);
 
@@ -339,7 +355,7 @@ const BhwMainDashboard = () => {
       activities.sort((a, b) => b.timestamp - a.timestamp).slice(0, 7)
     );
   };
-
+  
   const formatTimeAgo = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
