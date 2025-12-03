@@ -65,57 +65,128 @@ const ViewReferralModal = ({
       }`.trim()
     : "N/A";
 
+  const getStatusBadgeColor = (status) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "ongoing":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "completed":
+        return "bg-green-100 text-green-800 border-green-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[80vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white rounded-xl w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-hidden border border-gray-200">
+        {/* Modal Header */}
+        <div className="bg-white border-b border-gray-100 px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <h2 className="text-xl font-semibold text-gray-800">
                 Referral Details
               </h2>
             </div>
             <button
               onClick={() => setSelectedReferral(null)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors"
             >
-              <X
-                size={24}
-                className="group-hover:rotate-90 transition-transform duration-300"
-              />
+              <X size={20} />
             </button>
           </div>
+          <div className="mt-2 flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              Referral ID:{" "}
+              <span className="font-medium text-gray-700">
+                {selectedReferral.referral_id}
+              </span>
+            </p>
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(
+                selectedReferral.status
+              )}`}
+            >
+              {selectedReferral.status}
+            </span>
+          </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(80vh-120px)]">
-          <div className="space-y-4">
-            <p>
-              <strong>Referral ID:</strong> {selectedReferral.referral_id}
-            </p>
-            <p>
-              <strong>Resident ID:</strong> {selectedReferral.resident_id}
-            </p>
-            <p>
-              <strong>Resident Name:</strong> {residentName}
-            </p>
-            <p>
-              <strong>BHW ID:</strong> {selectedReferral.bhw_id}
-            </p>
-            <p>
-              <strong>Referred To:</strong> {selectedReferral.referred_to}
-            </p>
-            <p>
-              <strong>Reason:</strong> {selectedReferral.referral_reason}
-            </p>
-            <p>
-              <strong>Date:</strong> {selectedReferral.referral_date}
-            </p>
-            <p>
-              <strong>Status:</strong> {selectedReferral.status}
-            </p>
-            <p>
-              <strong>Notes:</strong> {selectedReferral.notes || "N/A"}
-            </p>
+
+        {/* Modal Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Resident Information */}
+            <div className="space-y-4">
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-blue-700 mb-3">
+                  Resident Information
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-gray-500">Resident Name</p>
+                    <p className="font-medium text-gray-900">{residentName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Resident ID</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedReferral.resident_id}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Referral Details */}
+              <div className="bg-purple-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-purple-700 mb-3">
+                  Referral Details
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-gray-500">BHW ID</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedReferral.bhw_id}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Referred To</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedReferral.referred_to}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Referral Date</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedReferral.referral_date}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Medical Information */}
+            <div className="space-y-4">
+              {/* Referral Reason */}
+              <div className="bg-yellow-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-yellow-700 mb-3">
+                  Referral Reason
+                </h3>
+                <p className="text-sm text-gray-700 whitespace-pre-line">
+                  {selectedReferral.referral_reason}
+                </p>
+              </div>
+
+              {/* Notes */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  Additional Notes
+                </h3>
+                <p className="text-sm text-gray-700 whitespace-pre-line">
+                  {selectedReferral.notes || "No additional notes provided"}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -131,173 +202,216 @@ const EditReferralModal = ({
   bhws,
 }) => {
   if (!editReferral) return null;
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white rounded-xl w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-hidden border border-gray-200">
+        {/* Modal Header */}
+        <div className="bg-white border-b border-gray-100 px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">Edit Referral</h2>
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Edit Referral
+              </h2>
             </div>
             <button
               type="button"
               onClick={() => setEditReferral(null)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors"
             >
-              <X
-                size={24}
-                className="group-hover:rotate-90 transition-transform duration-300"
-              />
+              <X size={20} />
             </button>
           </div>
+          <div className="mt-2">
+            <p className="text-sm text-gray-500">
+              Referral ID:{" "}
+              <span className="font-medium text-gray-700">
+                {editReferral.referral_id}
+              </span>
+            </p>
+          </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+
+        {/* Modal Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleReferralEdit(editReferral.referral_id, editReferral);
             }}
-            className="grid grid-cols-1 gap-4"
+            className="space-y-6"
           >
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Resident
-              </label>
-              <select
-                value={editReferral.resident_id}
-                onChange={(e) =>
-                  setEditReferral({
-                    ...editReferral,
-                    resident_id: Number(e.target.value),
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                required
-              >
-                <option value="">Select Resident</option>
-                {residents.map((r) => (
-                  <option key={r.resident_id} value={r.resident_id}>
-                    {r.first_name} {r.middle_name || ""} {r.last_name} (ID:{" "}
-                    {r.resident_id})
-                  </option>
-                ))}
-              </select>
+            {/* Referral Information */}
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-blue-700 mb-3">
+                Referral Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Resident *
+                  </label>
+                  <select
+                    value={editReferral.resident_id}
+                    onChange={(e) =>
+                      setEditReferral({
+                        ...editReferral,
+                        resident_id: Number(e.target.value),
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  >
+                    <option value="">Select Resident</option>
+                    {residents.map((r) => (
+                      <option key={r.resident_id} value={r.resident_id}>
+                        {r.first_name} {r.middle_name || ""} {r.last_name} (ID:{" "}
+                        {r.resident_id})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    BHW *
+                  </label>
+                  <select
+                    value={editReferral.bhw_id}
+                    onChange={(e) =>
+                      setEditReferral({
+                        ...editReferral,
+                        bhw_id: Number(e.target.value),
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  >
+                    <option value="">Select BHW</option>
+                    {bhws.map((bhw) => (
+                      <option key={bhw.user_id} value={bhw.user_id}>
+                        {bhw.full_name} (ID: {bhw.user_id})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Referred To *
+                  </label>
+                  <input
+                    type="text"
+                    value={editReferral.referred_to}
+                    onChange={(e) =>
+                      setEditReferral({
+                        ...editReferral,
+                        referred_to: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Referral Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={editReferral.referral_date}
+                    onChange={(e) =>
+                      setEditReferral({
+                        ...editReferral,
+                        referral_date: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={editReferral.status}
+                    onChange={(e) =>
+                      setEditReferral({
+                        ...editReferral,
+                        status: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option>Pending</option>
+                    <option>Ongoing</option>
+                    <option>Completed</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                BHW
-              </label>
-              <select
-                value={editReferral.bhw_id}
-                onChange={(e) =>
-                  setEditReferral({
-                    ...editReferral,
-                    bhw_id: Number(e.target.value),
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                required
-              >
-                <option value="">Select BHW</option>
-                {bhws.map((bhw) => (
-                  <option key={bhw.user_id} value={bhw.user_id}>
-                    {bhw.full_name} (ID: {bhw.user_id})
-                  </option>
-                ))}
-              </select>
+
+            {/* Referral Details */}
+            <div className="bg-yellow-50 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-yellow-700 mb-3">
+                Referral Details
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Reason *
+                  </label>
+                  <textarea
+                    value={editReferral.referral_reason}
+                    onChange={(e) =>
+                      setEditReferral({
+                        ...editReferral,
+                        referral_reason: e.target.value,
+                      })
+                    }
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
+                    required
+                    placeholder="Enter the reason for referral..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Additional Notes
+                  </label>
+                  <textarea
+                    value={editReferral.notes}
+                    onChange={(e) =>
+                      setEditReferral({
+                        ...editReferral,
+                        notes: e.target.value,
+                      })
+                    }
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
+                    placeholder="Enter any additional notes..."
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Referred To
-              </label>
-              <input
-                type="text"
-                value={editReferral.referred_to}
-                onChange={(e) =>
-                  setEditReferral({
-                    ...editReferral,
-                    referred_to: e.target.value,
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Reason
-              </label>
-              <textarea
-                value={editReferral.referral_reason}
-                onChange={(e) =>
-                  setEditReferral({
-                    ...editReferral,
-                    referral_reason: e.target.value,
-                  })
-                }
-                rows="3"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Date
-              </label>
-              <input
-                type="date"
-                value={editReferral.referral_date}
-                onChange={(e) =>
-                  setEditReferral({
-                    ...editReferral,
-                    referral_date: e.target.value,
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Status
-              </label>
-              <select
-                value={editReferral.status}
-                onChange={(e) =>
-                  setEditReferral({ ...editReferral, status: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              >
-                <option>Pending</option>
-                <option>Ongoing</option>
-                <option>Completed</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Notes
-              </label>
-              <textarea
-                value={editReferral.notes}
-                onChange={(e) =>
-                  setEditReferral({ ...editReferral, notes: e.target.value })
-                }
-                rows="3"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              />
-            </div>
-            <div className="flex justify-end space-x-2">
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => setEditReferral(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium"
               >
                 Save Changes
               </button>
@@ -318,7 +432,7 @@ const CreateReferralModal = ({
 }) => {
   const [newReferral, setNewReferral] = useState({
     resident_id: "",
-    bhw_id: bhwUser?.user_id ? String(bhwUser.user_id) : "", // Convert to string for <select> compatibility
+    bhw_id: bhwUser?.user_id ? String(bhwUser.user_id) : "",
     referred_to: "",
     referral_reason: "",
     referral_date: new Date().toISOString().split("T")[0],
@@ -348,172 +462,216 @@ const CreateReferralModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white rounded-xl w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-hidden border border-gray-200">
+        {/* Modal Header */}
+        <div className="bg-white border-b border-gray-100 px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">Create Referral</h2>
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Create New Referral
+              </h2>
             </div>
             <button
               type="button"
               onClick={() => setShowCreateModal(false)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors"
             >
-              <X
-                size={24}
-                className="group-hover:rotate-90 transition-transform duration-300"
-              />
+              <X size={20} />
             </button>
           </div>
+          <div className="mt-2">
+            <p className="text-sm text-gray-500">
+              Fill in the referral information for a resident
+            </p>
+          </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+
+        {/* Modal Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           {error && (
-            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-              {error}
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+              <p className="font-medium">Validation Error</p>
+              <p className="text-sm">{error}</p>
             </div>
           )}
+
           {residents.length === 0 && (
-            <div className="mb-4 p-2 bg-yellow-100 text-yellow-700 rounded">
-              No active residents available. Please add residents first.
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-lg">
+              <p className="font-medium">No Active Residents</p>
+              <p className="text-sm">
+                Please add residents to create referrals.
+              </p>
             </div>
           )}
+
           {bhws.length === 0 && (
-            <div className="mb-4 p-2 bg-yellow-100 text-yellow-700 rounded">
-              No active BHWs available. Please add BHWs first.
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-lg">
+              <p className="font-medium">No Active BHWs</p>
+              <p className="text-sm">Please add BHWs to create referrals.</p>
             </div>
           )}
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Resident
-              </label>
-              <select
-                value={newReferral.resident_id}
-                onChange={(e) =>
-                  setNewReferral({
-                    ...newReferral,
-                    resident_id: e.target.value,
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                required
-              >
-                <option value="">Select Resident</option>
-                {residents.map((r) => (
-                  <option key={r.resident_id} value={r.resident_id}>
-                    {r.first_name} {r.middle_name || ""} {r.last_name} (ID:{" "}
-                    {r.resident_id})
-                  </option>
-                ))}
-              </select>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Referral Information */}
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-blue-700 mb-3">
+                Referral Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Resident *
+                  </label>
+                  <select
+                    value={newReferral.resident_id}
+                    onChange={(e) =>
+                      setNewReferral({
+                        ...newReferral,
+                        resident_id: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                    disabled={residents.length === 0}
+                  >
+                    <option value="">Select Resident</option>
+                    {residents.map((r) => (
+                      <option key={r.resident_id} value={r.resident_id}>
+                        {r.first_name} {r.middle_name || ""} {r.last_name} (ID:{" "}
+                        {r.resident_id})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    BHW *
+                  </label>
+                  <select
+                    value={newReferral.bhw_id}
+                    onChange={(e) =>
+                      setNewReferral({ ...newReferral, bhw_id: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                    disabled={bhws.length === 0}
+                  >
+                    <option value="">Select BHW</option>
+                    {bhws.map((bhw) => (
+                      <option key={bhw.user_id} value={bhw.user_id}>
+                        {bhw.full_name} (ID: {bhw.user_id})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Referred To *
+                  </label>
+                  <input
+                    type="text"
+                    value={newReferral.referred_to}
+                    onChange={(e) =>
+                      setNewReferral({
+                        ...newReferral,
+                        referred_to: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                    placeholder="e.g., Municipal Hospital"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Referral Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={newReferral.referral_date}
+                    onChange={(e) =>
+                      setNewReferral({
+                        ...newReferral,
+                        referral_date: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={newReferral.status}
+                    onChange={(e) =>
+                      setNewReferral({ ...newReferral, status: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option>Pending</option>
+                    <option>Ongoing</option>
+                    <option>Completed</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                BHW
-              </label>
-              <select
-                value={newReferral.bhw_id}
-                onChange={(e) =>
-                  setNewReferral({ ...newReferral, bhw_id: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                required
-              >
-                <option value="">Select BHW</option>
-                {bhws.map((bhw) => (
-                  <option key={bhw.user_id} value={bhw.user_id}>
-                    {bhw.full_name} (ID: {bhw.user_id})
-                  </option>
-                ))}
-              </select>
+
+            {/* Referral Details */}
+            <div className="bg-yellow-50 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-yellow-700 mb-3">
+                Referral Details
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Reason *
+                  </label>
+                  <textarea
+                    value={newReferral.referral_reason}
+                    onChange={(e) =>
+                      setNewReferral({
+                        ...newReferral,
+                        referral_reason: e.target.value,
+                      })
+                    }
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
+                    required
+                    placeholder="Enter the reason for referral..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Additional Notes
+                  </label>
+                  <textarea
+                    value={newReferral.notes}
+                    onChange={(e) =>
+                      setNewReferral({ ...newReferral, notes: e.target.value })
+                    }
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
+                    placeholder="Enter any additional notes..."
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Referred To
-              </label>
-              <input
-                type="text"
-                value={newReferral.referred_to}
-                onChange={(e) =>
-                  setNewReferral({
-                    ...newReferral,
-                    referred_to: e.target.value,
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Reason
-              </label>
-              <textarea
-                value={newReferral.referral_reason}
-                onChange={(e) =>
-                  setNewReferral({
-                    ...newReferral,
-                    referral_reason: e.target.value,
-                  })
-                }
-                rows="3"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Date
-              </label>
-              <input
-                type="date"
-                value={newReferral.referral_date}
-                onChange={(e) =>
-                  setNewReferral({
-                    ...newReferral,
-                    referral_date: e.target.value,
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Status
-              </label>
-              <select
-                value={newReferral.status}
-                onChange={(e) =>
-                  setNewReferral({ ...newReferral, status: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              >
-                <option>Pending</option>
-                <option>Ongoing</option>
-                <option>Completed</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Notes
-              </label>
-              <textarea
-                value={newReferral.notes}
-                onChange={(e) =>
-                  setNewReferral({ ...newReferral, notes: e.target.value })
-                }
-                rows="3"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              />
-            </div>
-            <div className="flex justify-end space-x-2">
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
               >
                 Cancel
               </button>
@@ -524,7 +682,7 @@ const CreateReferralModal = ({
                   residents.length === 0 ||
                   bhws.length === 0
                 }
-                className={`px-4 py-2 text-sm font-medium text-white rounded-md ${
+                className={`px-4 py-2 text-white rounded-lg transition-colors font-medium ${
                   !!validateForm() ||
                   residents.length === 0 ||
                   bhws.length === 0
