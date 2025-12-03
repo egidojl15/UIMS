@@ -725,7 +725,9 @@ const EditResidentModal = ({
         : `https://uims-backend-production.up.railway.app${editResident.photo_url}` // FIXED: Correct base URL + photo_url
       : null
   );
+
   const [isUpdating, setIsUpdating] = useState(false); // NEW: Loading state for update button
+  const [spouseMode, setSpouseMode] = useState("select"); // 'select' or 'manual'
 
   // Helper function to calculate age
   const calculateAge = (birthdate) => {
@@ -782,6 +784,43 @@ const EditResidentModal = ({
       setIsUpdating(false); // NEW: End loading
     }
   };
+
+  useEffect(() => {
+    if (editResident.civil_status !== "Married") {
+      setSpouseMode("select");
+      return;
+    }
+
+    if (!editResident.spouse_name) {
+      setSpouseMode("select");
+      return;
+    }
+
+    const possibleNames = (residents || [])
+      .filter((r) => {
+        if (r.resident_id === editResident.resident_id) return false;
+        if (r.civil_status !== "Married") return false;
+        if (editResident.gender && r.gender === editResident.gender)
+          return false;
+        return true;
+      })
+      .map((r) => {
+        return `${r.first_name}${r.middle_name ? " " + r.middle_name : ""} ${
+          r.last_name
+        } ${r.suffix || ""}`.trim();
+      });
+
+    if (possibleNames.includes(editResident.spouse_name)) {
+      setSpouseMode("select");
+    } else {
+      setSpouseMode("manual");
+    }
+  }, [
+    editResident.civil_status,
+    editResident.spouse_name,
+    editResident.gender,
+    residents,
+  ]);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
@@ -975,26 +1014,34 @@ const EditResidentModal = ({
                   Spouse{" "}
                   <span className="text-gray-500 text-xs">(Optional)</span>
                 </label>
+
                 <select
-                  name="spouse_name"
-                  value={editResident.spouse_name || ""}
-                  onChange={(e) =>
-                    setEditResident({
-                      ...editResident,
-                      spouse_name: e.target.value,
-                    })
+                  value={
+                    spouseMode === "manual"
+                      ? "__manual__"
+                      : editResident.spouse_name || ""
                   }
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    if (value === "__manual__") {
+                      setSpouseMode("manual");
+                    } else if (value === "") {
+                      setSpouseMode("select");
+                      setEditResident({ ...editResident, spouse_name: "" });
+                    } else {
+                      setSpouseMode("select");
+                      setEditResident({ ...editResident, spouse_name: value });
+                    }
+                  }}
                   className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm"
                 >
                   <option value="">Select Spouse (Optional)</option>
                   {(residents || [])
                     .filter((r) => {
-                      // Don't show the current resident
                       if (r.resident_id === editResident.resident_id)
                         return false;
-                      // Only show married residents
                       if (r.civil_status !== "Married") return false;
-                      // If gender is selected, only show opposite gender
                       if (
                         editResident.gender &&
                         r.gender === editResident.gender
@@ -1012,21 +1059,25 @@ const EditResidentModal = ({
                         </option>
                       );
                     })}
-                  <option value="__manual__">✏️ Enter manually...</option>
+                  <option value="__manual__">Enter manually...</option>
                 </select>
-                {editResident.spouse_name === "__manual__" && (
+
+                {/* Manual Input Field - Only shows when in manual mode */}
+                {spouseMode === "manual" && (
                   <input
                     type="text"
                     placeholder="Enter spouse's full name"
-                    className="mt-2 block w-full rounded-md border-2 border-gray-400 shadow-sm px-3 py-2"
+                    value={editResident.spouse_name || ""}
                     onChange={(e) =>
                       setEditResident({
                         ...editResident,
                         spouse_name: e.target.value,
                       })
                     }
+                    className="mt-2 block w-full rounded-md border-2 border-gray-400 shadow-sm px-3 py-2"
                   />
                 )}
+
                 <p className="text-xs text-gray-500 mt-1">
                   {editResident.gender
                     ? `Showing ${
