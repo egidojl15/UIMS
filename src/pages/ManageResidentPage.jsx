@@ -690,8 +690,8 @@ const ViewResidentModal = ({
               <div>
                 <p className="text-gray-500">Household</p>
                 <p className="font-semibold">
-                  {selectedResident.household_id
-                    ? `Household #${selectedResident.household_id}`
+                  {selectedResident.household_number
+                    ? `Household ${selectedResident.household_number}`
                     : "Not assigned"}
                 </p>
               </div>
