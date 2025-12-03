@@ -289,6 +289,7 @@ const BhwMainDashboard = () => {
           bg: "bg-blue-50",
           title: "New Resident Added",
           description: `${r.first_name} ${r.last_name}`,
+          timestamp: new Date(r.created_at).getTime(),
           time: formatTimeAgo(r.created_at),
         });
       });
@@ -308,6 +309,7 @@ const BhwMainDashboard = () => {
           bg: "bg-red-50",
           title: "Health Record Updated",
           description: `Blood Type: ${h.blood_type || "N/A"}`,
+          timestamp: new Date(h.created_at).getTime(),
           time: formatTimeAgo(h.created_at),
         });
       });
@@ -327,12 +329,15 @@ const BhwMainDashboard = () => {
           bg: "bg-green-50",
           title: "New Referral",
           description: r.referral_reason,
+          timestamp: new Date(r.referral_date).getTime(),
           time: formatTimeAgo(r.referral_date),
         });
       });
     }
 
-    setRecentActivities(activities.sort((a, b) => b.time - a.time).slice(0, 7));
+    setRecentActivities(
+      activities.sort((a, b) => b.timestamp - a.timestamp).slice(0, 7)
+    );
   };
 
   const formatTimeAgo = (dateString) => {
