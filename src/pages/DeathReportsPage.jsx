@@ -26,66 +26,105 @@ const DeathReportModal = ({
   residents,
 }) => {
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-lg shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl border border-gray-100 overflow-hidden animate-scaleIn">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-900 to-blue-700 px-6 py-4 border-b border-blue-800">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
-                Add Death Record
-              </h2>
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <Skull size={20} className="text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  Add Death Record
+                </h2>
+                <p className="text-blue-100 text-sm">
+                  Complete all required fields
+                </p>
+              </div>
             </div>
             <button
-              type="button"
               onClick={() => setShowDeathForm(false)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-colors"
+              aria-label="Close modal"
             >
-              <X
-                size={24}
-                className="group-hover:rotate-90 transition-transform duration-300"
-              />
+              <X size={20} />
             </button>
           </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <form onSubmit={handleDeathSubmit} className="grid grid-cols-1 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Resident <span className="text-red-500"></span>
+
+        {/* Form */}
+        <form
+          onSubmit={handleDeathSubmit}
+          className="p-6 max-h-[70vh] overflow-y-auto"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Resident Selection */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Resident <span className="text-red-500">*</span>
               </label>
-              <select
-                value={deathForm.resident_id || ""}
-                onChange={(e) =>
-                  setDeathForm({ ...deathForm, resident_id: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm p-2"
-                required
-              >
-                <option value="">Select Resident</option>
-                {residents.map((r) => (
-                  <option key={r.resident_id} value={r.resident_id}>
-                    {`${r.first_name} ${r.last_name}`}
+              <div className="relative">
+                <select
+                  value={deathForm.resident_id || ""}
+                  onChange={(e) =>
+                    setDeathForm({ ...deathForm, resident_id: e.target.value })
+                  }
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  required
+                >
+                  <option value="" disabled className="text-gray-400">
+                    Select a resident
                   </option>
-                ))}
-              </select>
+                  {residents.map((r) => (
+                    <option key={r.resident_id} value={r.resident_id}>
+                      {`${r.first_name} ${r.last_name} (ID: ${r.resident_id})`}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-3.5 text-gray-400">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
+
+            {/* Date of Death */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Date of Death <span className="text-red-500"></span>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Date of Death <span className="text-red-500">*</span>
               </label>
-              <input
-                type="date"
-                value={deathForm.date_of_death || ""}
-                onChange={(e) =>
-                  setDeathForm({ ...deathForm, date_of_death: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm p-2"
-                required
-              />
+              <div className="relative">
+                <input
+                  type="date"
+                  value={deathForm.date_of_death || ""}
+                  onChange={(e) =>
+                    setDeathForm({
+                      ...deathForm,
+                      date_of_death: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  required
+                />
+              </div>
             </div>
+
+            {/* Cause of Death */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Cause of Death
               </label>
               <input
@@ -94,11 +133,14 @@ const DeathReportModal = ({
                 onChange={(e) =>
                   setDeathForm({ ...deathForm, cause_of_death: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm p-2"
+                placeholder="e.g., Natural Causes"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
               />
             </div>
+
+            {/* Place of Death */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Place of Death
               </label>
               <input
@@ -107,39 +149,45 @@ const DeathReportModal = ({
                 onChange={(e) =>
                   setDeathForm({ ...deathForm, place_of_death: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm p-2"
+                placeholder="e.g., Hospital, Home"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Notes
+
+            {/* Notes - Full Width */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Notes & Additional Information
               </label>
               <textarea
                 value={deathForm.notes || ""}
                 onChange={(e) =>
                   setDeathForm({ ...deathForm, notes: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm p-2"
+                placeholder="Enter any additional notes or information..."
                 rows="4"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"
               />
             </div>
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => setShowDeathForm(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-[#0F4C81] rounded-md hover:bg-[#58A1D3]"
-              >
-                Save
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
+
+          {/* Footer Buttons */}
+          <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={() => setShowDeathForm(false)}
+              className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2.5 text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors shadow-sm"
+            >
+              Save Death Record
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -147,60 +195,147 @@ const DeathReportModal = ({
 
 const ViewDeathModal = ({ selectedDeath, setSelectedDeath, calculateAge }) => {
   if (!selectedDeath) return null;
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-lg shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100 overflow-hidden animate-scaleIn">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-6 py-4 border-b border-gray-600">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
-                Death Record Details
-              </h2>
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <FileText size={20} className="text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  Death Record Details
+                </h2>
+                <p className="text-gray-300 text-sm">
+                  Complete death information
+                </p>
+              </div>
             </div>
             <button
               onClick={() => setSelectedDeath(null)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-colors"
+              aria-label="Close modal"
             >
-              <X
-                size={24}
-                className="group-hover:rotate-90 transition-transform duration-300"
-              />
+              <X size={20} />
             </button>
           </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div className="grid grid-cols-1 gap-4 text-sm">
-            <div>
-              <p className="text-gray-500">Resident</p>
-              <p className="font-semibold">{selectedDeath.resident_name}</p>
+
+        {/* Content */}
+        <div className="p-6">
+          <div className="space-y-6">
+            {/* Resident Information */}
+            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-4 h-4 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-gray-800">
+                  Resident Information
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Name</p>
+                  <p className="font-medium text-gray-900">
+                    {selectedDeath.resident_name}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Age at Death</p>
+                  <p className="font-medium text-gray-900">
+                    {calculateAge(selectedDeath.dob)} years
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500">Age at Death</p>
-              <p className="font-semibold">{calculateAge(selectedDeath.dob)}</p>
+
+            {/* Death Details */}
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Skull size={16} className="text-gray-600" />
+                </div>
+                <h3 className="font-semibold text-gray-800">Death Details</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Date of Death</p>
+                    <p className="font-medium text-gray-900">
+                      {formatDateForInput(selectedDeath.date_of_death)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Place of Death</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedDeath.place_of_death || "Not specified"}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Cause of Death</p>
+                  <p className="font-medium text-gray-900 bg-white p-3 rounded-lg border border-gray-200">
+                    {selectedDeath.cause_of_death || "Not specified"}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500">Date of Death</p>
-              <p className="font-semibold">
-                {formatDateForInput(selectedDeath.date_of_death)}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">Cause of Death</p>
-              <p className="font-semibold">
-                {selectedDeath.cause_of_death || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">Place of Death</p>
-              <p className="font-semibold">
-                {selectedDeath.place_of_death || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">Notes</p>
-              <p className="font-semibold">{selectedDeath.notes || "N/A"}</p>
-            </div>
+
+            {/* Notes */}
+            {selectedDeath.notes && (
+              <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-amber-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-gray-800">
+                    Additional Notes
+                  </h3>
+                </div>
+                <p className="text-gray-700 whitespace-pre-wrap bg-white p-3 rounded-lg border border-amber-200">
+                  {selectedDeath.notes}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
+            <button
+              onClick={() => setSelectedDeath(null)}
+              className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>
@@ -214,55 +349,79 @@ const EditDeathModal = ({
   handleDeathEdit,
   residents,
 }) => {
-  // Use the resident_name directly from the death record instead of looking up by ID
   const residentName = editDeath?.resident_name || "Unknown Resident";
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-lg shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100 overflow-hidden animate-scaleIn">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 border-b border-emerald-800">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
-                Edit Death Record
-              </h2>
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <Edit2 size={20} className="text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  Edit Death Record
+                </h2>
+                <p className="text-emerald-100 text-sm">
+                  Update record information
+                </p>
+              </div>
             </div>
             <button
-              type="button"
               onClick={() => setEditDeath(null)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-colors"
+              aria-label="Close modal"
             >
-              <X
-                size={24}
-                className="group-hover:rotate-90 transition-transform duration-300"
-              />
+              <X size={20} />
             </button>
           </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleDeathEdit(editDeath.id, editDeath);
-            }}
-            className="grid grid-cols-1 gap-4"
-          >
-            {/* Display-only Resident Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
+
+        {/* Form */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleDeathEdit(editDeath.id, editDeath);
+          }}
+          className="p-6 max-h-[70vh] overflow-y-auto"
+        >
+          <div className="space-y-6">
+            {/* Resident Display (Read-only) */}
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Resident
               </label>
-              <div className="mt-1 block w-full rounded-md border-2 border-gray-300 bg-gray-100 shadow-sm p-2 text-gray-700">
-                {residentName}
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg
+                    className="w-5 h-5 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">{residentName}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Resident cannot be changed for existing records
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Resident cannot be changed for existing death records
-              </p>
             </div>
 
+            {/* Date of Death */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Date of Death <span className="text-red-500">*</span>
               </label>
               <input
@@ -271,12 +430,14 @@ const EditDeathModal = ({
                 onChange={(e) =>
                   setEditDeath({ ...editDeath, date_of_death: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm p-2"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                 required
               />
             </div>
+
+            {/* Cause of Death */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Cause of Death
               </label>
               <input
@@ -285,11 +446,14 @@ const EditDeathModal = ({
                 onChange={(e) =>
                   setEditDeath({ ...editDeath, cause_of_death: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm p-2"
+                placeholder="Enter cause of death"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
               />
             </div>
+
+            {/* Place of Death */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Place of Death
               </label>
               <input
@@ -298,11 +462,14 @@ const EditDeathModal = ({
                 onChange={(e) =>
                   setEditDeath({ ...editDeath, place_of_death: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm p-2"
+                placeholder="e.g., Hospital, Home"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
               />
             </div>
+
+            {/* Notes */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Notes
               </label>
               <textarea
@@ -310,32 +477,35 @@ const EditDeathModal = ({
                 onChange={(e) =>
                   setEditDeath({ ...editDeath, notes: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm p-2"
+                placeholder="Enter any additional notes..."
                 rows="4"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all resize-none"
               />
             </div>
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => setEditDeath(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-[#0F4C81] rounded-md hover:bg-[#58A1D3]"
-              >
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
+
+          {/* Footer Buttons */}
+          <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={() => setEditDeath(null)}
+              className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-sm flex items-center gap-2"
+            >
+              <Edit2 size={16} />
+              Update Record
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
-
 const DeathReportsPage = () => {
   const {
     deaths,
