@@ -1325,7 +1325,15 @@ export const deathsAPI = {
 
   create: async (deathData) => {
     try {
-      const response = await api.post("/deaths", deathData);
+      // Format date before sending
+      const formattedData = {
+        ...deathData,
+        date_of_death: deathData.date_of_death
+          ? new Date(deathData.date_of_death).toISOString().split("T")[0]
+          : null,
+      };
+
+      const response = await api.post("/deaths", formattedData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -1334,7 +1342,15 @@ export const deathsAPI = {
 
   update: async (id, deathData) => {
     try {
-      const response = await api.put(`/deaths/${id}`, deathData);
+      // Format date before sending
+      const formattedData = {
+        ...deathData,
+        date_of_death: deathData.date_of_death
+          ? new Date(deathData.date_of_death).toISOString().split("T")[0]
+          : null,
+      };
+
+      const response = await api.put(`/deaths/${id}`, formattedData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
