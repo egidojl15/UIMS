@@ -720,10 +720,11 @@ const Blotter = () => {
               </div>
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
-                  <Search
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600"
-                    size={20}
-                  />
+<Search
+  size={20}
+strokeWidth={2.5}
+className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600 drop-shadow-sm"
+/>
                   <input
                     type="text"
                     placeholder="Search by ID, reporter, incident type, or location..."
@@ -734,9 +735,9 @@ const Blotter = () => {
                 </div>
                 <div className="relative">
                   <Filter
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={20}
-                  />
+  size={20} strokeWidth={2.5} 
+  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 drop-shadow-sm"
+/>
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
