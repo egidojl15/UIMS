@@ -576,7 +576,7 @@ const UserManagement = () => {
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1 relative">
                     <Search
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
                       size={20}
                     />
                     <input
@@ -646,7 +646,7 @@ const UserManagement = () => {
                             <td colSpan={6} className="text-center py-16">
                               <div className="flex flex-col items-center">
                                 <div className="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
-                                  <Search size={32} className="text-gray-400" />
+                                  <Search size={32} className="text-gray-600" />
                                 </div>
                                 <p className="text-gray-600 text-xl font-semibold mb-2">
                                   No users found
@@ -680,7 +680,7 @@ const UserManagement = () => {
                   {paginated.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Search size={32} className="text-gray-400" />
+                        <Search size={32} className="text-gray-600" />
                       </div>
                       <p className="text-gray-600 text-lg font-semibold mb-2">
                         No users found
