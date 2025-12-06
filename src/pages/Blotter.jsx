@@ -722,11 +722,11 @@ const Blotter = () => {
                 <div className="flex-1 relative">
                   {/* Search icon */}
                   <Search
-                    className="absolute left-4 top-1/2 -translate-y-1/2"
                     size={20}
-                    strokeWidth={2.8}
+                    strokeWidth={3}
                     color="#000000"
-                    style={{ filter: "drop-shadow(0 0 1px rgba(0,0,0,0.3))" }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ paintOrder: "stroke fill" }}
                   />
                   <input
                     type="text"
@@ -738,11 +738,11 @@ const Blotter = () => {
                 </div>
                 <div className="relative">
                   <Filter
-                    className="absolute left-4 top-1/2 -translate-y-1/2"
                     size={20}
-                    strokeWidth={2.8}
+                    strokeWidth={3}
                     color="#000000"
-                    style={{ filter: "drop-shadow(0 0 1px rgba(0,0,0,0.3))" }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ paintOrder: "stroke fill" }}
                   />
                   <select
                     value={statusFilter}
