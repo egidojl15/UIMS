@@ -985,7 +985,7 @@ const MedicalReferralPage = () => {
       doc.text("Province of Southern Leyte", pageWidth / 2, 17, {
         align: "center",
       });
-      doc.text("Municipality/City of Macrohon", pageWidth / 2, 22, {
+      doc.text("Municipality of Macrohon", pageWidth / 2, 22, {
         align: "center",
       });
 

@@ -12,6 +12,18 @@ import {
   Syringe,
   FileText,
   Download,
+  Calendar,
+  User,
+  Home,
+  Settings,
+  ChevronDown,
+  AlertCircle,
+  RefreshCw,
+  Check,
+  Droplet,
+  Scale,
+  Activity,
+  Droplets,
 } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
 import {
@@ -168,118 +180,496 @@ const ViewMaternalRecordModal = ({
     selectedRecord.dob || selectedRecord.date_of_birth
   );
 
+  const formatPregnancyDuration = (lmpDate) => {
+    if (!lmpDate) return "N/A";
+    const lmp = new Date(lmpDate);
+    const today = new Date();
+    const diffMs = today - lmp;
+    const weeks = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 7));
+    const days = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24 * 7)) / (1000 * 60 * 60 * 24)
+    );
+    return `${weeks} weeks ${days} days`;
+  };
+
+  const getStatusColor = (status) => {
+    if (selectedRecord.delivery_date) {
+      return {
+        bg: "bg-green-100",
+        text: "text-green-800",
+        border: "border-green-200",
+        icon: "✓",
+        label: "Delivered",
+      };
+    } else if (
+      selectedRecord.edd &&
+      new Date(selectedRecord.edd) < new Date()
+    ) {
+      return {
+        bg: "bg-red-100",
+        text: "text-red-800",
+        border: "border-red-200",
+        icon: "⚠",
+        label: "Past Due",
+      };
+    } else {
+      return {
+        bg: "bg-blue-100",
+        text: "text-blue-800",
+        border: "border-blue-200",
+        icon: "🤰",
+        label: "Pregnant",
+      };
+    }
+  };
+
+  const status = getStatusColor(selectedRecord.delivery_date);
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[80vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-6xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
+        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] via-[#3A7BC0] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
-                Maternal Health Details
-              </h2>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute -inset-1 bg-cyan-400/30 rounded-full blur-sm"></div>
+                <div className="relative w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <HeartPulse size={24} className="text-white" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  Maternal Health Record
+                </h2>
+                <p className="text-cyan-100/80 text-sm">
+                  Complete medical details and history
+                </p>
+              </div>
             </div>
-            <button
-              onClick={() => setSelectedRecord(null)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
-            >
-              <X
-                size={24}
-                className="group-hover:rotate-90 transition-transform duration-300"
-              />
-            </button>
+            <div className="flex items-center gap-4">
+              <div
+                className={`px-4 py-2 ${status.bg} ${status.text} ${status.border} rounded-full flex items-center gap-2 font-medium`}
+              >
+                <span>{status.icon}</span>
+                {status.label}
+              </div>
+              <button
+                onClick={() => setSelectedRecord(null)}
+                className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              >
+                <X
+                  size={24}
+                  className="group-hover:rotate-90 transition-transform duration-300"
+                />
+              </button>
+            </div>
           </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(80vh-120px)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-gray-500 font-medium">Resident Name</p>
-              <p className="font-semibold">{selectedRecord.resident_name}</p>
+
+        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+          {/* Patient Summary Banner */}
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200 mb-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <User size={28} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {selectedRecord.resident_name}
+                  </h3>
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Calendar size={16} />
+                      <span className="font-medium">
+                        {residentAge} years old
+                      </span>
+                    </div>
+                    <div className="w-px h-4 bg-gray-300"></div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Home size={16} />
+                      <span className="font-medium">
+                        Resident ID: {selectedRecord.resident_id}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="bg-white/80 rounded-xl p-4 border border-blue-100 text-center">
+                  <p className="text-sm text-gray-600 mb-1">Pregnancy Weeks</p>
+                  <p className="text-xl font-bold text-[#0F4C81]">
+                    {formatPregnancyDuration(selectedRecord.lmp_date)}
+                  </p>
+                </div>
+                <div className="bg-white/80 rounded-xl p-4 border border-blue-100 text-center">
+                  <p className="text-sm text-gray-600 mb-1">Prenatal Visits</p>
+                  <p className="text-xl font-bold text-[#0F4C81]">
+                    {selectedRecord.prenatal_visits || "0"}
+                  </p>
+                </div>
+                <div className="bg-white/80 rounded-xl p-4 border border-blue-100 text-center">
+                  <p className="text-sm text-gray-600 mb-1">Last Updated</p>
+                  <p className="text-sm font-bold text-gray-800">
+                    {new Date(selectedRecord.updated_at).toLocaleDateString(
+                      "en-US",
+                      {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }
+                    )}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500 font-medium">Age</p>
-              <p className="font-semibold">{residentAge}</p>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column - Pregnancy Information */}
+            <div className="space-y-8">
+              {/* Pregnancy Timeline */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-purple-600 to-pink-500 rounded-full"></div>
+                  <h3 className="text-lg font-bold text-purple-800">
+                    Pregnancy Timeline
+                  </h3>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-4 shadow-md">
+                      <Calendar className="text-white" size={20} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 mb-1">
+                        Last Menstrual Period (LMP)
+                      </p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {formatDateForInput(selectedRecord.lmp_date) ||
+                          "Not recorded"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="relative ml-6">
+                    <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-400 to-pink-400"></div>
+                    <div className="flex items-center mb-8 ml-6">
+                      <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center z-10 shadow-md">
+                        <Calendar className="text-white" size={18} />
+                      </div>
+                      <div className="flex-1 ml-4">
+                        <p className="text-sm text-gray-600 mb-1">
+                          Expected Delivery Date (EDD)
+                        </p>
+                        <p className="text-lg font-bold text-gray-900">
+                          {formatDateForInput(selectedRecord.edd) ||
+                            "Not calculated"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {selectedRecord.delivery_date && (
+                      <div className="flex items-center ml-6">
+                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center z-10 shadow-md">
+                          <Calendar className="text-white" size={18} />
+                        </div>
+                        <div className="flex-1 ml-4">
+                          <p className="text-sm text-gray-600 mb-1">
+                            Actual Delivery Date
+                          </p>
+                          <p className="text-lg font-bold text-gray-900">
+                            {formatDateForInput(selectedRecord.delivery_date)}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Health Metrics */}
+              <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl p-6 border border-emerald-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-emerald-600 to-green-500 rounded-full"></div>
+                  <h3 className="text-lg font-bold text-emerald-800">
+                    Health Metrics
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="bg-white/80 rounded-xl p-4 border border-emerald-100">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-400 rounded-lg flex items-center justify-center">
+                        <Scale size={16} className="text-white" />
+                      </div>
+                      <p className="text-sm text-gray-600">Weight</p>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {selectedRecord.weight
+                        ? `${selectedRecord.weight} kg`
+                        : "Not recorded"}
+                    </p>
+                  </div>
+
+                  <div className="bg-white/80 rounded-xl p-4 border border-emerald-100">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-400 rounded-lg flex items-center justify-center">
+                        <Droplet size={16} className="text-white" />
+                      </div>
+                      <p className="text-sm text-gray-600">Blood Pressure</p>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {selectedRecord.blood_pressure || "Not recorded"}
+                    </p>
+                  </div>
+
+                  <div className="bg-white/80 rounded-xl p-4 border border-emerald-100">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-400 rounded-lg flex items-center justify-center">
+                        <Activity size={16} className="text-white" />
+                      </div>
+                      <p className="text-sm text-gray-600">Hemoglobin</p>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {selectedRecord.hemoglobin
+                        ? `${selectedRecord.hemoglobin} g/dL`
+                        : "Not recorded"}
+                    </p>
+                  </div>
+
+                  <div className="bg-white/80 rounded-xl p-4 border border-emerald-100">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-400 rounded-lg flex items-center justify-center">
+                        <Activity size={16} className="text-white" />
+                      </div>
+                      <p className="text-sm text-gray-600">Prenatal Visits</p>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {selectedRecord.prenatal_visits || "0"}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">LMP Date</p>
-              <p className="font-semibold">
-                {formatDateForInput(selectedRecord.lmp_date || "N/A")}
-              </p>
+
+            {/* Right Column - Medical Details */}
+            <div className="space-y-8">
+              {/* Vaccinations & Supplements */}
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-amber-600 to-orange-500 rounded-full"></div>
+                  <h3 className="text-lg font-bold text-amber-800">
+                    Vaccinations & Supplements
+                  </h3>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-4 bg-white/80 rounded-xl border border-amber-100">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-10 h-10 ${
+                          selectedRecord.tetanus_vaccination
+                            ? "bg-gradient-to-br from-emerald-400 to-green-400"
+                            : "bg-gradient-to-br from-gray-300 to-gray-400"
+                        } rounded-xl flex items-center justify-center`}
+                      >
+                        {selectedRecord.tetanus_vaccination ? (
+                          <Check size={20} className="text-white" />
+                        ) : (
+                          <X size={20} className="text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          Tetanus Vaccination
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Recommended for all pregnant women
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        selectedRecord.tetanus_vaccination
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {selectedRecord.tetanus_vaccination
+                        ? "Completed"
+                        : "Not Given"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-white/80 rounded-xl border border-amber-100">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-10 h-10 ${
+                          selectedRecord.iron_supplement
+                            ? "bg-gradient-to-br from-emerald-400 to-green-400"
+                            : "bg-gradient-to-br from-gray-300 to-gray-400"
+                        } rounded-xl flex items-center justify-center`}
+                      >
+                        {selectedRecord.iron_supplement ? (
+                          <Check size={20} className="text-white" />
+                        ) : (
+                          <X size={20} className="text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          Iron Supplement
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Prevents anemia during pregnancy
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        selectedRecord.iron_supplement
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {selectedRecord.iron_supplement ? "Taking" : "Not Taking"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Delivery Information (Conditional) */}
+              {selectedRecord.delivery_date && (
+                <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-6 border border-cyan-100">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-2 h-8 bg-gradient-to-b from-cyan-600 to-blue-500 rounded-full"></div>
+                    <h3 className="text-lg font-bold text-cyan-800">
+                      Delivery Information
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white/80 rounded-xl p-4 border border-cyan-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar size={16} className="text-cyan-600" />
+                        <p className="text-sm text-gray-600">Delivery Date</p>
+                      </div>
+                      <p className="text-lg font-bold text-gray-900">
+                        {formatDateForInput(selectedRecord.delivery_date)}
+                      </p>
+                    </div>
+
+                    <div className="bg-white/80 rounded-xl p-4 border border-cyan-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Activity size={16} className="text-cyan-600" />
+                        <p className="text-sm text-gray-600">Delivery Type</p>
+                      </div>
+                      <p className="text-lg font-bold text-gray-900">
+                        {selectedRecord.delivery_type}
+                      </p>
+                    </div>
+
+                    <div className="bg-white/80 rounded-xl p-4 border border-cyan-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Scale size={16} className="text-cyan-600" />
+                        <p className="text-sm text-gray-600">Baby Weight</p>
+                      </div>
+                      <p className="text-lg font-bold text-gray-900">
+                        {selectedRecord.baby_weight
+                          ? `${selectedRecord.baby_weight} kg`
+                          : "Not recorded"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Complications & Notes */}
+              <div className="bg-gradient-to-r from-gray-50 to-slate-50 rounded-2xl p-6 border border-gray-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-gray-600 to-slate-500 rounded-full"></div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Medical Notes
+                  </h3>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertCircle size={18} className="text-gray-600" />
+                      <p className="font-medium text-gray-900">Complications</p>
+                    </div>
+                    <div className="bg-white/80 rounded-xl p-4 border border-gray-200 min-h-[100px]">
+                      <p className="text-gray-700 whitespace-pre-wrap">
+                        {selectedRecord.complications ||
+                          "No complications reported"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <FileText size={18} className="text-gray-600" />
+                      <p className="font-medium text-gray-900">
+                        Additional Notes
+                      </p>
+                    </div>
+                    <div className="bg-white/80 rounded-xl p-4 border border-gray-200 min-h-[100px]">
+                      <p className="text-gray-700 whitespace-pre-wrap">
+                        {selectedRecord.notes || "No additional notes"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Record Metadata */}
+              <div className="bg-gradient-to-r from-slate-50 to-zinc-50 rounded-2xl p-6 border border-slate-100">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Calendar size={14} className="text-gray-500" />
+                    <span className="text-gray-600">Created:</span>
+                    <span className="font-medium text-gray-800 ml-auto">
+                      {new Date(selectedRecord.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RefreshCw size={14} className="text-gray-500" />
+                    <span className="text-gray-600">Last Updated:</span>
+                    <span className="font-medium text-gray-800 ml-auto">
+                      {new Date(selectedRecord.updated_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">EDD</p>
-              <p className="font-semibold">
-                {formatDateForInput(selectedRecord.edd || "N/A")}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Prenatal Visits</p>
-              <p className="font-semibold">
-                {selectedRecord.prenatal_visits || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Blood Pressure</p>
-              <p className="font-semibold">
-                {selectedRecord.blood_pressure || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Weight (kg)</p>
-              <p className="font-semibold">{selectedRecord.weight || "N/A"}</p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Hemoglobin (g/dL)</p>
-              <p className="font-semibold">
-                {selectedRecord.hemoglobin || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Tetanus Vaccination</p>
-              <p className="font-semibold">
-                {selectedRecord.tetanus_vaccination ? "Yes" : "No"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Iron Supplement</p>
-              <p className="font-semibold">
-                {selectedRecord.iron_supplement ? "Yes" : "No"}
-              </p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Complications</p>
-              <p className="font-semibold">
-                {selectedRecord.complications || "None"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Delivery Date</p>
-              <p className="font-semibold">
-                {formatDateForInput(selectedRecord.delivery_date || "N/A")}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Delivery Type</p>
-              <p className="font-semibold">
-                {selectedRecord.delivery_type || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Baby Weight (kg)</p>
-              <p className="font-semibold">
-                {selectedRecord.baby_weight || "N/A"}
-              </p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Notes</p>
-              <p className="font-semibold">{selectedRecord.notes || "N/A"}</p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Last Updated</p>
-              <p className="font-semibold">
-                {new Date(selectedRecord.updated_at).toLocaleDateString()}
-              </p>
-            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-4 pt-8 mt-8 border-t border-gray-200">
+            <button
+              onClick={() => setSelectedRecord(null)}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-medium"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => {
+                // This would be handled by parent component
+                setSelectedRecord(null);
+                // Navigate to edit mode
+              }}
+              className="px-6 py-3 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-300 font-medium"
+            >
+              <div className="flex items-center gap-2">
+                <Edit2 size={18} />
+                Edit Record
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -416,31 +806,113 @@ const CreateMaternalRecordModal = ({
     notes: "",
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+
     if (!formData.resident_id) {
-      addNotification("error", "Validation Error", "Please select a resident");
+      newErrors.resident_id = "Please select a resident";
+    }
+
+    if (
+      formData.blood_pressure &&
+      !/^\d{2,3}\/\d{2,3}$/.test(formData.blood_pressure)
+    ) {
+      newErrors.blood_pressure = "Use format: 120/80";
+    }
+
+    if (formData.weight && (formData.weight < 30 || formData.weight > 200)) {
+      newErrors.weight = "Weight must be between 30-200 kg";
+    }
+
+    if (
+      formData.hemoglobin &&
+      (formData.hemoglobin < 7 || formData.hemoglobin > 20)
+    ) {
+      newErrors.hemoglobin = "Hemoglobin must be between 7-20 g/dL";
+    }
+
+    if (formData.lmp_date && formData.edd) {
+      const lmp = new Date(formData.lmp_date);
+      const edd = new Date(formData.edd);
+      if (edd <= lmp) {
+        newErrors.edd = "EDD must be after LMP date";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      addNotification("error", "Validation Error", "Please correct the errors");
       return;
     }
-    handleCreateMaternal(formData);
-    setShowCreateModal(false);
-    setFormData({ ...formData, resident_id: "" }); // Reset resident_id
+
+    setIsSubmitting(true);
+    try {
+      await handleCreateMaternal(formData);
+      setShowCreateModal(false);
+      // Reset form
+      setFormData({
+        resident_id: "",
+        lmp_date: "",
+        edd: "",
+        prenatal_visits: "",
+        blood_pressure: "",
+        weight: "",
+        hemoglobin: "",
+        tetanus_vaccination: false,
+        iron_supplement: false,
+        complications: "",
+        delivery_date: "",
+        delivery_type: "",
+        baby_weight: "",
+        notes: "",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-5xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
+        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] via-[#3A7BC0] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
-                Add Maternal Health Record
-              </h2>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute -inset-1 bg-cyan-400/30 rounded-full blur-sm"></div>
+                <div className="relative w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <Plus size={24} className="text-white" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  Add Maternal Health Record
+                </h2>
+                <p className="text-cyan-100/80 text-sm">
+                  Fill in the maternal health information
+                </p>
+              </div>
             </div>
             <button
-              onClick={() => setShowCreateModal(false)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              onClick={() => !isSubmitting && setShowCreateModal(false)}
+              disabled={isSubmitting}
+              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <X
                 size={24}
@@ -449,236 +921,423 @@ const CreateMaternalRecordModal = ({
             </button>
           </div>
         </div>
+
         <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div className="flex-1 overflow-y-auto px-2">
-            <form
-              onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Resident *
-                </label>
-                <select
-                  value={formData.resident_id}
-                  onChange={(e) =>
-                    setFormData({ ...formData, resident_id: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  required
-                >
-                  <option value="">Select Resident</option>
-                  {residents.map((r) => (
-                    <option key={r.resident_id} value={r.resident_id}>
-                      {r.first_name} {r.last_name} (ID: {r.resident_id})
-                    </option>
-                  ))}
-                </select>
+          <div className="flex-1 overflow-y-auto px-1">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Personal Information Section */}
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-[#0F4C81] to-[#58A1D3] rounded-full"></div>
+                  <h3 className="text-lg font-bold text-[#0F4C81]">
+                    Personal Information
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      Resident *
+                    </label>
+                    <select
+                      value={formData.resident_id}
+                      onChange={(e) =>
+                        handleInputChange("resident_id", e.target.value)
+                      }
+                      className={`w-full p-3 border ${
+                        errors.resident_id
+                          ? "border-red-300 ring-2 ring-red-100"
+                          : "border-gray-300"
+                      } rounded-xl focus:ring-2 focus:ring-[#58A1D3] focus:border-transparent bg-white/80 backdrop-blur-sm transition-all duration-200`}
+                      required
+                      disabled={isSubmitting}
+                    >
+                      <option value="">Select Resident</option>
+                      {residents.map((r) => (
+                        <option key={r.resident_id} value={r.resident_id}>
+                          {r.first_name} {r.last_name} • ID: {r.resident_id} •{" "}
+                          {r.gender} • {calculateAge(r.date_of_birth)}y
+                        </option>
+                      ))}
+                    </select>
+                    {errors.resident_id && (
+                      <p className="mt-2 text-sm text-red-600 flex items-center gap-2">
+                        <X size={14} />
+                        {errors.resident_id}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  LMP Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.lmp_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, lmp_date: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
+
+              {/* Pregnancy Information Section */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-purple-600 to-pink-500 rounded-full"></div>
+                  <h3 className="text-lg font-bold text-purple-800">
+                    Pregnancy Information
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      LMP Date
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={formData.lmp_date}
+                        onChange={(e) =>
+                          handleInputChange("lmp_date", e.target.value)
+                        }
+                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                        disabled={isSubmitting}
+                      />
+                      <div className="absolute right-3 top-3">
+                        <Calendar className="text-gray-400" size={18} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      EDD
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={formData.edd}
+                        onChange={(e) =>
+                          handleInputChange("edd", e.target.value)
+                        }
+                        className={`w-full p-3 border ${
+                          errors.edd
+                            ? "border-red-300 ring-2 ring-red-100"
+                            : "border-gray-300"
+                        } rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm`}
+                        disabled={isSubmitting}
+                      />
+                      <div className="absolute right-3 top-3">
+                        <Calendar className="text-gray-400" size={18} />
+                      </div>
+                    </div>
+                    {errors.edd && (
+                      <p className="mt-2 text-sm text-red-600">{errors.edd}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Prenatal Visits
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={formData.prenatal_visits}
+                        onChange={(e) =>
+                          handleInputChange("prenatal_visits", e.target.value)
+                        }
+                        className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                        min="0"
+                        max="20"
+                        placeholder="0"
+                        disabled={isSubmitting}
+                      />
+                      <div className="absolute left-3 top-3">
+                        <Activity className="text-gray-400" size={18} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Blood Pressure
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formData.blood_pressure}
+                        onChange={(e) =>
+                          handleInputChange("blood_pressure", e.target.value)
+                        }
+                        className={`w-full p-3 pl-10 border ${
+                          errors.blood_pressure
+                            ? "border-red-300 ring-2 ring-red-100"
+                            : "border-gray-300"
+                        } rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm`}
+                        placeholder="120/80"
+                        disabled={isSubmitting}
+                      />
+                      <div className="absolute left-3 top-3">
+                        <Droplets className="text-gray-400" size={18} />
+                      </div>
+                    </div>
+                    {errors.blood_pressure && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.blood_pressure}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  EDD
-                </label>
-                <input
-                  type="date"
-                  value={formData.edd}
-                  onChange={(e) =>
-                    setFormData({ ...formData, edd: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
+
+              {/* Health Metrics Section */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-green-600 to-emerald-500 rounded-full"></div>
+                  <h3 className="text-lg font-bold text-emerald-800">
+                    Health Metrics
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Weight (kg)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={formData.weight}
+                        onChange={(e) =>
+                          handleInputChange("weight", e.target.value)
+                        }
+                        className={`w-full p-3 pl-10 border ${
+                          errors.weight
+                            ? "border-red-300 ring-2 ring-red-100"
+                            : "border-gray-300"
+                        } rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white/80 backdrop-blur-sm`}
+                        step="0.1"
+                        min="0"
+                        placeholder="0.0"
+                        disabled={isSubmitting}
+                      />
+                      <div className="absolute left-3 top-3">
+                        <Scale className="text-gray-400" size={18} />
+                      </div>
+                    </div>
+                    {errors.weight && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.weight}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Hemoglobin (g/dL)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={formData.hemoglobin}
+                        onChange={(e) =>
+                          handleInputChange("hemoglobin", e.target.value)
+                        }
+                        className={`w-full p-3 pl-10 border ${
+                          errors.hemoglobin
+                            ? "border-red-300 ring-2 ring-red-100"
+                            : "border-gray-300"
+                        } rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white/80 backdrop-blur-sm`}
+                        step="0.1"
+                        min="0"
+                        placeholder="0.0"
+                        disabled={isSubmitting}
+                      />
+                      <div className="absolute left-3 top-3">
+                        <Droplet className="text-gray-400" size={18} />
+                      </div>
+                    </div>
+                    {errors.hemoglobin && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.hemoglobin}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center space-x-6">
+                    <div className="flex-1">
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Tetanus Vaccination
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
+                            formData.tetanus_vaccination
+                              ? "bg-emerald-500"
+                              : "bg-gray-300"
+                          }`}
+                        >
+                          <div
+                            className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${
+                              formData.tetanus_vaccination ? "left-7" : "left-1"
+                            }`}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">
+                          {formData.tetanus_vaccination ? "Yes" : "No"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-6">
+                    <div className="flex-1">
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Iron Supplement
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
+                            formData.iron_supplement
+                              ? "bg-emerald-500"
+                              : "bg-gray-300"
+                          }`}
+                        >
+                          <div
+                            className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${
+                              formData.iron_supplement ? "left-7" : "left-1"
+                            }`}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">
+                          {formData.iron_supplement ? "Yes" : "No"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Prenatal Visits
-                </label>
-                <input
-                  type="number"
-                  value={formData.prenatal_visits}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      prenatal_visits: e.target.value,
-                    })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  min="0"
-                />
+
+              {/* Delivery Information Section (Conditional) */}
+              {(formData.delivery_date ||
+                formData.delivery_type ||
+                formData.baby_weight) && (
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-2 h-8 bg-gradient-to-b from-amber-600 to-orange-500 rounded-full"></div>
+                    <h3 className="text-lg font-bold text-amber-800">
+                      Delivery Information
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Delivery Date
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.delivery_date}
+                        onChange={(e) =>
+                          handleInputChange("delivery_date", e.target.value)
+                        }
+                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Delivery Type
+                      </label>
+                      <select
+                        value={formData.delivery_type}
+                        onChange={(e) =>
+                          handleInputChange("delivery_type", e.target.value)
+                        }
+                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                        disabled={isSubmitting}
+                      >
+                        <option value="">Select Type</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Cesarean">Cesarean</option>
+                        <option value="Assisted">Assisted</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Baby Weight (kg)
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.baby_weight}
+                        onChange={(e) =>
+                          handleInputChange("baby_weight", e.target.value)
+                        }
+                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                        step="0.1"
+                        min="0"
+                        placeholder="0.0"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Additional Information Section */}
+              <div className="bg-gradient-to-r from-gray-50 to-slate-50 rounded-2xl p-6 border border-gray-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-gray-600 to-slate-500 rounded-full"></div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Additional Information
+                  </h3>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Complications
+                    </label>
+                    <textarea
+                      value={formData.complications}
+                      onChange={(e) =>
+                        handleInputChange("complications", e.target.value)
+                      }
+                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white/80 backdrop-blur-sm min-h-[100px] resize-y"
+                      placeholder="Any complications or health concerns..."
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Notes
+                    </label>
+                    <textarea
+                      value={formData.notes}
+                      onChange={(e) =>
+                        handleInputChange("notes", e.target.value)
+                      }
+                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white/80 backdrop-blur-sm min-h-[100px] resize-y"
+                      placeholder="Additional notes or observations..."
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Blood Pressure
-                </label>
-                <input
-                  type="text"
-                  value={formData.blood_pressure}
-                  onChange={(e) =>
-                    setFormData({ ...formData, blood_pressure: e.target.value })
-                  }
-                  placeholder="e.g., 120/80"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Weight (kg)
-                </label>
-                <input
-                  type="number"
-                  value={formData.weight}
-                  onChange={(e) =>
-                    setFormData({ ...formData, weight: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  step="0.1"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Hemoglobin (g/dL)
-                </label>
-                <input
-                  type="number"
-                  value={formData.hemoglobin}
-                  onChange={(e) =>
-                    setFormData({ ...formData, hemoglobin: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  step="0.1"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tetanus Vaccination
-                </label>
-                <input
-                  type="checkbox"
-                  checked={formData.tetanus_vaccination}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      tetanus_vaccination: e.target.checked,
-                    })
-                  }
-                  className="w-5 h-5 text-[#58A1D3] border-gray-300 rounded focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Iron Supplement
-                </label>
-                <input
-                  type="checkbox"
-                  checked={formData.iron_supplement}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      iron_supplement: e.target.checked,
-                    })
-                  }
-                  className="w-5 h-5 text-[#58A1D3] border-gray-300 rounded focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Complications
-                </label>
-                <textarea
-                  value={formData.complications}
-                  onChange={(e) =>
-                    setFormData({ ...formData, complications: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  rows="3"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delivery Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.delivery_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, delivery_date: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delivery Type
-                </label>
-                <select
-                  value={formData.delivery_type}
-                  onChange={(e) =>
-                    setFormData({ ...formData, delivery_type: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                >
-                  <option value="">Select Delivery Type</option>
-                  <option value="Normal">Normal</option>
-                  <option value="Cesarean">Cesarean</option>
-                  <option value="Assisted">Assisted</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Baby Weight (kg)
-                </label>
-                <input
-                  type="number"
-                  value={formData.baby_weight}
-                  onChange={(e) =>
-                    setFormData({ ...formData, baby_weight: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  step="0.1"
-                  min="0"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  rows="3"
-                />
-              </div>
-              <div className="md:col-span-2 flex justify-end space-x-3 mt-4">
+
+              {/* Form Actions */}
+              <div className="flex justify-between items-center pt-6 border-t border-gray-200">
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  onClick={() => !isSubmitting && setShowCreateModal(false)}
+                  disabled={isSubmitting}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#58A1D3] text-white rounded-lg hover:bg-[#0F4C81]"
-                >
-                  Save Record
-                </button>
+                <div className="flex items-center gap-4">
+                  {isSubmitting && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-[#0F4C81] rounded-full animate-spin"></div>
+                      <span className="text-sm">Saving...</span>
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-8 py-3 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all duration-300 font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  >
+                    {isSubmitting ? "Saving..." : "Save Maternal Record"}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -712,30 +1371,108 @@ const EditMaternalRecordModal = ({
     notes: record.notes || "",
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const validateForm = () => {
+    const newErrors = {};
+
     if (!formData.resident_id) {
-      addNotification("error", "Validation Error", "Please select a resident");
+      newErrors.resident_id = "Please select a resident";
+    }
+
+    if (
+      formData.blood_pressure &&
+      !/^\d{2,3}\/\d{2,3}$/.test(formData.blood_pressure)
+    ) {
+      newErrors.blood_pressure = "Use format: 120/80";
+    }
+
+    if (formData.weight && (formData.weight < 30 || formData.weight > 200)) {
+      newErrors.weight = "Weight must be between 30-200 kg";
+    }
+
+    if (
+      formData.hemoglobin &&
+      (formData.hemoglobin < 7 || formData.hemoglobin > 20)
+    ) {
+      newErrors.hemoglobin = "Hemoglobin must be between 7-20 g/dL";
+    }
+
+    if (formData.lmp_date && formData.edd) {
+      const lmp = new Date(formData.lmp_date);
+      const edd = new Date(formData.edd);
+      if (edd <= lmp) {
+        newErrors.edd = "EDD must be after LMP date";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      addNotification("error", "Validation Error", "Please correct the errors");
       return;
     }
-    handleEditMaternal(record.id, formData);
-    setShowEditModal(false);
+
+    setIsSubmitting(true);
+    try {
+      await handleEditMaternal(record.id, formData);
+      setShowEditModal(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const formatDuration = (start, end) => {
+    if (!start || !end) return "N/A";
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffMs = endDate - startDate;
+    const weeks = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 7));
+    const days = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24 * 7)) / (1000 * 60 * 60 * 24)
+    );
+    return `${weeks}w ${days}d`;
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-5xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
+        <div className="sticky top-0 bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 px-8 py-6 rounded-t-3xl">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
-                Edit Maternal Health Record
-              </h2>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute -inset-1 bg-emerald-400/30 rounded-full blur-sm"></div>
+                <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <Edit2 size={24} className="text-white" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  Edit Maternal Health Record
+                </h2>
+                <p className="text-emerald-100/80 text-sm">
+                  Update maternal health information
+                </p>
+              </div>
             </div>
             <button
-              onClick={() => setShowEditModal(false)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              onClick={() => !isSubmitting && setShowEditModal(false)}
+              disabled={isSubmitting}
+              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <X
                 size={24}
@@ -744,236 +1481,500 @@ const EditMaternalRecordModal = ({
             </button>
           </div>
         </div>
+
         <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div className="flex-1 overflow-y-auto px-2">
-            <form
-              onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Resident *
-                </label>
-                <select
-                  value={formData.resident_id}
-                  onChange={(e) =>
-                    setFormData({ ...formData, resident_id: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  required
-                >
-                  <option value="">Select Resident</option>
-                  {residents.map((r) => (
-                    <option key={r.resident_id} value={r.resident_id}>
-                      {r.first_name} {r.last_name} (ID: {r.resident_id})
-                    </option>
-                  ))}
-                </select>
+          <div className="flex-1 overflow-y-auto px-1">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Quick Stats Banner */}
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-white/80 rounded-xl border border-blue-100">
+                    <p className="text-sm text-gray-600 mb-1">
+                      Current Resident
+                    </p>
+                    <p className="text-lg font-bold text-[#0F4C81]">
+                      {record.resident_name}
+                    </p>
+                  </div>
+                  <div className="text-center p-4 bg-white/80 rounded-xl border border-blue-100">
+                    <p className="text-sm text-gray-600 mb-1">
+                      Pregnancy Status
+                    </p>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        record.delivery_date
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {record.delivery_date ? "Delivered" : "Pregnant"}
+                    </span>
+                  </div>
+                  <div className="text-center p-4 bg-white/80 rounded-xl border border-blue-100">
+                    <p className="text-sm text-gray-600 mb-1">
+                      Prenatal Visits
+                    </p>
+                    <p className="text-lg font-bold text-[#0F4C81]">
+                      {record.prenatal_visits || "0"}
+                    </p>
+                  </div>
+                  <div className="text-center p-4 bg-white/80 rounded-xl border border-blue-100">
+                    <p className="text-sm text-gray-600 mb-1">Last Updated</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {new Date(record.updated_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  LMP Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.lmp_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, lmp_date: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
+
+              {/* Pregnancy Information - Main Section */}
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-8 bg-gradient-to-b from-purple-600 to-pink-500 rounded-full"></div>
+                      <h3 className="text-lg font-bold text-purple-800">
+                        Pregnancy Timeline
+                      </h3>
+                    </div>
+                    <div className="text-sm text-purple-700 bg-purple-100 px-3 py-1 rounded-full font-medium">
+                      {formData.lmp_date && formData.edd
+                        ? formatDuration(formData.lmp_date, formData.edd)
+                        : "Enter dates"}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <Calendar size={16} className="text-purple-600" />
+                        LMP Date
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={formData.lmp_date}
+                          onChange={(e) =>
+                            handleInputChange("lmp_date", e.target.value)
+                          }
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <Calendar size={16} className="text-purple-600" />
+                        EDD (Expected Delivery)
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={formData.edd}
+                          onChange={(e) =>
+                            handleInputChange("edd", e.target.value)
+                          }
+                          className={`w-full p-3 border ${
+                            errors.edd
+                              ? "border-red-300 ring-2 ring-red-100"
+                              : "border-gray-300"
+                          } rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm`}
+                          disabled={isSubmitting}
+                        />
+                        {errors.edd && (
+                          <p className="mt-2 text-sm text-red-600">
+                            {errors.edd}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Health Metrics in Card Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                        <Activity size={20} className="text-white" />
+                      </div>
+                      <h4 className="font-bold text-gray-800">Prenatal Care</h4>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Visits Count
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={formData.prenatal_visits}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "prenatal_visits",
+                                e.target.value
+                              )
+                            }
+                            className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            min="0"
+                            max="20"
+                            placeholder="0"
+                            disabled={isSubmitting}
+                          />
+                          <div className="absolute left-3 top-3">
+                            <Activity className="text-gray-400" size={18} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-6 border border-emerald-100">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
+                        <Scale size={20} className="text-white" />
+                      </div>
+                      <h4 className="font-bold text-gray-800">Vital Signs</h4>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Weight (kg)
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.weight}
+                          onChange={(e) =>
+                            handleInputChange("weight", e.target.value)
+                          }
+                          className={`w-full p-3 border ${
+                            errors.weight
+                              ? "border-red-300 ring-2 ring-red-100"
+                              : "border-gray-300"
+                          } rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent`}
+                          step="0.1"
+                          min="0"
+                          placeholder="0.0"
+                          disabled={isSubmitting}
+                        />
+                        {errors.weight && (
+                          <p className="mt-2 text-sm text-red-600">
+                            {errors.weight}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Blood Pressure
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.blood_pressure}
+                          onChange={(e) =>
+                            handleInputChange("blood_pressure", e.target.value)
+                          }
+                          className={`w-full p-3 border ${
+                            errors.blood_pressure
+                              ? "border-red-300 ring-2 ring-red-100"
+                              : "border-gray-300"
+                          } rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent`}
+                          placeholder="120/80"
+                          disabled={isSubmitting}
+                        />
+                        {errors.blood_pressure && (
+                          <p className="mt-2 text-sm text-red-600">
+                            {errors.blood_pressure}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+                        <Droplet size={20} className="text-white" />
+                      </div>
+                      <h4 className="font-bold text-gray-800">
+                        Blood & Supplements
+                      </h4>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Hemoglobin (g/dL)
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.hemoglobin}
+                          onChange={(e) =>
+                            handleInputChange("hemoglobin", e.target.value)
+                          }
+                          className={`w-full p-3 border ${
+                            errors.hemoglobin
+                              ? "border-red-300 ring-2 ring-red-100"
+                              : "border-gray-300"
+                          } rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent`}
+                          step="0.1"
+                          min="0"
+                          placeholder="0.0"
+                          disabled={isSubmitting}
+                        />
+                        {errors.hemoglobin && (
+                          <p className="mt-2 text-sm text-red-600">
+                            {errors.hemoglobin}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Tetanus
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <div
+                              onClick={() =>
+                                !isSubmitting &&
+                                handleInputChange(
+                                  "tetanus_vaccination",
+                                  !formData.tetanus_vaccination
+                                )
+                              }
+                              className={`relative w-10 h-6 rounded-full transition-all duration-300 cursor-pointer ${
+                                formData.tetanus_vaccination
+                                  ? "bg-emerald-500"
+                                  : "bg-gray-300"
+                              }`}
+                            >
+                              <div
+                                className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${
+                                  formData.tetanus_vaccination
+                                    ? "left-5"
+                                    : "left-1"
+                                }`}
+                              ></div>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {formData.tetanus_vaccination ? "Yes" : "No"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Iron
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <div
+                              onClick={() =>
+                                !isSubmitting &&
+                                handleInputChange(
+                                  "iron_supplement",
+                                  !formData.iron_supplement
+                                )
+                              }
+                              className={`relative w-10 h-6 rounded-full transition-all duration-300 cursor-pointer ${
+                                formData.iron_supplement
+                                  ? "bg-emerald-500"
+                                  : "bg-gray-300"
+                              }`}
+                            >
+                              <div
+                                className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${
+                                  formData.iron_supplement ? "left-5" : "left-1"
+                                }`}
+                              ></div>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {formData.iron_supplement ? "Yes" : "No"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Advanced Options Toggle */}
+                <div className="bg-gradient-to-r from-gray-50 to-slate-50 rounded-2xl p-6 border border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="flex items-center justify-between w-full text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-gray-600 to-slate-500 rounded-lg flex items-center justify-center">
+                        <Settings size={18} className="text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-800">
+                          Delivery & Additional Information
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          Click to {showAdvanced ? "hide" : "show"} advanced
+                          options
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronDown
+                      size={20}
+                      className={`text-gray-500 transition-transform duration-300 ${
+                        showAdvanced ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {showAdvanced && (
+                    <div className="mt-6 space-y-6 animate-fadeIn">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Delivery Date
+                          </label>
+                          <input
+                            type="date"
+                            value={formData.delivery_date}
+                            onChange={(e) =>
+                              handleInputChange("delivery_date", e.target.value)
+                            }
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Delivery Type
+                          </label>
+                          <select
+                            value={formData.delivery_type}
+                            onChange={(e) =>
+                              handleInputChange("delivery_type", e.target.value)
+                            }
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                            disabled={isSubmitting}
+                          >
+                            <option value="">Select Type</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Cesarean">Cesarean</option>
+                            <option value="Assisted">Assisted</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Baby Weight (kg)
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.baby_weight}
+                            onChange={(e) =>
+                              handleInputChange("baby_weight", e.target.value)
+                            }
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                            step="0.1"
+                            min="0"
+                            placeholder="0.0"
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Complications
+                          </label>
+                          <textarea
+                            value={formData.complications}
+                            onChange={(e) =>
+                              handleInputChange("complications", e.target.value)
+                            }
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent min-h-[100px] resize-y"
+                            placeholder="Any complications or health concerns..."
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Notes
+                          </label>
+                          <textarea
+                            value={formData.notes}
+                            onChange={(e) =>
+                              handleInputChange("notes", e.target.value)
+                            }
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent min-h-[100px] resize-y"
+                            placeholder="Additional notes or observations..."
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  EDD
-                </label>
-                <input
-                  type="date"
-                  value={formData.edd}
-                  onChange={(e) =>
-                    setFormData({ ...formData, edd: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Prenatal Visits
-                </label>
-                <input
-                  type="number"
-                  value={formData.prenatal_visits}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      prenatal_visits: e.target.value,
-                    })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Blood Pressure
-                </label>
-                <input
-                  type="text"
-                  value={formData.blood_pressure}
-                  onChange={(e) =>
-                    setFormData({ ...formData, blood_pressure: e.target.value })
-                  }
-                  placeholder="e.g., 120/80"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Weight (kg)
-                </label>
-                <input
-                  type="number"
-                  value={formData.weight}
-                  onChange={(e) =>
-                    setFormData({ ...formData, weight: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  step="0.1"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Hemoglobin (g/dL)
-                </label>
-                <input
-                  type="number"
-                  value={formData.hemoglobin}
-                  onChange={(e) =>
-                    setFormData({ ...formData, hemoglobin: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  step="0.1"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tetanus Vaccination
-                </label>
-                <input
-                  type="checkbox"
-                  checked={formData.tetanus_vaccination}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      tetanus_vaccination: e.target.checked,
-                    })
-                  }
-                  className="w-5 h-5 text-[#58A1D3] border-gray-300 rounded focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Iron Supplement
-                </label>
-                <input
-                  type="checkbox"
-                  checked={formData.iron_supplement}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      iron_supplement: e.target.checked,
-                    })
-                  }
-                  className="w-5 h-5 text-[#58A1D3] border-gray-300 rounded focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Complications
-                </label>
-                <textarea
-                  value={formData.complications}
-                  onChange={(e) =>
-                    setFormData({ ...formData, complications: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  rows="3"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delivery Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.delivery_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, delivery_date: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delivery Type
-                </label>
-                <select
-                  value={formData.delivery_type}
-                  onChange={(e) =>
-                    setFormData({ ...formData, delivery_type: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                >
-                  <option value="">Select Delivery Type</option>
-                  <option value="Normal">Normal</option>
-                  <option value="Cesarean">Cesarean</option>
-                  <option value="Assisted">Assisted</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Baby Weight (kg)
-                </label>
-                <input
-                  type="number"
-                  value={formData.baby_weight}
-                  onChange={(e) =>
-                    setFormData({ ...formData, baby_weight: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  step="0.1"
-                  min="0"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  rows="3"
-                />
-              </div>
-              <div className="md:col-span-2 flex justify-end space-x-3 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#58A1D3] text-white rounded-lg hover:bg-[#0F4C81]"
-                >
-                  Update Record
-                </button>
+
+              {/* Form Actions */}
+              <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => !isSubmitting && setShowEditModal(false)}
+                    disabled={isSubmitting}
+                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({
+                        resident_id: record.resident_id || "",
+                        lmp_date: formatDateForInput(record.lmp_date) || "",
+                        edd: formatDateForInput(record.edd) || "",
+                        prenatal_visits: record.prenatal_visits || "",
+                        blood_pressure: record.blood_pressure || "",
+                        weight: record.weight || "",
+                        hemoglobin: record.hemoglobin || "",
+                        tetanus_vaccination:
+                          record.tetanus_vaccination || false,
+                        iron_supplement: record.iron_supplement || false,
+                        complications: record.complications || "",
+                        delivery_date:
+                          formatDateForInput(record.delivery_date) || "",
+                        delivery_type: record.delivery_type || "",
+                        baby_weight: record.baby_weight || "",
+                        notes: record.notes || "",
+                      });
+                      setErrors({});
+                    }}
+                    disabled={isSubmitting}
+                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Reset Changes
+                  </button>
+                </div>
+                <div className="flex items-center gap-4">
+                  {isSubmitting && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-emerald-500 rounded-full animate-spin"></div>
+                      <span className="text-sm">Updating...</span>
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-xl hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all duration-300 font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  >
+                    {isSubmitting ? "Updating..." : "Update Record"}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -1728,7 +2729,7 @@ const MaternalChildHealthPage = () => {
           doc.text("Province of Southern Leyte", pageWidth / 2, 17, {
             align: "center",
           });
-          doc.text("Municipality/City of Macrohon", pageWidth / 2, 22, {
+          doc.text("Municipality of Macrohon", pageWidth / 2, 22, {
             align: "center",
           });
 
