@@ -275,13 +275,25 @@ const BhwMainDashboard = () => {
   const generateRecentActivities = (residents, health, referrals) => {
     const activities = [];
 
-    // Recent residents (last 3)
+    // Recent residents (last 3) - Use registered_date instead of created_at
     if (residents && residents.length > 0) {
       const recent = residents
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .sort((a, b) => {
+          // Use registered_date first, fall back to created_at if not available
+          const dateA = a.registered_date
+            ? new Date(a.registered_date)
+            : new Date(a.created_at || a.updated_at);
+          const dateB = b.registered_date
+            ? new Date(b.registered_date)
+            : new Date(b.created_at || b.updated_at);
+          return dateB - dateA;
+        })
         .slice(0, 3);
 
       recent.forEach((r) => {
+        // Use registered_date if available, otherwise use created_at/updated_at
+        const activityDate = r.registered_date || r.created_at || r.updated_at;
+
         activities.push({
           type: "resident",
           icon: Users,
@@ -289,7 +301,8 @@ const BhwMainDashboard = () => {
           bg: "bg-blue-50",
           title: "New Resident Added",
           description: `${r.first_name} ${r.last_name}`,
-          time: formatTimeAgo(r.created_at),
+          time: formatTimeAgo(activityDate),
+          rawDate: activityDate, // Add this for debugging
         });
       });
     }
@@ -297,10 +310,17 @@ const BhwMainDashboard = () => {
     // Recent health records (last 2)
     if (health && health.length > 0) {
       const recent = health
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .sort((a, b) => {
+          // Use updated_at for health records (when they were last updated)
+          const dateA = new Date(a.updated_at || a.created_at);
+          const dateB = new Date(b.updated_at || b.created_at);
+          return dateB - dateA;
+        })
         .slice(0, 2);
 
       recent.forEach((h) => {
+        const activityDate = h.updated_at || h.created_at;
+
         activities.push({
           type: "health",
           icon: HeartPulse,
@@ -308,7 +328,8 @@ const BhwMainDashboard = () => {
           bg: "bg-red-50",
           title: "Health Record Updated",
           description: `Blood Type: ${h.blood_type || "N/A"}`,
-          time: formatTimeAgo(h.created_at),
+          time: formatTimeAgo(activityDate),
+          rawDate: activityDate,
         });
       });
     }
@@ -316,7 +337,12 @@ const BhwMainDashboard = () => {
     // Recent referrals (last 2)
     if (referrals && referrals.length > 0) {
       const recent = referrals
-        .sort((a, b) => new Date(b.referral_date) - new Date(a.referral_date))
+        .sort((a, b) => {
+          // Use referral_date for sorting
+          const dateA = new Date(a.referral_date);
+          const dateB = new Date(b.referral_date);
+          return dateB - dateA;
+        })
         .slice(0, 2);
 
       recent.forEach((r) => {
@@ -328,26 +354,48 @@ const BhwMainDashboard = () => {
           title: "New Referral",
           description: r.referral_reason,
           time: formatTimeAgo(r.referral_date),
+          rawDate: r.referral_date,
         });
       });
     }
 
-    setRecentActivities(activities.sort((a, b) => b.time - a.time).slice(0, 7));
+    // Sort all activities by date (newest first)
+    const sortedActivities = activities
+      .sort((a, b) => {
+        const dateA = new Date(a.rawDate || 0);
+        const dateB = new Date(b.rawDate || 0);
+        return dateB - dateA;
+      })
+      .slice(0, 7);
+
+    setRecentActivities(sortedActivities);
   };
 
   const formatTimeAgo = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    if (!dateString) return "Recently";
 
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Recently";
+
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return "Just now";
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error, dateString);
+      return "Recently";
+    }
   };
 
   const StatCard = ({
