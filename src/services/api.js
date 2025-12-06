@@ -970,10 +970,33 @@ export const reportsAPI = {
 
   generateHealthRecords: async (filters) => {
     try {
+      console.log(
+        "📊 [API] Generating health records report with filters:",
+        filters
+      );
+
+      // ✅ CORRECT: Use the /reports/health-records endpoint
       const response = await api.post("/reports/health-records", filters);
+      console.log("📊 [API] Health records report response:", {
+        success: response.data.success,
+        dataLength: response.data.data?.length,
+        total: response.data.total,
+        reportType: response.data.reportType,
+      });
+
       return response.data;
     } catch (error) {
-      throw error.response?.data || error;
+      console.error("❌ [API] Health records report error:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+
+      throw new Error(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to generate health records report"
+      );
     }
   },
 

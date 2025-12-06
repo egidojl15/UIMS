@@ -1263,6 +1263,20 @@ const HealthRecordsPage = () => {
     loadReportOptions();
   }, []);
 
+  // Add this useEffect to HealthRecordsPage.jsx to debug report generator
+  useEffect(() => {
+    console.log("🏥 [HealthRecordsPage] Report generator state:", {
+      showReportGenerator,
+      currentReportType,
+      purokOptions: purokOptions?.length,
+      healthConditionOptions: healthConditionOptions?.length,
+    });
+  }, [
+    showReportGenerator,
+    currentReportType,
+    purokOptions,
+    healthConditionOptions,
+  ]);
   // Fetch health records on component mount
   useEffect(() => {
     const fetchHealthRecords = async () => {
@@ -1522,44 +1536,75 @@ const HealthRecordsPage = () => {
   // Report generation functions
   const handleGenerateHealthRecordsReport = async (filters) => {
     try {
+      console.log(
+        "🔄 [HealthRecordsPage] Generating report with filters:",
+        filters
+      );
+
       const response = await reportsAPI.generateHealthRecords(filters);
+
+      console.log("📋 [HealthRecordsPage] Report response:", {
+        success: response.success,
+        dataLength: response.data?.length,
+        preview: filters.preview,
+      });
+
       if (response.success) {
         if (filters.preview) {
-          return response.data;
+          // For preview, return the data array
+          console.log(
+            "👁️ [HealthRecordsPage] Returning preview data:",
+            response.data
+          );
+          return Array.isArray(response.data) ? response.data : [];
         } else {
           // Generate actual report file
-          generateReportFile(response.data, "Health Records Report", [
-            { key: "full_name", label: "Full Name", type: "text" },
-            { key: "age", label: "Age", type: "number" },
-            { key: "gender", label: "Gender", type: "text" },
-            { key: "purok", label: "Purok", type: "text" },
-            { key: "blood_type", label: "Blood Type", type: "text" },
-            { key: "philhealth", label: "PhilHealth", type: "text" },
-            { key: "height", label: "Height (cm)", type: "number" },
-            { key: "weight", label: "Weight (kg)", type: "number" },
-            { key: "heart_rate", label: "Heart Rate", type: "number" },
-            { key: "pulse_rate", label: "Pulse Rate", type: "number" },
-            {
-              key: "medical_conditions",
-              label: "Medical Conditions",
-              type: "text",
-            },
-            { key: "allergies", label: "Allergies", type: "text" },
-            {
-              key: "emergency_contact",
-              label: "Emergency Contact",
-              type: "text",
-            },
-            { key: "record_date", label: "Record Date", type: "date" },
-          ]);
-          addNotification(
-            "success",
-            "Report Generated",
-            "Health records report has been generated successfully"
-          );
+          console.log("📄 [HealthRecordsPage] Generating PDF report...");
+
+          if (response.data && response.data.length > 0) {
+            generateReportFile(response.data, "Health Records Report", [
+              { key: "full_name", label: "Full Name", type: "text" },
+              { key: "age", label: "Age", type: "number" },
+              { key: "gender", label: "Gender", type: "text" },
+              { key: "purok", label: "Purok", type: "text" },
+              { key: "blood_type", label: "Blood Type", type: "text" },
+              { key: "philhealth", label: "PhilHealth", type: "text" },
+              { key: "height", label: "Height (cm)", type: "number" },
+              { key: "weight", label: "Weight (kg)", type: "number" },
+              { key: "heart_rate", label: "Heart Rate (bpm)", type: "number" },
+              { key: "pulse_rate", label: "Pulse Rate (bpm)", type: "number" },
+              {
+                key: "medical_conditions",
+                label: "Medical Conditions",
+                type: "text",
+              },
+              { key: "allergies", label: "Allergies", type: "text" },
+              {
+                key: "emergency_contact",
+                label: "Emergency Contact",
+                type: "text",
+              },
+              { key: "record_date", label: "Record Date", type: "date" },
+            ]);
+
+            addNotification(
+              "success",
+              "Report Generated",
+              `Health records report has been generated successfully. Total records: ${response.data.length}`
+            );
+          } else {
+            addNotification(
+              "warning",
+              "No Data",
+              "No health records found with the selected filters"
+            );
+          }
         }
+      } else {
+        throw new Error(response.message || "Failed to generate report");
       }
     } catch (error) {
+      console.error("❌ [HealthRecordsPage] Report generation error:", error);
       addNotification(
         "error",
         "Report Failed",

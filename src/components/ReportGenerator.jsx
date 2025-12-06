@@ -54,6 +54,22 @@ const ReportGenerator = ({
     }, 300);
   };
 
+  // Add this useEffect at the top of the ReportGenerator component
+  useEffect(() => {
+    console.log("🎯 [ReportGenerator] Component mounted with props:", {
+      reportType,
+      onGenerate: typeof onGenerate,
+      filters: filters?.length,
+      columns: columns?.length,
+      dateRange,
+    });
+
+    // Test if onGenerate is a function
+    if (typeof onGenerate !== "function") {
+      console.error("❌ [ReportGenerator] onGenerate is not a function!");
+    }
+  }, [reportType, onGenerate, filters, columns, dateRange]);
+
   const generatePreview = async () => {
     setLoading(true);
     try {
@@ -63,25 +79,45 @@ const ReportGenerator = ({
         dateTo: dateRange ? dateTo : null,
         preview: true,
       };
-      console.log("Sending filters to backend:", filtersToSend);
+      console.log("🔍 [ReportGenerator] Sending filters:", filtersToSend);
 
       const result = await onGenerate(filtersToSend);
 
-      // Handle both array and object responses
+      console.log("🔍 [ReportGenerator] Raw result:", result);
+
+      // Handle different response structures
+      let previewData = [];
+      let totalCount = 0;
+
       if (Array.isArray(result)) {
-        // Show all records in preview for better user experience
-        setPreviewData(result);
-        setTotalCount(result.length);
-      } else if (result && result.data) {
-        // Show all records in preview for better user experience
-        setPreviewData(result.data);
-        setTotalCount(result.total || result.data.length);
-      } else {
-        setPreviewData([]);
-        setTotalCount(0);
+        previewData = result;
+        totalCount = result.length;
+      } else if (result && result.success && Array.isArray(result.data)) {
+        previewData = result.data;
+        totalCount = result.total || result.data.length;
+      } else if (result && Array.isArray(result.data)) {
+        previewData = result.data;
+        totalCount = result.total || result.data.length;
+      } else if (result && result.success && result.data) {
+        // Handle if data is not an array but an object with data property
+        previewData = [result.data];
+        totalCount = 1;
+      }
+
+      console.log("🔍 [ReportGenerator] Processed data:", {
+        previewCount: previewData.length,
+        totalCount,
+        sample: previewData[0],
+      });
+
+      setPreviewData(previewData);
+      setTotalCount(totalCount);
+
+      if (previewData.length === 0) {
+        console.log("⚠️ [ReportGenerator] No data returned for preview");
       }
     } catch (error) {
-      console.error("Error generating preview:", error);
+      console.error("❌ [ReportGenerator] Error:", error);
       setPreviewData([]);
       setTotalCount(0);
     } finally {
