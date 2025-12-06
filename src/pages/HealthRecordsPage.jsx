@@ -1830,8 +1830,8 @@ const HealthRecordsPage = () => {
             <thead className="sticky top-0 z-10">
               <tr className="bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white">
                 <th
-                  className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
-                  style={{ minWidth: "140px" }}
+                  className="py-4 px-4 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-sm"
+                  style={{ minWidth: "180px" }}
                 >
                   Resident Name
                 </th>
@@ -1842,44 +1842,44 @@ const HealthRecordsPage = () => {
                   PhilHealth
                 </th> */}
                 <th
-                  className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
-                  style={{ width: "85px" }}
+                  className="py-4 px-4 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-sm"
+                  style={{ minWidth: "100px" }}
                 >
                   Blood Type
                 </th>
                 <th
-                  className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
-                  style={{ width: "75px" }}
+                  className="py-4 px-4 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-sm"
+                  style={{ minWidth: "90px" }}
                 >
                   Height
                 </th>
                 <th
-                  className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
-                  style={{ width: "75px" }}
+                  className="py-4 px-4 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-sm"
+                  style={{ minWidth: "90px" }}
                 >
                   Weight
                 </th>
                 <th
-                  className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
-                  style={{ width: "85px" }}
+                  className="py-4 px-4 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-sm"
+                  style={{ minWidth: "100px" }}
                 >
                   Heart Rate
                 </th>
                 <th
-                  className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
-                  style={{ width: "85px" }}
+                  className="py-4 px-4 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-sm"
+                  style={{ minWidth: "100px" }}
                 >
                   Pulse Rate
                 </th>
                 <th
-                  className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
-                  style={{ minWidth: "120px" }}
+                  className="py-4 px-4 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-sm"
+                  style={{ minWidth: "200px" }}
                 >
                   Medical Conditions
                 </th>
                 <th
-                  className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
-                  style={{ minWidth: "100px" }}
+                  className="py-4 px-4 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-sm"
+                  style={{ minWidth: "150px" }}
                 >
                   Allergies
                 </th>
@@ -1896,8 +1896,8 @@ const HealthRecordsPage = () => {
                   Contact Number
                 </th> */}
                 <th
-                  className="py-3 px-2 text-center font-semibold sticky top-0 z-10 bg-[#0F4C81] text-xs"
-                  style={{ width: "100px" }}
+                  className="py-4 px-4 text-center font-semibold sticky top-0 z-10 bg-[#0F4C81] text-sm"
+                  style={{ minWidth: "120px" }}
                 >
                   Actions
                 </th>
@@ -1912,9 +1912,9 @@ const HealthRecordsPage = () => {
                   return (
                     <tr
                       key={hr.health_record_id}
-                      className="border-t hover:bg-gray-50"
+                      className="border-t hover:bg-gray-50 transition-colors"
                     >
-                      <td className="py-2 px-2 font-medium border-r border-gray-200 text-xs">
+                      <td className="py-3 px-4 font-medium border-r border-gray-200 text-sm">
                         {hr.resident_name || "N/A"}
                       </td>
                       {/* <td className="py-2 px-2 text-center border-r border-gray-200">
@@ -1926,27 +1926,27 @@ const HealthRecordsPage = () => {
                           {hr.is_philhealth ? "✓" : "✗"}
                         </span>
                       </td> */}
-                      <td className="py-2 px-2 border-r border-gray-200 text-xs">
+                      <td className="py-3 px-4 border-r border-gray-200 text-xs">
                         {hr.blood_type || "N/A"}
                       </td>
-                      <td className="py-2 px-2 border-r border-gray-200 whitespace-nowrap text-xs">
+                      <td className="py-3 px-4 border-r border-gray-200 whitespace-nowrap text-sm">
                         {hr.height ? `${hr.height} cm` : "N/A"}
                       </td>
-                      <td className="py-2 px-2 border-r border-gray-200 whitespace-nowrap text-xs">
+                      <td className="py-3 px-4 border-r border-gray-200 whitespace-nowrap text-sm">
                         {hr.weight ? `${hr.weight} kg` : "N/A"}
                       </td>
-                      <td className="py-2 px-2 border-r border-gray-200 whitespace-nowrap text-xs">
+                      <td className="py-3 px-4 border-r border-gray-200 whitespace-nowrap text-sm">
                         {hr.heart_rate ? `${hr.heart_rate} bpm` : "N/A"}
                       </td>
-                      <td className="py-2 px-2 border-r border-gray-200 whitespace-nowrap text-xs">
+                      <td className="py-3 px-4 border-r border-gray-200 whitespace-nowrap text-sm">
                         {hr.pulse_rate ? `${hr.pulse_rate} bpm` : "N/A"}
                       </td>
-                      <td className="py-2 px-2 border-r border-gray-200 text-xs">
+                      <td className="py-3 px-4 border-r border-gray-200 text-sm">
                         <div className="truncate" title={hr.medical_conditions}>
                           {hr.medical_conditions || "None"}
                         </div>
                       </td>
-                      <td className="py-2 px-2 border-r border-gray-200 text-xs">
+                      <td className="py-3 px-4 border-r border-gray-200 text-sm">
                         <div className="truncate" title={hr.allergies}>
                           {hr.allergies || "None"}
                         </div>
@@ -1962,7 +1962,7 @@ const HealthRecordsPage = () => {
                       {/* <td className="py-2 px-2 border-r border-gray-200 whitespace-nowrap text-xs">
                         {hr.emergency_contact_number || "N/A"}
                       </td> */}
-                      <td className="py-2 px-2">
+                      <td className="py-3 px-4">
                         <div className="flex justify-center space-x-2">
                           <button
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
