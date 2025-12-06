@@ -32,6 +32,11 @@ import api, {
   loginsAPI,
   logUserActivity,
   notificationsAPI,
+  residentsAPI,
+  complaintsAPI,
+  blottersAPI,
+  logbookAPI,
+  activityAPI,
 } from "../services/api";
 
 /* -------------------------------------------------------------------------- */
@@ -232,39 +237,23 @@ const BrgyCouncilor = ({ children }) => {
           logbookResponse,
           activityResponse,
         ] = await Promise.allSettled([
-          fetch("http://localhost:5000/api/residents", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("http://localhost:5000/api/complaints", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("http://localhost:5000/api/blotters", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("http://localhost:5000/api/logbook", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("http://localhost:5000/api/activity-logs", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+          residentsAPI.getAll(),
+          complaintsAPI.getAll(),
+          blottersAPI.getAll(),
+          logbookAPI.getAll(),
+          activityAPI.getAll(),
         ]);
 
-        if (
-          residentsResponse.status === "fulfilled" &&
-          residentsResponse.value.ok
-        ) {
-          const residentsData = await residentsResponse.value.json();
+        if (residentsResponse.status === "fulfilled") {
+          const residentsData = residentsResponse.value;
           setResidents(residentsData.data || residentsData.residents || []);
         } else {
           console.error("Failed to fetch residents:", residentsResponse.reason);
           setResidents([]);
         }
 
-        if (
-          complaintsResponse.status === "fulfilled" &&
-          complaintsResponse.value.ok
-        ) {
-          const complaintsData = await complaintsResponse.value.json();
+        if (complaintsResponse.status === "fulfilled") {
+          const complaintsData = complaintsResponse.value;
           setComplaints(complaintsData.data || complaintsData.complaints || []);
         } else {
           console.error(
@@ -274,33 +263,24 @@ const BrgyCouncilor = ({ children }) => {
           setComplaints([]);
         }
 
-        if (
-          blottersResponse.status === "fulfilled" &&
-          blottersResponse.value.ok
-        ) {
-          const blottersData = await blottersResponse.value.json();
+        if (blottersResponse.status === "fulfilled") {
+          const blottersData = blottersResponse.value;
           setBlotters(blottersData.data || blottersData.blotters || []);
         } else {
           console.error("Failed to fetch blotters:", blottersResponse.reason);
           setBlotters([]);
         }
 
-        if (
-          logbookResponse.status === "fulfilled" &&
-          logbookResponse.value.ok
-        ) {
-          const logbookData = await logbookResponse.value.json();
+        if (logbookResponse.status === "fulfilled") {
+          const logbookData = logbookResponse.value.data;
           setLogbooks(logbookData.data || logbookData.logbooks || []);
         } else {
           console.error("Failed to fetch logbook:", logbookResponse.reason);
           setLogbooks([]);
         }
 
-        if (
-          activityResponse.status === "fulfilled" &&
-          activityResponse.value.ok
-        ) {
-          const activityData = await activityResponse.value.json();
+        if (activityResponse.status === "fulfilled") {
+          const activityData = activityResponse.value.data;
           setActivityLog(activityData.data || activityData.activities || []);
         } else {
           console.error(
@@ -399,57 +379,35 @@ const BrgyCouncilor = ({ children }) => {
         logbookResponse,
         activityResponse,
       ] = await Promise.allSettled([
-        fetch("http://localhost:5000/api/residents", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("http://localhost:5000/api/complaints", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("http://localhost:5000/api/blotters", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("http://localhost:5000/api/logbook", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("http://localhost:5000/api/activity-logs", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        residentsAPI.getAll(),
+        complaintsAPI.getAll(),
+        blottersAPI.getAll(),
+        logbookAPI.getAll(),
+        activityAPI.getAll(),
       ]);
 
-      if (
-        residentsResponse.status === "fulfilled" &&
-        residentsResponse.value.ok
-      ) {
-        const residentsData = await residentsResponse.value.json();
+      if (residentsResponse.status === "fulfilled") {
+        const residentsData = residentsResponse.value;
         setResidents(residentsData.data || residentsData.residents || []);
       }
 
-      if (
-        complaintsResponse.status === "fulfilled" &&
-        complaintsResponse.value.ok
-      ) {
-        const complaintsData = await complaintsResponse.value.json();
+      if (complaintsResponse.status === "fulfilled") {
+        const complaintsData = complaintsResponse.value;
         setComplaints(complaintsData.data || complaintsData.complaints || []);
       }
 
-      if (
-        blottersResponse.status === "fulfilled" &&
-        blottersResponse.value.ok
-      ) {
-        const blottersData = await blottersResponse.value.json();
+      if (blottersResponse.status === "fulfilled") {
+        const blottersData = blottersResponse.value;
         setBlotters(blottersData.data || blottersData.blotters || []);
       }
 
-      if (logbookResponse.status === "fulfilled" && logbookResponse.value.ok) {
-        const logbookData = await logbookResponse.value.json();
+      if (logbookResponse.status === "fulfilled") {
+        const logbookData = logbookResponse.value.data;
         setLogbooks(logbookData.data || logbookData.logbooks || []);
       }
 
-      if (
-        activityResponse.status === "fulfilled" &&
-        activityResponse.value.ok
-      ) {
-        const activityData = await activityResponse.value.json();
+      if (activityResponse.status === "fulfilled") {
+        const activityData = activityResponse.value.data;
         setActivityLog(activityData.data || activityData.activities || []);
       }
     } catch (err) {
@@ -591,13 +549,7 @@ const BrgyCouncilor = ({ children }) => {
         "Complaint form being processed"
       );
 
-      const token = localStorage.getItem("authToken");
-      const response = await fetch("http://localhost:5000/api/complaints", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      const result = await response.json();
+      const result = await complaintsAPI.create(formData);
 
       console.log("📋 Complaint API response:", result);
 
@@ -689,16 +641,7 @@ const BrgyCouncilor = ({ children }) => {
         "Blotter form being processed"
       );
 
-      const token = localStorage.getItem("authToken");
-      const response = await fetch("http://localhost:5000/api/blotters", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(blotterForm),
-      });
-      const result = await response.json();
+      const result = await blottersAPI.create(blotterForm);
 
       console.log("📋 Blotter API response:", result);
 
