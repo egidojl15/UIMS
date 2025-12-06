@@ -825,7 +825,7 @@ const Blotter = () => {
                         <td colSpan="7" className="text-center py-16">
                           <div className="flex flex-col items-center">
                             <div className="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
-                              <Search size={32} className="text-gray-600" />
+                              <Search size={32} className="text-black" />
                             </div>
                             <p className="text-gray-600 text-xl font-semibold mb-2">
                               No blotters found
