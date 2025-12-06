@@ -324,51 +324,28 @@ const BrgyCouncilor = ({ children }) => {
       );
       console.log("✅ Refresh activity logged");
 
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        setError("No authentication token found. Please log in.");
-        setLoading(false);
-        return;
-      }
+      const userRole = "councilor";
+      const statsResponse = await dashboardAPI.getStats(userRole);
+      setStats({
+        activeResidents: statsResponse.active_residents || 0,
+        openComplaints: statsResponse.open_complaints || 0,
+        blotterRecords: statsResponse.blotter_records || 0,
+        systemUsersOnline: statsResponse.users_online || 0,
+      });
 
-      const [
-        residentsResponse,
-        complaintsResponse,
-        blottersResponse,
-        logbookResponse,
-        activityResponse,
-      ] = await Promise.allSettled([
-        residentsAPI.getAll(),
-        complaintsAPI.getAll(),
-        blottersAPI.getAll(),
-        logbookAPI.getAll(),
-        activityAPI.getAll(),
-      ]);
+      // Still fetch residents for form dropdowns
+      const residentsResponse = await residentsAPI.getAll();
+      setResidents(residentsResponse.data || residentsResponse.residents || []);
 
-      if (residentsResponse.status === "fulfilled") {
-        const residentsData = residentsResponse.value;
-        setResidents(residentsData.data || residentsData.residents || []);
-      }
-
-      if (complaintsResponse.status === "fulfilled") {
-        const complaintsData = complaintsResponse.value;
-        setComplaints(complaintsData.data || complaintsData.complaints || []);
-      }
-
-      if (blottersResponse.status === "fulfilled") {
-        const blottersData = blottersResponse.value;
-        setBlotters(blottersData.data || blottersData.blotters || []);
-      }
-
-      if (logbookResponse.status === "fulfilled") {
-        const logbookData = logbookResponse.value.data;
-        setLogbooks(logbookData.data || logbookData.logbooks || []);
-      }
-
-      if (activityResponse.status === "fulfilled") {
-        const activityData = activityResponse.value.data;
-        setActivityLog(activityData.data || activityData.activities || []);
-      }
+      await logUserActivity(
+        "Refresh Dashboard Data",
+        "dashboard",
+        "refresh",
+        "Dashboard data refresh",
+        "completed",
+        "Dashboard data refreshed successfully",
+        "All dashboard data reloaded successfully"
+      );
     } catch (err) {
       console.error("Error refreshing data:", err);
       setError(err.message || "Failed to refresh data");
@@ -384,18 +361,6 @@ const BrgyCouncilor = ({ children }) => {
       );
     } finally {
       setLoading(false);
-
-      if (!error) {
-        await logUserActivity(
-          "Refresh Dashboard Data",
-          "dashboard",
-          "refresh",
-          "Dashboard data refresh",
-          "completed",
-          "Dashboard data refreshed successfully",
-          "All dashboard data reloaded successfully"
-        );
-      }
     }
   };
 
@@ -847,43 +812,39 @@ const BrgyCouncilor = ({ children }) => {
               {/* Statistics Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
                 <StatCard
-                  title="Activity Log"
-                  value={activityLog.length}
-                  icon={Activity}
-                  color="bg-gradient-to-br from-orange-500 to-red-500"
-                  trend={activityLog.length > 0 ? "+5%" : ""}
-                  hovered={hoveredCard === "activity"}
-                  onMouseEnter={() => setHoveredCard("activity")}
+                  title="Active Residents"
+                  value={stats.activeResidents}
+                  icon={User}
+                  color="bg-gradient-to-br from-blue-500 to-cyan-500"
+                  hovered={hoveredCard === "residents"}
+                  onMouseEnter={() => setHoveredCard("residents")}
                   onMouseLeave={() => setHoveredCard(null)}
                 />
                 <StatCard
-                  title="Blotter Reports"
-                  value={blotters.length}
+                  title="Open Complaints"
+                  value={stats.openComplaints}
+                  icon={FileText}
+                  color="bg-gradient-to-br from-orange-500 to-red-500"
+                  hovered={hoveredCard === "complaints"}
+                  onMouseEnter={() => setHoveredCard("complaints")}
+                  onMouseLeave={() => setHoveredCard(null)}
+                />
+                <StatCard
+                  title="Blotter Records"
+                  value={stats.blotterRecords}
                   icon={ShieldAlert}
                   color="bg-gradient-to-br from-red-500 to-pink-500"
-                  trend={blotters.length > 0 ? "+12%" : ""}
                   hovered={hoveredCard === "blotter"}
                   onMouseEnter={() => setHoveredCard("blotter")}
                   onMouseLeave={() => setHoveredCard(null)}
                 />
                 <StatCard
-                  title="Logbook Total"
-                  value={logbooks.length}
-                  icon={BookCopyIcon}
-                  color="bg-gradient-to-br from-blue-500 to-cyan-500"
-                  trend={logbooks.length > 0 ? "+8%" : ""}
-                  hovered={hoveredCard === "logbook"}
-                  onMouseEnter={() => setHoveredCard("logbook")}
-                  onMouseLeave={() => setHoveredCard(null)}
-                />
-                <StatCard
-                  title="Total Complaints"
-                  value={complaints.length}
-                  icon={FileText}
+                  title="Users Online"
+                  value={stats.systemUsersOnline}
+                  icon={Activity}
                   color="bg-gradient-to-br from-emerald-500 to-teal-500"
-                  trend={complaints.length > 0 ? "+3%" : ""}
-                  hovered={hoveredCard === "complaints"}
-                  onMouseEnter={() => setHoveredCard("complaints")}
+                  hovered={hoveredCard === "online"}
+                  onMouseEnter={() => setHoveredCard("online")}
                   onMouseLeave={() => setHoveredCard(null)}
                 />
               </div>
@@ -1142,6 +1103,23 @@ const BrgyCouncilor = ({ children }) => {
     };
   }, [showUserMenu]);
 
+  // Routing logic to render page components based on current path
+  const renderPageContent = () => {
+    const currentPath = location.pathname;
+    
+    if (currentPath.includes("/complaints")) {
+      return <Complaints />;
+    } else if (currentPath.includes("/blotter")) {
+      return <Blotter />;
+    } else if (currentPath.includes("/logbook")) {
+      return <LogBookPage />;
+    } else if (currentPath.includes("/activitylog")) {
+      return <ActivityLogPage onClose={() => navigate("/dashboard/councilor")} />;
+    } else {
+      return defaultContent;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] font-sans flex">
       {/* Top Header */}
@@ -1300,7 +1278,7 @@ const BrgyCouncilor = ({ children }) => {
 
       {/* Main Content Area */}
       <main className="lg:ml-64 mt-24 h-[calc(100vh-6rem)] overflow-y-auto w-full">
-        {childrenWithProps || defaultContent}
+        {renderPageContent()}
       </main>
     </div>
   );
