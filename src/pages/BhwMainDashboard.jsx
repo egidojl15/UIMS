@@ -272,7 +272,7 @@ const BhwMainDashboard = () => {
     }
   };
 
-  const generateRecentActivities = (residents, health, referrals) => {
+  const generateRecentActivities = (residents, health, referrals, deaths) => {
     const activities = [];
 
     // Recent residents (last 3) - Use registered_date instead of created_at
@@ -355,6 +355,37 @@ const BhwMainDashboard = () => {
           description: r.referral_reason,
           time: formatTimeAgo(r.referral_date),
           rawDate: r.referral_date,
+        });
+      });
+    }
+
+    if (deaths && deaths.length > 0) {
+      const recent = deaths
+        .sort((a, b) => {
+          // Use registered_date first, fall back to created_at if not available
+          const dateA = d.registered_date
+            ? new Date(d.registered_date)
+            : new Date(d.created_at || a.updated_at);
+          const dateB = d.registered_date
+            ? new Date(d.registered_date)
+            : new Date(d.created_at || b.updated_at);
+          return dateB - dateA;
+        })
+        .slice(0, 3);
+
+      recent.forEach((r) => {
+        // Use registered_date if available, otherwise use created_at/updated_at
+        const activityDate = d.registered_date || d.created_at || d.updated_at;
+
+        activities.push({
+          type: "resident",
+          icon: Skull,
+          color: "text-blue-600",
+          bg: "bg-blue-50",
+          title: "New Death Record Added",
+          description: `${r.first_name} ${r.last_name}`,
+          time: formatTimeAgo(activityDate),
+          rawDate: activityDate, // Add this for debugging
         });
       });
     }
