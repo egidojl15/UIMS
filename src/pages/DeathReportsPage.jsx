@@ -679,8 +679,7 @@ const DeathReportsPage = () => {
             date_of_death: death.date_of_death,
             cause_of_death: death.cause_of_death,
             place_of_death: death.place_of_death,
-            attending_physician: death.attending_physician || "N/A",
-            remarks: death.remarks || "N/A",
+            notes: death.notes || "N/A",
           };
         });
       }
@@ -754,8 +753,7 @@ const DeathReportsPage = () => {
           formatDateForInput(death.date_of_death),
           death.cause_of_death,
           death.place_of_death,
-          death.attending_physician || "N/A",
-          death.remarks || "N/A",
+          death.notes || "N/A",
         ];
       });
 
@@ -769,8 +767,7 @@ const DeathReportsPage = () => {
             "Date of Death",
             "Cause of Death",
             "Place of Death",
-            "Attending Physician",
-            "Remarks",
+            "Notes",
           ],
         ],
         body: tableData,
@@ -1218,12 +1215,8 @@ const DeathReportsPage = () => {
             { key: "date_of_death", label: "Date of Death", type: "date" },
             { key: "cause_of_death", label: "Cause of Death", type: "text" },
             { key: "place_of_death", label: "Place of Death", type: "text" },
-            {
-              key: "attending_physician",
-              label: "Attending Physician",
-              type: "text",
-            },
-            { key: "remarks", label: "Remarks", type: "text" },
+
+            { key: "notes", label: "Notes", type: "text" },
           ]}
         />
       )}
