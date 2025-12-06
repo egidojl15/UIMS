@@ -5,7 +5,7 @@
 ALTER TABLE `child_immunizations` 
 ADD COLUMN `parent_name` varchar(200) DEFAULT NULL AFTER `mother_resident_id`,
 ADD COLUMN `father_name` varchar(100) DEFAULT NULL AFTER `parent_name`,
-ADD COLUMN `mother_name` varchar(100) DEFAULT NULL AFTER `father_name`;
+ADD COLUMN `mother_name` varchar(100) DEFAULT NULL AFTER `father_name`; 
 
 -- Add indexes for better search performance
 ALTER TABLE `child_immunizations` 
