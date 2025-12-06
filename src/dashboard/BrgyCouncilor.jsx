@@ -37,7 +37,12 @@ import api, {
   blottersAPI,
   logbookAPI,
   activityAPI,
+  dashboardAPI,
 } from "../services/api";
+import Complaints from "../pages/Complaints";
+import Blotter from "../pages/Blotter";
+import LogBookPage from "../pages/LogBookPage";
+import ActivityLogPage from "../pages/ActivityLogPage";
 
 /* -------------------------------------------------------------------------- */
 /*  NotificationBadge Component                                               */
@@ -174,6 +179,12 @@ const BrgyCouncilor = ({ children }) => {
   const [logbooks, setLogbooks] = useState([]);
   const [activityLog, setActivityLog] = useState([]);
   const [residents, setResidents] = useState([]);
+  const [stats, setStats] = useState({
+    activeResidents: 0,
+    openComplaints: 0,
+    blotterRecords: 0,
+    systemUsersOnline: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -220,84 +231,32 @@ const BrgyCouncilor = ({ children }) => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-          setError("No authentication token found. Please log in.");
-          setLoading(false);
-          return;
-        }
-        console.log("Using token:", token);
+        setLoading(true);
+        const userRole = "councilor"; // Set the role for councilor dashboard
+        const statsResponse = await dashboardAPI.getStats(userRole);
+        setStats({
+          activeResidents: statsResponse.active_residents || 0,
+          openComplaints: statsResponse.open_complaints || 0,
+          blotterRecords: statsResponse.blotter_records || 0,
+          systemUsersOnline: statsResponse.users_online || 0,
+        });
 
-        const [
-          residentsResponse,
-          complaintsResponse,
-          blottersResponse,
-          logbookResponse,
-          activityResponse,
-        ] = await Promise.allSettled([
-          residentsAPI.getAll(),
-          complaintsAPI.getAll(),
-          blottersAPI.getAll(),
-          logbookAPI.getAll(),
-          activityAPI.getAll(),
-        ]);
-
-        if (residentsResponse.status === "fulfilled") {
-          const residentsData = residentsResponse.value;
-          setResidents(residentsData.data || residentsData.residents || []);
-        } else {
-          console.error("Failed to fetch residents:", residentsResponse.reason);
-          setResidents([]);
-        }
-
-        if (complaintsResponse.status === "fulfilled") {
-          const complaintsData = complaintsResponse.value;
-          setComplaints(complaintsData.data || complaintsData.complaints || []);
-        } else {
-          console.error(
-            "Failed to fetch complaints:",
-            complaintsResponse.reason
-          );
-          setComplaints([]);
-        }
-
-        if (blottersResponse.status === "fulfilled") {
-          const blottersData = blottersResponse.value;
-          setBlotters(blottersData.data || blottersData.blotters || []);
-        } else {
-          console.error("Failed to fetch blotters:", blottersResponse.reason);
-          setBlotters([]);
-        }
-
-        if (logbookResponse.status === "fulfilled") {
-          const logbookData = logbookResponse.value.data;
-          setLogbooks(logbookData.data || logbookData.logbooks || []);
-        } else {
-          console.error("Failed to fetch logbook:", logbookResponse.reason);
-          setLogbooks([]);
-        }
-
-        if (activityResponse.status === "fulfilled") {
-          const activityData = activityResponse.value.data;
-          setActivityLog(activityData.data || activityData.activities || []);
-        } else {
-          console.error(
-            "Failed to fetch activity logs:",
-            activityResponse.reason
-          );
-          setActivityLog([]);
-        }
+        // Still fetch residents for form dropdowns
+        const residentsResponse = await residentsAPI.getAll();
+        setResidents(residentsResponse.data || residentsResponse.residents || []);
+        
+        setError(null);
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError(err.message || "Failed to fetch data");
+        console.error("Error fetching dashboard data:", err);
+        setError(err.message || "Failed to fetch dashboard data");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchDashboardData();
   }, []);
 
   const handleNavigation = async (path) => {
