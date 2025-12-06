@@ -788,6 +788,7 @@ const CreateMaternalRecordModal = ({
   handleCreateMaternal,
   residents,
   addNotification,
+  calculateAge, // Add this
 }) => {
   const [formData, setFormData] = useState({
     resident_id: "",
