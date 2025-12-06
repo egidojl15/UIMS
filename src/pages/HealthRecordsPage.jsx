@@ -1835,12 +1835,12 @@ const HealthRecordsPage = () => {
                 >
                   Resident Name
                 </th>
-                <th
+                {/* <th
                   className="py-3 px-2 text-center font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
                   style={{ width: "80px" }}
                 >
                   PhilHealth
-                </th>
+                </th> */}
                 <th
                   className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
                   style={{ width: "85px" }}
@@ -1883,7 +1883,7 @@ const HealthRecordsPage = () => {
                 >
                   Allergies
                 </th>
-                <th
+                {/* <th
                   className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] text-xs"
                   style={{ minWidth: "130px" }}
                 >
@@ -1894,7 +1894,7 @@ const HealthRecordsPage = () => {
                   style={{ width: "110px" }}
                 >
                   Contact Number
-                </th>
+                </th> */}
                 <th
                   className="py-3 px-2 text-center font-semibold sticky top-0 z-10 bg-[#0F4C81] text-xs"
                   style={{ width: "100px" }}
