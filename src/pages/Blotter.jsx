@@ -720,12 +720,12 @@ const Blotter = () => {
               </div>
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
-                  {/* Search icon */}
-                  <Search 
+                  {/* Search icon - Solid Black */}
+                  <Search
                     size={20}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                    color="#000000"
-                    style={{ paintOrder: "stroke fill" }}
+                    strokeWidth={2.5}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black"
+                    style={{ filter: "none", opacity: 1 }}
                   />
                   <input
                     type="text"
@@ -736,12 +736,12 @@ const Blotter = () => {
                   />
                 </div>
                 <div className="relative">
+                  {/* Filter icon - Solid Black */}
                   <Filter
                     size={20}
                     strokeWidth={3}
-                    color="#000000"
-                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                    style={{ paintOrder: "stroke fill" }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black font-bold"
+                    style={{ filter: "none", opacity: 1 }}
                   />
                   <select
                     value={statusFilter}
