@@ -556,9 +556,10 @@ const UserManagement = () => {
               />
             </div>
 
-            {/* ──────── Search ──────── */}
+            {/* ──────── Search Bar - FIXED: Solid Black Icon (Same as Blotter & Logbook) ──────── */}
             <div className="group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-6 mb-8 border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">
@@ -573,11 +574,15 @@ const UserManagement = () => {
                     </p>
                   </div>
                 </div>
+
                 <div className="flex flex-col md:flex-row gap-4">
+                  {/* Search Input - Pure Black Icon */}
                   <div className="flex-1 relative">
                     <Search
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
-                      size={20}
+                      size={22}
+                      strokeWidth={3}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black z-10"
+                      style={{ filter: "none", opacity: 1 }}
                     />
                     <input
                       type="text"
@@ -587,12 +592,14 @@ const UserManagement = () => {
                         setSearch(e.target.value);
                         setCurrentPage(1);
                       }}
-                      className="w-full pl-12 pr-4 py-4 bg-white/50 backdrop-blur-sm border border-white/30 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 text-gray-700 placeholder-gray-500"
+                      className="w-full pl-14 pr-4 py-4 bg-white/70 backdrop-blur-sm border border-gray-300/50 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white transition-all duration-300 text-gray-800 placeholder-gray-500 font-medium"
                     />
                   </div>
+
+                  {/* Add User Button */}
                   <button
                     onClick={openAddModal}
-                    className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg hover:shadow-blue-500/30 text-white px-6 py-4 rounded-2xl transition-all duration-300 font-medium group"
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg hover:shadow-blue-500/30 text-white px-6 py-4 rounded-2xl transition-all duration-300 font-medium group whitespace-nowrap"
                   >
                     <Plus
                       size={20}
