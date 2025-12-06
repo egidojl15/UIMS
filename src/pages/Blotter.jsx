@@ -865,127 +865,132 @@ const Blotter = () => {
             </div>
           </div>
 
-          {/* Mobile Card Layout */}
-          <div className="lg:hidden">
+          {/* Mobile Card Layout - WITH CLEAN WHITE BACKGROUND */}
+          <div className="lg:hidden space-y-6 px-2">
             {loading ? (
-              <div className="p-8 text-center">
+              <div className="p-12 text-center">
                 <div className="w-16 h-16 border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-[#0F4C81] font-medium">
-                  Loading blotters...
-                </p>
+                <p className="text-[#0F4C81] font-medium text-lg">Loading blotters...</p>
               </div>
             ) : filteredBlotters.length === 0 ? (
-              <div className="p-8 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Search size={32} className="text-gray-600" />
+              <div className="p-12 text-center bg-white rounded-3xl shadow-lg">
+                <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search size={40} className="text-gray-600" />
                 </div>
-                <p className="text-gray-600 text-xl font-semibold mb-2">
+                <p className="text-gray-700 text-xl font-semibold mb-2">
                   No blotters found
                 </p>
-                <p className="text-gray-500 text-sm">
+                <p className="text-gray-500">
                   {searchTerm || statusFilter !== "all"
-                    ? "Try adjusting your search criteria"
-                    : "No blotters registered yet"}
+                    ? "Try adjusting your search or filters"
+                    : "No blotter records yet"}
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <>
                 {filteredBlotters.map((b) => (
                   <div
                     key={b.blotter_id}
-                    className="p-5 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-cyan-50/50 transition-all duration-300"
+                    className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden
+                               transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl p-2 shadow-md">
-                          <Calendar size={16} className="text-white" />
-                        </div>
-                        <div>
-                          <div className="font-bold text-[#0F4C81] text-lg">
-                            #{b.blotter_id}
+                    {/* Card Header - Light Gradient Accent */}
+                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-5 border-b border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-3 shadow-lg">
+                            <Calendar size={24} className="text-white" />
                           </div>
-                          <div className="text-xs text-gray-500">
-                            Blotter ID
+                          <div>
+                            <div className="text-2xl font-bold text-[#0F4C81]">
+                              #{b.blotter_id}
+                            </div>
+                            <div className="text-sm text-gray-600 font-medium">Blotter ID</div>
                           </div>
                         </div>
+
+                        {/* Status Badge */}
+                        <span
+                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold
+                            ${b.status === "resolved"
+                              ? "bg-green-100 text-green-800 border border-green-300"
+                              : b.status === "active"
+                              ? "bg-red-100 text-red-800 border border-red-300"
+                              : "bg-gray-100 text-gray-800 border border-gray-300"
+                            }`}
+                        >
+                          <div className="w-2.5 h-2.5 rounded-full bg-current opacity-80"></div>
+                          {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
+                        </span>
                       </div>
-                      <span
-                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
-                          b.status === "active"
-                            ? "bg-red-100 text-red-800 border border-red-200"
-                            : b.status === "resolved"
-                            ? "bg-green-100 text-green-800 border border-green-200"
-                            : "bg-gray-100 text-gray-800 border border-gray-200"
-                        }`}
-                      >
-                        <div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div>
-                        {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
-                      </span>
                     </div>
 
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Reporter:</span>
-                        <span className="font-medium text-gray-900 truncate max-w-[180px]">
-                          {b.reported_by || "N/A"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Type:</span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800">
-                          {(b.reporter_type || "")
-                            .replace("_", " ")
-                            .replace(/\b\w/g, (l) => l.toUpperCase())}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Incident:</span>
-                        <span className="font-medium text-gray-900 truncate max-w-[180px]">
-                          {b.incident_type || "N/A"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Date:</span>
-                        <span className="font-medium text-gray-900">
-                          {b.incident_date
-                            ? new Date(b.incident_date).toLocaleDateString(
-                                "en-US",
-                                {
+                    {/* Card Body - Pure White */}
+                    <div className="p-6 space-y-5 bg-white">
+                      <div className="grid grid-cols-2 gap-6 text-sm">
+                        <div>
+                          <span className="text-gray-600 font-medium">Reporter:</span>
+                          <p className="font-bold text-gray-900 mt-1 truncate">
+                            {b.reported_by || "N/A"}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600 font-medium">Type:</span>
+                          <div className="mt-1">
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800">
+                              {(b.reporter_type || "")
+                                .replace("_", " ")
+                                .replace(/\b\w/g, (l) => l.toUpperCase())}
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-gray-600 font-medium">Incident:</span>
+                          <p className="font-bold text-gray-900 mt-1">
+                            {b.incident_type || "N/A"}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600 font-medium">Date:</span>
+                          <p className="font-bold text-gray-900 mt-1">
+                            {b.incident_date
+                              ? new Date(b.incident_date).toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
                                   year: "numeric",
-                                }
-                              )
-                            : "N/A"}
-                        </span>
+                                })
+                              : "N/A"}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex gap-2 mt-4">
-                      <button
-                        onClick={() => handleView(b)}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium rounded-xl hover:shadow-md transition-all"
-                      >
-                        <Eye size={16} />
-                        View
-                      </button>
-                      <button
-                        onClick={() => handleEdit(b)}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium rounded-xl hover:shadow-md transition-all"
-                      >
-                        <Edit size={16} />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(b.blotter_id)}
-                        className="flex items-center justify-center px-3 py-2.5 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl hover:shadow-md transition-all"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {/* Action Buttons */}
+                      <div className="flex gap-3 pt-4 border-t border-gray-200">
+                        <button
+                          onClick={() => handleView(b)}
+                          className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-2xl hover:shadow-lg transition-all duration-300"
+                        >
+                          <Eye size={20} />
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleEdit(b)}
+                          className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-2xl hover:shadow-lg transition-all duration-300"
+                        >
+                          <Edit size={20} />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(b.blotter_id)}
+                          className="px-5 py-3.5 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-2xl hover:shadow-lg transition-all duration-300"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
-              </div>
+              </>
             )}
           </div>
 
