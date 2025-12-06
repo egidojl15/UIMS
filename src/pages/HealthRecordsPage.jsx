@@ -84,12 +84,8 @@ const ViewHealthRecordModal = ({
                   <div>
                     <p className="text-xs text-gray-500">Resident Name</p>
                     <p className="font-medium text-gray-900">
-                      {selectedHealthRecord.first_name}
-                    </p>
-                    <p className="font-medium text-gray-900">
-                      {selectedHealthRecord.middle_name}
-                    </p>
-                    <p className="font-medium text-gray-900">
+                      {selectedHealthRecord.first_name}{" "}
+                      {selectedHealthRecord.middle_name}{" "}
                       {selectedHealthRecord.last_name}
                     </p>
                   </div>
