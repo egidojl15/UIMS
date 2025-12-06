@@ -243,9 +243,29 @@ const BrgyCouncilor = ({ children }) => {
           systemUsersOnline: statsResponse.users_online || 0,
         });
 
-        // Still fetch residents for form dropdowns
+        // Fetch residents for form dropdowns
         const residentsResponse = await residentsAPI.getAll();
         setResidents(residentsResponse.data || residentsResponse.residents || []);
+        
+        // Fetch complaints data
+        try {
+          const complaintsResponse = await complaintsAPI.getAll();
+          const complaintsData = complaintsResponse.data || complaintsResponse || [];
+          setComplaints(Array.isArray(complaintsData) ? complaintsData : []);
+        } catch (complaintError) {
+          console.error("Error fetching complaints:", complaintError);
+          setComplaints([]);
+        }
+        
+        // Fetch blotters data
+        try {
+          const blottersResponse = await blottersAPI.getAll();
+          const blottersData = blottersResponse.data || blottersResponse || [];
+          setBlotters(Array.isArray(blottersData) ? blottersData : []);
+        } catch (blotterError) {
+          console.error("Error fetching blotters:", blotterError);
+          setBlotters([]);
+        }
         
         setError(null);
       } catch (err) {
@@ -336,6 +356,26 @@ const BrgyCouncilor = ({ children }) => {
       // Still fetch residents for form dropdowns
       const residentsResponse = await residentsAPI.getAll();
       setResidents(residentsResponse.data || residentsResponse.residents || []);
+      
+      // Fetch complaints data
+      try {
+        const complaintsResponse = await complaintsAPI.getAll();
+        const complaintsData = complaintsResponse.data || complaintsResponse || [];
+        setComplaints(Array.isArray(complaintsData) ? complaintsData : []);
+      } catch (complaintError) {
+        console.error("Error fetching complaints:", complaintError);
+        setComplaints([]);
+      }
+      
+      // Fetch blotters data
+      try {
+        const blottersResponse = await blottersAPI.getAll();
+        const blottersData = blottersResponse.data || blottersResponse || [];
+        setBlotters(Array.isArray(blottersData) ? blottersData : []);
+      } catch (blotterError) {
+        console.error("Error fetching blotters:", blotterError);
+        setBlotters([]);
+      }
 
       await logUserActivity(
         "Refresh Dashboard Data",
