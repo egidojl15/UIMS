@@ -1917,7 +1917,7 @@ const HealthRecordsPage = () => {
                       <td className="py-2 px-2 font-medium border-r border-gray-200 text-xs">
                         {hr.resident_name || "N/A"}
                       </td>
-                      <td className="py-2 px-2 text-center border-r border-gray-200">
+                      {/* <td className="py-2 px-2 text-center border-r border-gray-200">
                         <span
                           className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold ${
                             hr.is_philhealth ? "bg-green-500" : "bg-gray-400"
@@ -1925,7 +1925,7 @@ const HealthRecordsPage = () => {
                         >
                           {hr.is_philhealth ? "✓" : "✗"}
                         </span>
-                      </td>
+                      </td> */}
                       <td className="py-2 px-2 border-r border-gray-200 text-xs">
                         {hr.blood_type || "N/A"}
                       </td>
@@ -1951,17 +1951,17 @@ const HealthRecordsPage = () => {
                           {hr.allergies || "None"}
                         </div>
                       </td>
-                      <td className="py-2 px-2 border-r border-gray-200 text-xs">
+                      {/* <td className="py-2 px-2 border-r border-gray-200 text-xs">
                         <div
                           className="truncate"
                           title={hr.emergency_contact_name}
                         >
                           {hr.emergency_contact_name || "N/A"}
                         </div>
-                      </td>
-                      <td className="py-2 px-2 border-r border-gray-200 whitespace-nowrap text-xs">
+                      </td> */}
+                      {/* <td className="py-2 px-2 border-r border-gray-200 whitespace-nowrap text-xs">
                         {hr.emergency_contact_number || "N/A"}
-                      </td>
+                      </td> */}
                       <td className="py-2 px-2">
                         <div className="flex justify-center space-x-2">
                           <button
