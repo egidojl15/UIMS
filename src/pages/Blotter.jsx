@@ -700,7 +700,7 @@ const Blotter = () => {
             />
           </div>
 
-          {/* Search and Filter Bar */}
+          {/* Search and Filter Bar - FIXED: Solid Black Icons */}
           <div className="group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-6 mb-8 border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
@@ -718,13 +718,14 @@ const Blotter = () => {
                   </p>
                 </div>
               </div>
+
               <div className="flex flex-col md:flex-row gap-4">
+                {/* Search Input */}
                 <div className="flex-1 relative">
-                  {/* Search icon - Solid Black */}
                   <Search
-                    size={20}
-                    strokeWidth={2.5}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black"
+                    size={22}
+                    strokeWidth={3}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black z-10"
                     style={{ filter: "none", opacity: 1 }}
                   />
                   <input
@@ -732,21 +733,28 @@ const Blotter = () => {
                     placeholder="Search by ID, reporter, incident type, or location..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-white/50 backdrop-blur-sm border border-white/30 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 text-gray-700 placeholder-gray-500"
+                    className="w-full pl-14 pr-4 py-4 bg-white/70 backdrop-blur-sm border border-gray-300/50 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white transition-all duration-300 text-gray-800 placeholder-gray-500 font-medium"
                   />
                 </div>
+
+                {/* Filter Dropdown */}
                 <div className="relative">
-                  {/* Filter icon - Solid Black */}
                   <Filter
-                    size={20}
+                    size={22}
                     strokeWidth={3}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black font-bold"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black z-10 font-bold"
                     style={{ filter: "none", opacity: 1 }}
                   />
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="pl-12 pr-8 py-4 bg-white/50 backdrop-blur-sm border border-white/30 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 text-gray-700 appearance-none cursor-pointer"
+                    className="pl-14 pr-10 py-4 bg-white/70 backdrop-blur-sm border border-gray-300/50 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white transition-all duration-300 text-gray-800 appearance-none cursor-pointer font-medium text-base"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                      backgroundPosition: "right 16px center",
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: "16px",
+                    }}
                   >
                     <option value="all">All Status</option>
                     <option value="active">Active</option>
@@ -754,6 +762,8 @@ const Blotter = () => {
                     <option value="closed">Closed</option>
                   </select>
                 </div>
+
+                {/* New Blotter Button */}
                 <button
                   onClick={handleAdd}
                   className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg hover:shadow-blue-500/30 text-white px-6 py-4 rounded-2xl transition-all duration-300 font-medium group"
