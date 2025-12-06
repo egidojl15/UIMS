@@ -3834,6 +3834,7 @@ const styles = `
     animation: float 3s ease-in-out infinite;
   }
 `;
+s;
 
 if (typeof document !== "undefined") {
   const id = "maternal-child-float-styles";
