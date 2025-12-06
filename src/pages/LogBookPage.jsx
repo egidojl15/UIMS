@@ -954,7 +954,7 @@ const LogbookPage = () => {
                 />
               </div>
 
-              {/* Search and Filter Bar */}
+              {/* Search and Filter Bar - FIXED: Solid Black Icons (Same as Blotter) */}
               <div className="group relative bg-white/90 backdrop-blur-xl rounded-xl sm:rounded-3xl shadow-xl p-3 sm:p-6 mb-4 sm:mb-8 border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10">
@@ -974,48 +974,64 @@ const LogbookPage = () => {
                       </p>
                     </div>
                   </div>
+
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                    {/* Search Input - Solid Black Icon */}
                     <div className="flex-1 relative">
                       <Search
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                        size={window.innerWidth < 640 ? 16 : 20}
+                        size={22}
+                        strokeWidth={3}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black z-10"
+                        style={{ filter: "none", opacity: 1 }}
                       />
                       <input
                         type="text"
                         placeholder="Search by name, address, contact, or purpose..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 sm:pl-12 pr-4 py-2 sm:py-4 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 text-gray-700 placeholder-gray-500 text-xs sm:text-sm"
+                        className="w-full pl-14 pr-4 py-3 sm:py-4 bg-white/70 backdrop-blur-sm border border-gray-300/50 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white transition-all duration-300 text-gray-800 placeholder-gray-500 font-medium text-sm"
                       />
                     </div>
+
+                    {/* Month Filter - Solid Black Calendar Icon */}
                     <div className="relative">
                       <Calendar
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                        size={window.innerWidth < 640 ? 16 : 20}
+                        size={22}
+                        strokeWidth={3}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black z-10"
+                        style={{ filter: "none", opacity: 1 }}
                       />
                       <input
                         type="month"
                         value={selectedMonth}
                         onChange={(e) => setSelectedMonth(e.target.value)}
-                        className="pl-9 sm:pl-12 pr-4 sm:pr-8 py-2 sm:py-4 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 text-gray-700 text-xs sm:text-sm"
+                        className="pl-14 pr-8 py-3 sm:py-4 bg-white/70 backdrop-blur-sm border border-gray-300/50 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white transition-all duration-300 text-gray-800 appearance-none cursor-pointer font-medium text-sm"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                          backgroundPosition: "right 16px center",
+                          backgroundRepeat: "no-repeat",
+                          backgroundSize: "16px",
+                        }}
                       />
                     </div>
+
+                    {/* Action Buttons */}
                     <div className="flex space-x-2">
                       <button
                         onClick={handlePrint}
-                        className="flex items-center justify-center gap-1 sm:gap-2 bg-white/50 backdrop-blur-sm px-2 sm:px-4 py-2 sm:py-4 rounded-xl hover:bg-white/70 border border-white/30 transition-all duration-300 font-medium text-xs sm:text-sm text-gray-700"
+                        className="flex items-center justify-center gap-1.5 bg-white/70 backdrop-blur-sm px-4 py-3 sm:py-4 rounded-xl hover:bg-white/90 border border-gray-300/50 transition-all duration-300 font-medium text-gray-800 text-sm whitespace-nowrap"
                         title="Print Records"
                       >
                         <PrinterIcon />
-                        <span>Print</span>
+                        <span className="hidden sm:inline">Print</span>
                       </button>
                       <button
                         onClick={handleExportPDF}
-                        className="flex items-center justify-center gap-1 sm:gap-2 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white px-2 sm:px-4 py-2 sm:py-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 font-medium text-xs sm:text-sm"
+                        className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white px-4 py-3 sm:py-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 font-medium text-sm whitespace-nowrap"
                         title="Export as PDF"
                       >
                         <FileTextIcon />
-                        <span>Export PDF</span>
+                        <span className="hidden sm:inline">PDF</span>
                       </button>
                     </div>
                   </div>
