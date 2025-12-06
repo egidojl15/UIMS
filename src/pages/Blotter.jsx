@@ -721,11 +721,10 @@ const Blotter = () => {
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
                   {/* Search icon */}
-                  <Search
+                  <Search 
                     size={20}
-                    strokeWidth={3}
-                    color="#000000"
                     className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+                    color="#000000"
                     style={{ paintOrder: "stroke fill" }}
                   />
                   <input
