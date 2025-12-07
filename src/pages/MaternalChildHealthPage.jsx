@@ -477,7 +477,7 @@ const CreateMaternalRecordModal = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  LMP Date
+                  LMP Date (Last Menstrual Period)
                 </label>
                 <input
                   type="date"
@@ -490,7 +490,7 @@ const CreateMaternalRecordModal = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  EDD
+                  EDD (Estimated Date of Delivery)
                 </label>
                 <input
                   type="date"
@@ -772,7 +772,7 @@ const EditMaternalRecordModal = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  LMP Date
+                  LMP Date (Last Menstrual Period)
                 </label>
                 <input
                   type="date"
@@ -785,7 +785,7 @@ const EditMaternalRecordModal = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  EDD
+                  EDD (Estimated Date of Delivery)
                 </label>
                 <input
                   type="date"
@@ -1881,25 +1881,46 @@ const MaternalChildHealthPage = () => {
 
   const handleCreateMaternal = async (data) => {
     try {
+      console.log("📤 Sending maternal data to API:", data);
+      console.log("📤 Data types:", {
+        resident_id: typeof data.resident_id,
+        tetanus_vaccination: typeof data.tetanus_vaccination,
+        iron_supplement: typeof data.iron_supplement,
+      });
+
       const res = await maternalHealthAPI.create(data);
+      console.log("✅ API Response:", res);
+
       if (res.success) {
+        // Try to find resident for the name
         const resident = residents.find(
-          (r) => r.resident_id === data.resident_id
+          (r) => r.resident_id === Number(data.resident_id)
         );
-        const newRecord = {
+
+        // If we can't find the resident, use data from response
+        const newRecord = res.data || {
           ...data,
-          id: res.data.id,
-          resident_name: `${resident.first_name} ${resident.last_name}`,
+          id: res.data?.id,
+          resident_name: resident
+            ? `${resident.first_name} ${resident.last_name}`
+            : `Resident ID: ${data.resident_id}`,
           updated_at: new Date().toISOString(),
         };
+
         setMaternalRecords((prev) => [...prev, newRecord]);
         addNotification("success", "Success", "Maternal health record created");
       }
     } catch (error) {
+      console.error("❌ Create Failed - Full error:", error);
+      console.error("❌ Error response:", error.response?.data);
+      console.error("❌ Error status:", error.response?.status);
+
       addNotification(
         "error",
         "Create Failed",
-        error.message || "Failed to create record"
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to create record"
       );
     }
   };
