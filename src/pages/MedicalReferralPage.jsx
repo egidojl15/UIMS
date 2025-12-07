@@ -146,7 +146,24 @@ const ViewReferralModal = ({
                   <div>
                     <p className="text-xs text-gray-500">BHW ID</p>
                     <p className="font-medium text-gray-900">
-                      {selectedReferral.bhw_id}
+                      <select
+                        value={editReferral.bhw_id}
+                        onChange={(e) =>
+                          setEditReferral({
+                            ...editReferral,
+                            bhw_id: Number(e.target.value),
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        required
+                      >
+                        <option value="">Select BHW</option>
+                        {bhws.map((bhw) => (
+                          <option key={bhw.user_id} value={bhw.user_id}>
+                            {bhw.full_name} (ID: {bhw.user_id})
+                          </option>
+                        ))}
+                      </select>
                     </p>
                   </div>
                   <div>
