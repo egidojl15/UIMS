@@ -53,6 +53,7 @@ const ViewReferralModal = ({
   selectedReferral,
   setSelectedReferral,
   residents,
+  bhws,
 }) => {
   if (!selectedReferral) return null;
 
@@ -145,9 +146,19 @@ const ViewReferralModal = ({
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs text-gray-500">BHW</p>
-                    <p className="font-medium text-gray-900">
-                      {selectedReferral.full_name} {selectedReferral.bhw_id}
-                    </p>
+                    {(() => {
+                      const bhw = bhws.find(
+                        (b) => b.user_id === selectedReferral.bhw_id
+                      );
+                      return (
+                        <p className="font-medium text-gray-900">
+                          {bhw ? bhw.full_name : "Unknown BHW"}
+                          <span className="text-xs text-gray-500 ml-2">
+                            (ID: {selectedReferral.bhw_id})
+                          </span>
+                        </p>
+                      );
+                    })()}
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Referred To</p>
@@ -1405,6 +1416,7 @@ const MedicalReferralPage = () => {
           selectedReferral={selectedReferral}
           setSelectedReferral={setSelectedReferral}
           residents={residents}
+          bhws={bhws}
         />
       )}
       {editReferral && (
