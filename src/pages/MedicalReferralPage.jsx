@@ -7,6 +7,7 @@ import {
   referralsAPI,
   residentsAPI,
   usersAPI,
+  api,
   logUserActivity,
 } from "../services/api";
 import NotificationSystem from "../components/NotificationSystem";
@@ -816,32 +817,19 @@ const MedicalReferralPage = () => {
     );
   }, [referralSearch, referrals, residents]);
 
-  // Fetch BHWs - FIXED WITH CORRECT PATH
+  // Replace your current useEffect with this:
   useEffect(() => {
     const fetchBHWs = async () => {
       try {
-        console.log("Fetching BHWs from /api/users/bhws/list ...");
-        const response = await usersAPI.get("/users/bhws/list"); // ← CORRECT PATH (hits /api/users/bhws/list)
+        console.log("Fetching BHWs...");
+        const response = await api.get("/users/bhws/list"); // This works!
+
         if (response.data.success) {
           setBhws(response.data.data);
-          console.log("BHWs loaded successfully:", response.data.data);
-          if (response.data.data.length === 0) {
-            addNotification(
-              "warning",
-              "Warning",
-              "No active BHWs found in system."
-            );
-          }
-        } else {
-          throw new Error(
-            response.data.message || "API returned success: false"
-          );
+          console.log("BHWs loaded:", response.data.data);
         }
       } catch (err) {
-        console.error(
-          "Failed to load BHWs:",
-          err.response?.data || err.message
-        );
+        console.error("Failed to load BHWs:", err.response?.data || err);
         addNotification("error", "Error", "Could not load BHW list");
       }
     };
