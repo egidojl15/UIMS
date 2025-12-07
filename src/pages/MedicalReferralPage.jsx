@@ -68,8 +68,22 @@ const ViewReferralModal = ({
       }`.trim()
     : "N/A";
 
-  const bhw = bhws.find((b) => b.user_id === selectedReferral.bhw_id);
-  const bhwName = bhw ? bhw.full_name : "Unknown BHW";
+  // FIXED: Better BHW lookup with detailed logging
+  console.log("Looking up BHW with ID:", selectedReferral.bhw_id);
+  console.log("Available BHWs:", bhws);
+
+  const bhw = bhws.find((b) => {
+    console.log(
+      `Comparing BHW user_id ${b.user_id} with referral bhw_id ${selectedReferral.bhw_id}`
+    );
+    return Number(b.user_id) === Number(selectedReferral.bhw_id);
+  });
+
+  console.log("Found BHW:", bhw);
+
+  const bhwName = bhw
+    ? bhw.full_name
+    : `Unknown BHW (ID: ${selectedReferral.bhw_id})`;
 
   const getStatusBadgeColor = (status) => {
     switch (status.toLowerCase()) {
@@ -753,32 +767,35 @@ const MedicalReferralPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Keep ONLY this single useEffect for fetching all data:
+
   useEffect(() => {
     async function fetchData() {
       try {
         const [referralsRes, residentsRes, bhwsRes] = await Promise.all([
           referralsAPI.getAll(),
           residentsAPI.getAll(),
-          usersAPI.getBHWs(),
+          api.get("/users/bhws/list"), // ✅ Use the direct API call that works
         ]);
+
         if (referralsRes.success) {
           setReferrals(referralsRes.data);
           setFilteredReferrals(referralsRes.data);
         }
+
         if (residentsRes.success) {
           setResidents(residentsRes.data.filter((r) => r.is_active === 1));
         }
-        if (bhwsRes.success) {
-          setBhws(
-            bhwsRes.data.filter(
-              (u) =>
-                u.is_active === 1 &&
-                (u.position?.toLowerCase().includes("health") ||
-                  u.role_name?.toLowerCase().includes("health") ||
-                  u.position?.toLowerCase() === "bhw" ||
-                  u.position?.toLowerCase() === "barangay health worker")
-            )
-          );
+
+        // ✅ FIXED: Process the BHWs response correctly
+        if (bhwsRes.data && bhwsRes.data.success) {
+          console.log("BHWs fetched from API:", bhwsRes.data.data);
+
+          // The API already returns filtered BHWs, but let's ensure they're active
+          const activeBHWs = bhwsRes.data.data.filter((u) => u.is_active === 1);
+
+          console.log("Active BHWs:", activeBHWs);
+          setBhws(activeBHWs);
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -792,7 +809,7 @@ const MedicalReferralPage = () => {
       }
     }
     fetchData();
-  }, []);
+  }, [addNotification]); // ✅ Add addNotification as dependency
 
   useEffect(() => {
     setFilteredReferrals(
@@ -817,26 +834,6 @@ const MedicalReferralPage = () => {
       })
     );
   }, [referralSearch, referrals, residents]);
-
-  // Replace your current useEffect with this:
-  useEffect(() => {
-    const fetchBHWs = async () => {
-      try {
-        console.log("Fetching BHWs...");
-        const response = await api.get("/users/bhws/list"); // This works!
-
-        if (response.data.success) {
-          setBhws(response.data.data);
-          console.log("BHWs loaded:", response.data.data);
-        }
-      } catch (err) {
-        console.error("Failed to load BHWs:", err.response?.data || err);
-        addNotification("error", "Error", "Could not load BHW list");
-      }
-    };
-
-    fetchBHWs();
-  }, []);
 
   const handleReferralCreate = async (newData, setError) => {
     try {
