@@ -823,6 +823,16 @@ export const usersAPI = {
   getAll: async () => (await api.get("/users")).data,
   getById: async (id) => (await api.get(`/users/${id}`)).data,
 
+  getBHWs: async () => {
+    try {
+      const response = await api.get("/users/bhws/list");
+      return response.data;
+    } catch (error) {
+      console.error("Get BHWs error:", error);
+      return { success: false, data: [] };
+    }
+  },
+
   create: async (userData) => {
     const formData = new FormData();
     Object.entries(userData).forEach(([key, value]) => {

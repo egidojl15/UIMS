@@ -747,7 +747,7 @@ const MedicalReferralPage = () => {
         const [referralsRes, residentsRes, bhwsRes] = await Promise.all([
           referralsAPI.getAll(),
           residentsAPI.getAll(),
-          usersAPI.getAll(),
+          usersAPI.getBHWs(),
         ]);
         if (referralsRes.success) {
           setReferrals(referralsRes.data);
@@ -758,7 +758,14 @@ const MedicalReferralPage = () => {
         }
         if (bhwsRes.success) {
           setBhws(
-            bhwsRes.data.filter((u) => u.is_active === 1 && u.role_id === 2)
+            bhwsRes.data.filter(
+              (u) =>
+                u.is_active === 1 &&
+                (u.position?.toLowerCase().includes("health") ||
+                  u.role_name?.toLowerCase().includes("health") ||
+                  u.position?.toLowerCase() === "bhw" ||
+                  u.position?.toLowerCase() === "barangay health worker")
+            )
           );
         }
       } catch (error) {
