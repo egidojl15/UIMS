@@ -820,7 +820,7 @@ const MedicalReferralPage = () => {
   useEffect(() => {
     const fetchBHWs = async () => {
       try {
-        const response = await usersAPI.get("/bhws/list");
+        const response = await usersAPI.get("/users/bhws/list");
         if (response.data.success) {
           setBhws(response.data.data); // Make sure this state exists!
           console.log("BHWs loaded:", response.data.data);
