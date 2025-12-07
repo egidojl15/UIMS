@@ -817,16 +817,27 @@ const MedicalReferralPage = () => {
   }, [referralSearch, referrals, residents]);
 
   // Fetch BHWs
+  // Fetch BHWs - FIXED PATH AND HANDLING
   useEffect(() => {
     const fetchBHWs = async () => {
       try {
-        const response = await usersAPI.get("/users/bhws/list");
+        console.log("Fetching BHWs from correct path: /api/users/bhws/list");
+        const response = await usersAPI.get("/bhws/list"); // ← CORRECTED: No extra "/users"
+
         if (response.data.success) {
-          setBhws(response.data.data); // Make sure this state exists!
+          setBhws(response.data.data);
           console.log("BHWs loaded:", response.data.data);
+          if (response.data.data.length === 0) {
+            console.warn(
+              "BHW list is empty — check database for matching users."
+            );
+            addNotification("warning", "Warning", "No BHWs found in system.");
+          }
+        } else {
+          throw new Error("API returned success: false");
         }
       } catch (err) {
-        console.error("Failed to load BHWs:", err);
+        console.error("BHW fetch error:", err.response?.data || err.message);
         addNotification("error", "Error", "Could not load BHW list");
       }
     };
