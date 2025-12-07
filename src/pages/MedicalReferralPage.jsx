@@ -53,7 +53,6 @@ const ViewReferralModal = ({
   selectedReferral,
   setSelectedReferral,
   residents,
-  bhws,
 }) => {
   if (!selectedReferral) return null;
 
@@ -145,36 +144,9 @@ const ViewReferralModal = ({
                 </h3>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-gray-500">BHW</p>
+                    <p className="text-xs text-gray-500">BHW ID</p>
                     <p className="font-medium text-gray-900">
-                      {(() => {
-                        // Convert both to same type (number) and try multiple possible field names
-                        const bhwId = Number(selectedReferral.bhw_id);
-
-                        const bhw = bhws.find(
-                          (b) =>
-                            Number(b.user_id) === bhwId ||
-                            Number(b.id) === bhwId ||
-                            Number(b.bhw_id) === bhwId
-                        );
-
-                        if (bhw && bhw.full_name) {
-                          return (
-                            <>
-                              {bhw.full_name}
-                              <span className="text-xs text-gray-500 ml-2">
-                                (ID: {bhw.user_id || bhw.id || bhw.bhw_id})
-                              </span>
-                            </>
-                          );
-                        }
-
-                        return (
-                          <span className="text-orange-600 font-medium">
-                            Unknown BHW (ID: {selectedReferral.bhw_id})
-                          </span>
-                        );
-                      })()}
+                      {selectedReferral.bhw_id}
                     </p>
                   </div>
                   <div>
@@ -1284,14 +1256,7 @@ const MedicalReferralPage = () => {
                     <td className="py-2 px-3">
                       {getResidentName(ref.resident_id)}
                     </td>
-                    <td className="py-2 px-3">
-                      {(() => {
-                        const bhw = bhws.find(
-                          (b) => Number(b.user_id) === Number(ref.bhw_id)
-                        );
-                        return bhw ? bhw.full_name : `BHW #${ref.bhw_id}`;
-                      })()}
-                    </td>
+                    <td className="py-2 px-3">{ref.bhw_id}</td>
                     <td className="py-2 px-3">{ref.referred_to}</td>
                     <td className="py-2 px-3">{ref.referral_reason}</td>
                     <td className="py-2 px-3">
@@ -1387,12 +1352,7 @@ const MedicalReferralPage = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-600">BHW ID:</span>
                       <span className="font-medium text-gray-900">
-                        {(() => {
-                          const bhw = bhws.find(
-                            (b) => Number(b.user_id) === Number(ref.bhw_id)
-                          );
-                          return bhw ? bhw.full_name : `BHW #${ref.bhw_id}`;
-                        })()}
+                        {ref.bhw_id}
                       </span>
                     </div>
                   </div>
@@ -1445,7 +1405,6 @@ const MedicalReferralPage = () => {
           selectedReferral={selectedReferral}
           setSelectedReferral={setSelectedReferral}
           residents={residents}
-          bhws={bhws}
         />
       )}
       {editReferral && (
