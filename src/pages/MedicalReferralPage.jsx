@@ -53,6 +53,7 @@ const ViewReferralModal = ({
   selectedReferral,
   setSelectedReferral,
   residents,
+  bhws,
 }) => {
   if (!selectedReferral) return null;
 
@@ -64,6 +65,9 @@ const ViewReferralModal = ({
         resident.last_name
       }`.trim()
     : "N/A";
+
+  const bhw = bhws.find((b) => b.user_id === selectedReferral.bhw_id);
+  const bhwName = bhw ? bhw.full_name : "N/A";
 
   const getStatusBadgeColor = (status) => {
     switch (status.toLowerCase()) {
@@ -144,26 +148,9 @@ const ViewReferralModal = ({
                 </h3>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-gray-500">BHW ID</p>
+                    <p className="text-xs text-gray-500">BHW</p>
                     <p className="font-medium text-gray-900">
-                      <select
-                        value={editReferral.bhw_id}
-                        onChange={(e) =>
-                          setEditReferral({
-                            ...editReferral,
-                            bhw_id: Number(e.target.value),
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                        required
-                      >
-                        <option value="">Select BHW</option>
-                        {bhws.map((bhw) => (
-                          <option key={bhw.user_id} value={bhw.user_id}>
-                            {bhw.full_name} (ID: {bhw.user_id})
-                          </option>
-                        ))}
-                      </select>
+                      {bhwName} (ID: {selectedReferral.bhw_id})
                     </p>
                   </div>
                   <div>
@@ -176,6 +163,12 @@ const ViewReferralModal = ({
                     <p className="text-xs text-gray-500">Referral Date</p>
                     <p className="font-medium text-gray-900">
                       {formatDateForInput(selectedReferral.referral_date)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Status</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedReferral.status}
                     </p>
                   </div>
                 </div>
@@ -1422,6 +1415,7 @@ const MedicalReferralPage = () => {
           selectedReferral={selectedReferral}
           setSelectedReferral={setSelectedReferral}
           residents={residents}
+          bhws={bhws}
         />
       )}
       {editReferral && (
