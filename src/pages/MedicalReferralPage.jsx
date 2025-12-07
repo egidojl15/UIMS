@@ -158,7 +158,7 @@ const ViewReferralModal = ({
                   <div>
                     <p className="text-xs text-gray-500">Referral Date</p>
                     <p className="font-medium text-gray-900">
-                      {selectedReferral.referral_date}
+                      {formatDateForInput(selectedReferral.referral_date)}
                     </p>
                   </div>
                 </div>
@@ -321,7 +321,7 @@ const EditReferralModal = ({
                   </label>
                   <input
                     type="date"
-                    value={editReferral.referral_date}
+                    value={formatDateForInput(editReferral.referral_date)}
                     onChange={(e) =>
                       setEditReferral({
                         ...editReferral,
