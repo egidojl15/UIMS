@@ -144,9 +144,9 @@ const ViewReferralModal = ({
                 </h3>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-gray-500">BHW ID</p>
+                    <p className="text-xs text-gray-500">BHW</p>
                     <p className="font-medium text-gray-900">
-                      {selectedReferral.bhw_id}
+                      {selectedReferral.full_name} {selectedReferral.bhw_id}
                     </p>
                   </div>
                   <div>
