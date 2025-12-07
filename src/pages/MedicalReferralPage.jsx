@@ -7,9 +7,10 @@ import {
   referralsAPI,
   residentsAPI,
   usersAPI,
-  api,
   logUserActivity,
 } from "../services/api";
+
+import api from "../services/api"; // ← Default import (this works!)
 import NotificationSystem from "../components/NotificationSystem";
 import ReportGenerator from "../components/ReportGenerator";
 import { formatDateForInput } from "./ManageResidentPage";
