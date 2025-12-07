@@ -67,7 +67,7 @@ const ViewReferralModal = ({
     : "N/A";
 
   const bhw = bhws.find((b) => b.user_id === selectedReferral.bhw_id);
-  const bhwName = bhw ? bhw.full_name : "N/A";
+  const bhwName = bhw ? bhw.full_name : "Unknown BHW";
 
   const getStatusBadgeColor = (status) => {
     switch (status.toLowerCase()) {
@@ -815,6 +815,24 @@ const MedicalReferralPage = () => {
       })
     );
   }, [referralSearch, referrals, residents]);
+
+  // Fetch BHWs
+  useEffect(() => {
+    const fetchBHWs = async () => {
+      try {
+        const response = await usersAPI.get("/bhws/list");
+        if (response.data.success) {
+          setBhws(response.data.data); // Make sure this state exists!
+          console.log("BHWs loaded:", response.data.data);
+        }
+      } catch (err) {
+        console.error("Failed to load BHWs:", err);
+        addNotification("error", "Error", "Could not load BHW list");
+      }
+    };
+
+    fetchBHWs();
+  }, []);
 
   const handleReferralCreate = async (newData, setError) => {
     try {
