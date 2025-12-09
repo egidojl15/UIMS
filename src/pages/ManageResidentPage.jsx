@@ -1671,7 +1671,8 @@ const AddResidentModal = ({
                 </p>
               </div>
             )}
-
+            // In AddResidentModal component, update the religion dropdown
+            section:
             {/* === RELIGION: Beautiful Searchable Dropdown === */}
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1686,6 +1687,7 @@ const AddResidentModal = ({
                   setResidentForm({ ...residentForm, religion: e.target.value })
                 }
                 className="hidden"
+                required // Add required attribute
               >
                 <option value="">Select religion</option>
                 {religions.map((r) => (
@@ -1702,15 +1704,14 @@ const AddResidentModal = ({
                   type="text"
                   value={residentForm.religion || ""}
                   onChange={(e) => {
-                    setResidentForm({
-                      ...residentForm,
-                      religion: e.target.value,
-                    });
+                    const value = e.target.value;
+                    setResidentForm({ ...residentForm, religion: value });
                     setShowReligionDropdown(true);
                   }}
                   onFocus={() => setShowReligionDropdown(true)}
                   placeholder="Search or select religion..."
                   className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent transition-all"
+                  required
                 />
                 <div className="absolute right-3 top-4 text-gray-400">▼</div>
               </div>
@@ -1759,7 +1760,6 @@ const AddResidentModal = ({
                 />
               )}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Occupation
@@ -1778,7 +1778,6 @@ const AddResidentModal = ({
                 placeholder="e.g., Farmer, Teacher, Student, etc."
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Educational Attainment
@@ -1870,7 +1869,6 @@ const AddResidentModal = ({
                 className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Purok
