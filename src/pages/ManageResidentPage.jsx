@@ -3377,7 +3377,7 @@ const ManageResidentsPage = () => {
                 <th className="py-3 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] whitespace-nowrap text-xs sm:text-sm min-w-[100px]">
                   Civil Status
                 </th>
-                <th className="py-4 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81]">
+                {/* <th className="py-4 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81]">
                   Religion
                 </th>
                 <th className="py-4 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81]">
@@ -3385,7 +3385,7 @@ const ManageResidentsPage = () => {
                 </th>
                 <th className="py-4 px-2 text-left font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81]">
                   Education
-                </th>
+                </th> */}
                 <th className="py-3 px-2 text-center font-semibold border-r border-white/20 sticky top-0 z-10 bg-[#0F4C81] whitespace-nowrap text-xs sm:text-sm min-w-[60px]">
                   PWD
                 </th>
@@ -3446,7 +3446,7 @@ const ManageResidentsPage = () => {
                     <td className="py-3 px-2 border-r border-gray-200 text-xs sm:text-sm whitespace-nowrap">
                       {r.civil_status}
                     </td>
-                    <td className="py-4 px-2 border-r border-gray-200">
+                    {/* <td className="py-4 px-2 border-r border-gray-200">
                       {r.religion || "-"}
                     </td>
                     <td className="py-4 px-2 border-r border-gray-200">
@@ -3454,7 +3454,7 @@ const ManageResidentsPage = () => {
                     </td>
                     <td className="py-4 px-2 border-r border-gray-200">
                       {r.educational_attainment || "-"}
-                    </td>
+                    </td> */}
                     <td className="py-3 px-2 border-r border-gray-200 text-center">
                       <span
                         className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold ${
