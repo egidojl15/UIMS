@@ -770,80 +770,18 @@ const EditResidentModal = ({
     }
   };
 
-  // In EditResidentModal component, update handleSubmit:
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsUpdating(true);
-
-    // Validate required fields
-    if (
-      !editResident.first_name ||
-      !editResident.last_name ||
-      !editResident.date_of_birth ||
-      !editResident.gender ||
-      !editResident.civil_status ||
-      !editResident.purok
-    ) {
-      alert("Please fill in all required fields");
-      setIsUpdating(false);
-      return;
-    }
-
-    // Calculate age
+    setIsUpdating(true); // NEW: Show loading
     const age = calculateAge(editResident.date_of_birth);
-
     try {
-      // Create FormData
-      const formData = new FormData();
-
-      // Append all form fields EXACTLY as backend expects
-      formData.append("first_name", editResident.first_name);
-      formData.append("last_name", editResident.last_name);
-      formData.append("middle_name", editResident.middle_name || "");
-      formData.append("suffix", editResident.suffix || "");
-      formData.append("date_of_birth", editResident.date_of_birth);
-      formData.append("gender", editResident.gender);
-      formData.append("civil_status", editResident.civil_status);
-      formData.append("spouse_name", editResident.spouse_name || "");
-      formData.append("religion", editResident.religion || "");
-      formData.append("occupation", editResident.occupation || "");
-      formData.append(
-        "educational_attainment",
-        editResident.educational_attainment || ""
-      );
-      formData.append("contact_number", editResident.contact_number || "");
-      formData.append("email", editResident.email || "");
-      formData.append("purok", editResident.purok);
-      formData.append("is_4ps", editResident.is_4ps ? "1" : "0");
-      formData.append(
-        "is_registered_voter",
-        editResident.is_registered_voter ? "1" : "0"
-      );
-      formData.append("is_pwd", editResident.is_pwd ? "1" : "0");
-      formData.append("is_senior_citizen", age >= 60 ? "1" : "0");
-
-      // Append household_id if provided
-      if (editResident.household_id) {
-        formData.append("household_id", editResident.household_id);
-      }
-
-      // Append photo file - MUST be "photo" not "photo_file"
-      if (photoFile) {
-        formData.append("photo", photoFile); // KEY FIX: "photo" not "photo_file"
-      }
-
-      // Call the handleResidentEdit function
-      await handleResidentEdit(editResident.resident_id, formData);
-
-      // Clean up
-      if (photoPreview && photoPreview.startsWith("blob:")) {
-        URL.revokeObjectURL(photoPreview);
-      }
-      setEditResident(null);
-    } catch (error) {
-      console.error("Error updating resident:", error);
+      await handleResidentEdit(editResident.resident_id, {
+        ...editResident,
+        is_senior_citizen: age >= 60 ? 1 : 0,
+        photo_file: photoFile,
+      });
     } finally {
-      setIsUpdating(false);
+      setIsUpdating(false); // NEW: End loading
     }
   };
 
@@ -910,27 +848,12 @@ const EditResidentModal = ({
             onSubmit={handleSubmit}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            // In EditResidentModal, update the file input section:
             <div className="col-span-1 md:col-span-2 flex flex-col items-center">
               {photoPreview ? (
                 <img
                   src={photoPreview}
                   alt="Resident"
                   className="w-24 h-24 rounded-full object-cover mb-2"
-                />
-              ) : editResident.photo_url ? (
-                <img
-                  src={
-                    isAbsoluteUrl(editResident.photo_url)
-                      ? editResident.photo_url
-                      : `https://uims-backend-production.up.railway.app${editResident.photo_url}`
-                  }
-                  alt="Resident"
-                  className="w-24 h-24 rounded-full object-cover mb-2"
-                  onError={(e) => {
-                    e.target.src = "/placeholder-avatar.png";
-                    console.error("Image load failed:", e.target.src);
-                  }}
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center mb-2">
@@ -947,6 +870,7 @@ const EditResidentModal = ({
                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Last Name
@@ -965,6 +889,7 @@ const EditResidentModal = ({
                 required
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 First Name
@@ -982,6 +907,7 @@ const EditResidentModal = ({
                 className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Middle Name
@@ -1000,6 +926,7 @@ const EditResidentModal = ({
                 required
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Suffix (e.g., Jr., Sr.)
@@ -1014,6 +941,7 @@ const EditResidentModal = ({
                 className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Date of Birth
@@ -1033,6 +961,7 @@ const EditResidentModal = ({
                 required
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Gender
@@ -1051,6 +980,7 @@ const EditResidentModal = ({
                 <option value="Female">Female</option>
               </select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Civil Status
@@ -1157,6 +1087,7 @@ const EditResidentModal = ({
                 </p>
               </div>
             )}
+
             {/* === RELIGION IN EDIT MODE === */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -1176,6 +1107,7 @@ const EditResidentModal = ({
                 placeholder="e.g., Roman Catholic, Protestant, etc."
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Educational Attainment
@@ -1198,6 +1130,7 @@ const EditResidentModal = ({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Contact Number
@@ -1220,6 +1153,7 @@ const EditResidentModal = ({
                 className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Email
@@ -1234,6 +1168,7 @@ const EditResidentModal = ({
                 className="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Purok
@@ -1255,6 +1190,7 @@ const EditResidentModal = ({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Household
@@ -1288,6 +1224,7 @@ const EditResidentModal = ({
                 )}
               </select>
             </div>
+
             <div className="flex items-center space-x-4 col-span-1 md:col-span-2">
               <label className="inline-flex items-center">
                 <input
@@ -1346,6 +1283,7 @@ const EditResidentModal = ({
                 </span>
               </div>
             </div>
+
             <div className="flex justify-end col-span-1 md:col-span-2 space-x-2">
               <button
                 type="button"
@@ -1418,73 +1356,40 @@ const AddResidentModal = ({
     }
   };
 
-  // In AddResidentModal component, update handleSubmit:
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Validate required fields
-    if (
-      !residentForm.first_name ||
-      !residentForm.last_name ||
-      !residentForm.date_of_birth ||
-      !residentForm.gender ||
-      !residentForm.civil_status ||
-      !residentForm.purok
-    ) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    // Calculate age for senior citizen status
     const age = calculateAge(residentForm.date_of_birth);
-
-    // Create FormData object
-    const formData = new FormData();
-
-    // Append all form fields EXACTLY as backend expects
-    formData.append("first_name", residentForm.first_name);
-    formData.append("last_name", residentForm.last_name);
-    formData.append("middle_name", residentForm.middle_name || "");
-    formData.append("suffix", residentForm.suffix || "");
-    formData.append("date_of_birth", residentForm.date_of_birth);
-    formData.append("gender", residentForm.gender);
-    formData.append("civil_status", residentForm.civil_status);
-    formData.append("spouse_name", residentForm.spouse_name || "");
-    formData.append("religion", residentForm.religion || "");
-    formData.append("occupation", residentForm.occupation || "");
-    formData.append(
-      "educational_attainment",
-      residentForm.educational_attainment || ""
-    );
-    formData.append("contact_number", residentForm.contact_number || "");
-    formData.append("email", residentForm.email || "");
-    formData.append("purok", residentForm.purok);
-    formData.append("is_4ps", residentForm.is_4ps ? "1" : "0");
-    formData.append(
-      "is_registered_voter",
-      residentForm.is_registered_voter ? "1" : "0"
-    );
-    formData.append("is_pwd", residentForm.is_pwd ? "1" : "0");
-    formData.append("is_senior_citizen", age >= 60 ? "1" : "0");
-
-    // Append household_id if provided
-    if (residentForm.household_id) {
-      formData.append("household_id", residentForm.household_id);
-    }
-
-    // Append photo file - MUST be "photo" not "photo_file"
-    if (residentForm.photo_file) {
-      formData.append("photo", residentForm.photo_file); // KEY FIX: "photo" not "photo_file"
-    }
-
-    // Call the submit function with FormData
-    handleResidentSubmit(formData);
-
-    // Clean up photo preview URL if it was created
-    if (photoPreview && photoPreview.startsWith("blob:")) {
-      URL.revokeObjectURL(photoPreview);
-    }
+    // Create updated form data with calculated senior citizen status
+    const updatedForm = {
+      ...residentForm,
+      is_senior_citizen: age >= 60 ? 1 : 0,
+    };
+    // Update the form state
+    setResidentForm(updatedForm);
+    // Call the submit function with updated data
+    handleResidentSubmit(e, updatedForm.photo_file);
   };
+
+  // ——— RELIGION DROPDOWN DATA ———
+  const [showReligionDropdown, setShowReligionDropdown] = useState(false);
+
+  const religions = [
+    "Roman Catholic",
+    "Iglesia ni Cristo",
+    "Islam",
+    "Protestant",
+    "Born Again Christian",
+    "Aglipayan (Philippine Independent Church)",
+    "Seventh-day Adventist",
+    "Baptist",
+    "Jehovah’s Witnesses",
+    "Church of Christ",
+    "Methodist",
+    "Evangelical",
+    "Buddhism",
+    "Hinduism",
+    "None / No Religion",
+  ];
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
@@ -1731,7 +1636,7 @@ const AddResidentModal = ({
                 className="hidden"
               >
                 <option value="">Select religion</option>
-                {religion.map((r) => (
+                {religions.map((r) => (
                   <option key={r} value={r}>
                     {r}
                   </option>
@@ -1761,7 +1666,7 @@ const AddResidentModal = ({
               {/* Dropdown list - stays INSIDE the modal */}
               {showReligionDropdown && (
                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto">
-                  {religion
+                  {religions
                     .filter((r) =>
                       r
                         .toLowerCase()
@@ -2268,13 +2173,11 @@ const ManageResidentsPage = () => {
     return matchesSearch && matchesPurok;
   });
 
-  // Update the standaloneHandleResidentSubmit function to accept FormData:
+  // Standalone handle resident submission
   const standaloneHandleResidentSubmit = async (formData) => {
     try {
       let result;
-
       if (standaloneEditResident) {
-        // For editing, use the update endpoint with FormData
         result = await residentsAPI.update(
           standaloneEditResident.resident_id,
           formData
@@ -2285,7 +2188,6 @@ const ManageResidentsPage = () => {
           "Resident updated successfully"
         );
       } else {
-        // For creating new resident, use create endpoint with FormData
         result = await residentsAPI.create(formData);
         standaloneAddNotification(
           "success",
@@ -2298,23 +2200,7 @@ const ManageResidentsPage = () => {
         standaloneFetchResidents();
         setStandaloneShowResidentForm(false);
         setStandaloneEditResident(null);
-        setStandaloneResidentForm({
-          first_name: "",
-          middle_name: "",
-          last_name: "",
-          suffix: "",
-          date_of_birth: "",
-          gender: "",
-          civil_status: "",
-          contact_number: "",
-          email: "",
-          purok: "",
-          is_4ps: false,
-          is_registered_voter: false,
-          is_pwd: false,
-          religion: "", // ADD THIS LINE
-          photo_file: null,
-        });
+        setStandaloneResidentForm({});
       }
     } catch (error) {
       console.error("Error saving resident:", error);
@@ -2322,10 +2208,10 @@ const ManageResidentsPage = () => {
     }
   };
 
-  // Update the standaloneHandleResidentEdit function to accept FormData:
-  const standaloneHandleResidentEdit = async (residentId, formData) => {
+  // Standalone handle resident edit - saves the edited resident data
+  const standaloneHandleResidentEdit = async (residentId, residentData) => {
     try {
-      const result = await residentsAPI.update(residentId, formData);
+      const result = await residentsAPI.update(residentId, residentData);
       if (result.success) {
         standaloneAddNotification(
           "success",
@@ -3338,7 +3224,6 @@ const ManageResidentsPage = () => {
       is_4ps: false,
       is_registered_voter: false,
       is_pwd: false,
-      religion: "", // ADD THIS LINE
       photo_file: null,
     });
   };
@@ -3794,7 +3679,6 @@ const ManageResidentsPage = () => {
           purokOptions={purokOptions}
           households={households}
           residents={residents}
-          closeEditModal={closeEditModal} // Add this if you have it
         />
       )}
 
