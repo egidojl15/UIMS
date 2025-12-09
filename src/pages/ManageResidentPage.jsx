@@ -1358,16 +1358,67 @@ const AddResidentModal = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // First validate required fields
+    if (!residentForm.religion || residentForm.religion.trim() === "") {
+      addNotification("error", "Validation Error", "Please select a religion");
+      return;
+    }
+
+    // Check other required fields
+    const requiredFields = [
+      "last_name",
+      "first_name",
+      "middle_name",
+      "date_of_birth",
+      "gender",
+      "civil_status",
+      "purok",
+    ];
+    for (const field of requiredFields) {
+      if (
+        !residentForm[field] ||
+        residentForm[field].toString().trim() === ""
+      ) {
+        addNotification(
+          "error",
+          "Validation Error",
+          `Please fill in ${field.replace("_", " ")}`
+        );
+        return;
+      }
+    }
+
     const age = calculateAge(residentForm.date_of_birth);
-    // Create updated form data with calculated senior citizen status
-    const updatedForm = {
-      ...residentForm,
+
+    // Create form data for submission
+    const formData = {
+      last_name: residentForm.last_name,
+      first_name: residentForm.first_name,
+      middle_name: residentForm.middle_name,
+      suffix: residentForm.suffix || "",
+      date_of_birth: residentForm.date_of_birth,
+      gender: residentForm.gender,
+      civil_status: residentForm.civil_status,
+      religion: residentForm.religion,
+      occupation: residentForm.occupation || "",
+      educational_attainment: residentForm.educational_attainment || "",
+      contact_number: residentForm.contact_number || "",
+      email: residentForm.email || "",
+      purok: residentForm.purok,
+      household_id: residentForm.household_id || "",
+      is_pwd: residentForm.is_pwd ? 1 : 0,
+      is_4ps: residentForm.is_4ps ? 1 : 0,
+      is_registered_voter: residentForm.is_registered_voter ? 1 : 0,
       is_senior_citizen: age >= 60 ? 1 : 0,
+      spouse_name:
+        residentForm.civil_status === "Married"
+          ? residentForm.spouse_name || ""
+          : "",
     };
-    // Update the form state
-    setResidentForm(updatedForm);
-    // Call the submit function with updated data
-    handleResidentSubmit(e, updatedForm.photo_file);
+
+    // Call the submit function with form data
+    handleResidentSubmit(formData);
   };
 
   // ——— RELIGION DROPDOWN DATA ———
@@ -2090,7 +2141,27 @@ const ManageResidentsPage = () => {
   const [standaloneSelectedResident, setStandaloneSelectedResident] =
     useState(null);
   const [standaloneEditResident, setStandaloneEditResident] = useState(null);
-  const [standaloneResidentForm, setStandaloneResidentForm] = useState({});
+  const [standaloneResidentForm, setStandaloneResidentForm] = useState({
+    last_name: "",
+    first_name: "",
+    middle_name: "",
+    suffix: "",
+    date_of_birth: "",
+    gender: "",
+    civil_status: "",
+    religion: "",
+    occupation: "",
+    educational_attainment: "",
+    contact_number: "",
+    email: "",
+    purok: "",
+    household_id: "",
+    is_pwd: false,
+    is_4ps: false,
+    is_registered_voter: false,
+    spouse_name: "",
+    photo_file: null,
+  });
   const [standaloneHouseholds, setStandaloneHouseholds] = useState([]);
   const [standaloneNotifications, setStandaloneNotifications] = useState([]);
   const [standaloneLoading, setStandaloneLoading] = useState(true);
@@ -2182,35 +2253,45 @@ const ManageResidentsPage = () => {
   // Standalone handle resident submission
   const standaloneHandleResidentSubmit = async (formData) => {
     try {
-      let result;
-      if (standaloneEditResident) {
-        result = await residentsAPI.update(
-          standaloneEditResident.resident_id,
-          formData
-        );
-        standaloneAddNotification(
-          "success",
-          "Success",
-          "Resident updated successfully"
-        );
-      } else {
-        result = await residentsAPI.create(formData);
+      console.log("Submitting resident form data:", formData);
+
+      // Create FormData object for file upload
+      const submitFormData = new FormData();
+
+      // Append all fields
+      Object.keys(formData).forEach((key) => {
+        if (key === "photo_file" && formData[key] instanceof File) {
+          submitFormData.append("photo", formData[key]);
+        } else if (key !== "photo_file") {
+          submitFormData.append(key, formData[key]);
+        }
+      });
+
+      const result = await residentsAPI.create(submitFormData);
+
+      if (result.success) {
         standaloneAddNotification(
           "success",
           "Success",
           "Resident created successfully"
         );
-      }
-
-      if (result.success) {
         standaloneFetchResidents();
         setStandaloneShowResidentForm(false);
-        setStandaloneEditResident(null);
         setStandaloneResidentForm({});
+      } else {
+        standaloneAddNotification(
+          "error",
+          "Error",
+          result.message || "Failed to create resident"
+        );
       }
     } catch (error) {
-      console.error("Error saving resident:", error);
-      standaloneAddNotification("error", "Error", "Failed to save resident");
+      console.error("Error creating resident:", error);
+      standaloneAddNotification(
+        "error",
+        "Error",
+        error.message || "Failed to create resident"
+      );
     }
   };
 
@@ -3692,10 +3773,15 @@ const ManageResidentsPage = () => {
         <AddResidentModal
           residentForm={residentForm}
           setResidentForm={setResidentForm}
-          handleResidentSubmit={handleResidentSubmit}
+          handleResidentSubmit={
+            isStandalone
+              ? standaloneHandleResidentSubmit
+              : context.handleResidentSubmit
+          }
           setShowResidentForm={setShowResidentForm}
           purokOptions={purokOptions}
           households={households}
+          filteredResidents={filteredResidents}
         />
       )}
 
