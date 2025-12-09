@@ -2312,6 +2312,7 @@ const ManageResidentsPage = () => {
           is_4ps: false,
           is_registered_voter: false,
           is_pwd: false,
+          religion: "", // ADD THIS LINE
           photo_file: null,
         });
       }
@@ -3337,6 +3338,7 @@ const ManageResidentsPage = () => {
       is_4ps: false,
       is_registered_voter: false,
       is_pwd: false,
+      religion: "", // ADD THIS LINE
       photo_file: null,
     });
   };
