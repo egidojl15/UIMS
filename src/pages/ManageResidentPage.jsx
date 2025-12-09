@@ -1363,6 +1363,13 @@ const AddResidentModal = ({
     // First validate required fields
     if (!residentForm.religion || residentForm.religion.trim() === "") {
       addNotification("error", "Validation Error", "Please select a religion");
+
+      // Scroll to religion field for better UX
+      const religionInput = document.querySelector('[name="religion"]');
+      if (religionInput) {
+        religionInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
       return;
     }
 
@@ -1376,6 +1383,7 @@ const AddResidentModal = ({
       "civil_status",
       "purok",
     ];
+
     for (const field of requiredFields) {
       if (
         !residentForm[field] ||
@@ -1386,6 +1394,14 @@ const AddResidentModal = ({
           "Validation Error",
           `Please fill in ${field.replace("_", " ")}`
         );
+
+        // Scroll to the problematic field
+        const fieldInput = document.querySelector(`[name="${field}"]`);
+        if (fieldInput) {
+          fieldInput.scrollIntoView({ behavior: "smooth", block: "center" });
+          fieldInput.focus();
+        }
+
         return;
       }
     }
@@ -1671,8 +1687,7 @@ const AddResidentModal = ({
                 </p>
               </div>
             )}
-            // In AddResidentModal component, update the religion dropdown
-            section:
+
             {/* === RELIGION: Beautiful Searchable Dropdown === */}
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">
