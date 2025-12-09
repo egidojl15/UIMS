@@ -331,36 +331,32 @@ export const residentsAPI = {
     }
   },
 
-  // FIXED: Update resident with photo support
-  update: async (id, residentData) => {
+  // In api.js, simplify the create and update methods:
+  create: async (formData) => {
+    try {
+      console.log("=== FRONTEND CREATE RESIDENT ===");
+      console.log("FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      const response = await api.post("/residents", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Create resident error:", error);
+      throw error.response?.data || error;
+    }
+  },
+
+  update: async (id, formData) => {
     try {
       console.log("=== FRONTEND UPDATE RESIDENT ===");
       console.log("Resident ID:", id);
-      console.log("Resident data:", residentData);
-
-      const formData = new FormData();
-
-      // Add all resident fields to FormData
-      Object.keys(residentData).forEach((key) => {
-        if (key === "photo_file" && residentData[key]) {
-          // Add the photo file if it exists and is a File object
-          console.log("Adding photo file:", residentData[key]);
-          formData.append("photo", residentData[key]);
-        } else if (
-          residentData[key] !== null &&
-          residentData[key] !== undefined &&
-          key !== "photo_file"
-        ) {
-          // Add other fields, converting booleans to strings
-          if (typeof residentData[key] === "boolean") {
-            formData.append(key, residentData[key] ? "1" : "0");
-          } else {
-            formData.append(key, residentData[key]);
-          }
-        }
-      });
-
-      // Log FormData contents for debugging
       console.log("FormData contents:");
       for (let [key, value] of formData.entries()) {
         console.log(key, value);
