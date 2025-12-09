@@ -2062,21 +2062,15 @@ const defaultPurokOptions = [
 ];
 
 const ManageResidentsPage = () => {
-  // Get context from Outlet - will be undefined if no Outlet parent exists
-  let context;
-  try {
-    context = useOutletContext();
-  } catch (error) {
-    context = null;
-  }
+  // Get context from Outlet - returns undefined if no Outlet parent
+  const context = useOutletContext() || null;
 
-  // Determine if we're in standalone mode (no valid context from Outlet)
-  // Check if context exists and has the required properties
+  // Determine if we're in standalone mode
   const isStandalone =
     !context ||
     typeof context !== "object" ||
     !context.residents ||
-    typeof context.residents === "undefined";
+    Array.isArray(context.residents) === false;
 
   // Debug logging
   console.log("ManageResidentsPage - Context:", context);
