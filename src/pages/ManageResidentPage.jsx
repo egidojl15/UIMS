@@ -1314,6 +1314,7 @@ const AddResidentModal = ({
   purokOptions,
   households,
   filteredResidents,
+  addNotification, // Add this prop
 }) => {
   const [photoPreview, setPhotoPreview] = useState(null);
 
@@ -3782,6 +3783,7 @@ const ManageResidentsPage = () => {
           purokOptions={purokOptions}
           households={households}
           filteredResidents={filteredResidents}
+          addNotification={addNotification} // Add this line
         />
       )}
 
