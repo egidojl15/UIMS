@@ -1731,7 +1731,7 @@ const AddResidentModal = ({
                 className="hidden"
               >
                 <option value="">Select religion</option>
-                {religions.map((r) => (
+                {religion.map((r) => (
                   <option key={r} value={r}>
                     {r}
                   </option>
@@ -1761,7 +1761,7 @@ const AddResidentModal = ({
               {/* Dropdown list - stays INSIDE the modal */}
               {showReligionDropdown && (
                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto">
-                  {religions
+                  {religion
                     .filter((r) =>
                       r
                         .toLowerCase()
