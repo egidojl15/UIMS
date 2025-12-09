@@ -1634,7 +1634,6 @@ const AddResidentModal = ({
                   setResidentForm({ ...residentForm, religion: e.target.value })
                 }
                 className="hidden"
-                required
               >
                 <option value="">Select religion</option>
                 {religions.map((r) => (
