@@ -1,12 +1,12 @@
-Front-end in Upper Ichon Management System(UIMS)
-  This project make to get our fucking Degree 
-    Project Members;
-    Barola, Camille -Xamilla
-    Barola, Samantha Kate
-    Cabales, Joshua Anthony
-    Edigo, Jetler
-    Montederamos, Marion Dave
-    Requiso, Harris 
+Front-end in Upper Ichon Management System(UIMS) <br>
+  This project make to get our fucking Degree <br>
+    Project Members;<br>
+    Barola, Camille -Xamilla<br>
+    Barola, Samantha Kate<br>
+    Cabales, Joshua Anthony<br>
+    Edigo, Jetler<br>
+    Montederamos, Marion Dave <br>
+    Requiso, Harris <br>
 
 
 # React + Vite
