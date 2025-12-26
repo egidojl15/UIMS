@@ -199,7 +199,8 @@ const ViewDeathModal = ({ selectedDeath, setSelectedDeath, calculateAge }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
-      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100 overflow-hidden animate-scaleIn">
+      {/* Changed max-w-lg → max-w-md and added w-full for mobile */}
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 overflow-hidden animate-scaleIn">
         {/* Header */}
         <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-6 py-4 border-b border-gray-600">
           <div className="flex justify-between items-center">
@@ -251,7 +252,7 @@ const ViewDeathModal = ({ selectedDeath, setSelectedDeath, calculateAge }) => {
                   Resident Information
                 </h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Name</p>
                   <p className="font-medium text-gray-900">
@@ -276,7 +277,7 @@ const ViewDeathModal = ({ selectedDeath, setSelectedDeath, calculateAge }) => {
                 <h3 className="font-semibold text-gray-800">Death Details</h3>
               </div>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Date of Death</p>
                     <p className="font-medium text-gray-900">
