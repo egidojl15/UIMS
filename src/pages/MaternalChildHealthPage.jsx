@@ -11,8 +11,22 @@ import {
   Baby,
   Syringe,
   FileText,
-  Clock,
   Download,
+  Calendar,
+  User, // Add this
+  Weight,
+  Droplets,
+  Shield,
+  Pill,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  ChevronRight,
+  ChevronLeft,
+  Save,
+  AlertTriangle,
+  Info,
+  Activity, // Add this for blood pressure icon
 } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
 import {
