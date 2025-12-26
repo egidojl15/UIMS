@@ -1400,8 +1400,14 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
     setManualMembers((prev) => prev.filter((m) => m.id !== memberId));
   };
 
-  // Filter residents based on search term
+  // Filter residents based on search term AND exclude the selected head
   const filteredResidents = allResidents.filter((resident) => {
+    // Exclude the selected head of household from member options
+    if (selectedHeadId && resident.resident_id == selectedHeadId) {
+      return false;
+    }
+
+    // Apply search filter
     const fullName =
       `${resident.first_name} ${resident.middle_name} ${resident.last_name} ${resident.suffix}`.toLowerCase();
     const searchLower = memberSearchTerm.toLowerCase();
@@ -1774,6 +1780,25 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
                     />
                   </div>
                 </div>
+
+                {/* Add this info message when head is selected */}
+                {selectedHeadId && formData.household_head_name && (
+                  <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <User className="w-4 h-4 text-blue-600 mt-0.5" />
+                      <div className="text-sm">
+                        <span className="font-semibold text-blue-900">
+                          {formData.household_head_name}
+                        </span>
+                        <span className="text-blue-700">
+                          {" "}
+                          is set as the head of household and will be
+                          automatically included.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {loadingResidents ? (
                   <div className="text-center py-4 text-gray-500">
