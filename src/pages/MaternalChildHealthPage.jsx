@@ -168,20 +168,50 @@ const ViewMaternalRecordModal = ({
     selectedRecord.dob || selectedRecord.date_of_birth
   );
 
+  const status = selectedRecord.delivery_date ? "Delivered" : "Ongoing";
+  const statusColor = selectedRecord.delivery_date
+    ? "bg-green-100 text-green-800 border-green-200"
+    : "bg-yellow-100 text-yellow-800 border-yellow-200";
+
+  const getStatusIcon = () => {
+    if (selectedRecord.delivery_date) {
+      return <CheckCircle className="w-4 h-4" />;
+    }
+    return <Clock className="w-4 h-4" />;
+  };
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[80vh] overflow-hidden">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
+        {/* Enhanced Header */}
         <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
-                Maternal Health Details
-              </h2>
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+                <HeartPulse className="text-white" size={28} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                  Maternal Health Details
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border ${statusColor}`}
+                  >
+                    {getStatusIcon()}
+                    {status}
+                  </span>
+                </h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
+                  <p className="text-white/80 text-sm">
+                    Click outside or press ESC to close
+                  </p>
+                </div>
+              </div>
             </div>
             <button
               onClick={() => setSelectedRecord(null)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group backdrop-blur-sm"
+              aria-label="Close modal"
             >
               <X
                 size={24}
@@ -190,95 +220,324 @@ const ViewMaternalRecordModal = ({
             </button>
           </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(80vh-120px)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-gray-500 font-medium">Resident Name</p>
-              <p className="font-semibold">{selectedRecord.resident_name}</p>
+
+        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+          {/* Patient Info Card */}
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 mb-8 border border-blue-100">
+            <div className="flex flex-col md:flex-row md:items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  {selectedRecord.resident_name}
+                </h3>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-700">
+                      Age: <strong>{residentAge}</strong>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-700">
+                      Last Updated:{" "}
+                      <strong>
+                        {new Date(
+                          selectedRecord.updated_at
+                        ).toLocaleDateString()}
+                      </strong>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 md:mt-0">
+                <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200">
+                  <Baby className="w-5 h-5 text-[#58A1D3]" />
+                  <span className="font-medium text-gray-800">
+                    Maternal Record
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500 font-medium">Age</p>
-              <p className="font-semibold">{residentAge}</p>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Pregnancy Information */}
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+              <div className="flex items-center gap-3 mb-4">
+                <Calendar className="w-5 h-5 text-purple-600" />
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Pregnancy Details
+                </h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">
+                    LMP Date
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {formatDateForInput(selectedRecord.lmp_date) ||
+                      "Not specified"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">EDD</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {formatDateForInput(selectedRecord.edd) || "Not calculated"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">
+                    Prenatal Visits
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-[#0F4C81]">
+                      {selectedRecord.prenatal_visits || "0"}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      visits completed
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">LMP Date</p>
-              <p className="font-semibold">
-                {formatDateForInput(selectedRecord.lmp_date || "N/A")}
-              </p>
+
+            {/* Health Metrics */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+              <div className="flex items-center gap-3 mb-4">
+                <Weight className="w-5 h-5 text-green-600" />
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Health Metrics
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">
+                    Blood Pressure
+                  </p>
+                  <div
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg ${
+                      selectedRecord.blood_pressure
+                        ? "bg-white border border-gray-200"
+                        : "bg-gray-100"
+                    }`}
+                  >
+                    <span
+                      className={`font-bold ${
+                        selectedRecord.blood_pressure
+                          ? "text-gray-900"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {selectedRecord.blood_pressure || "Not measured"}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">
+                    Weight
+                  </p>
+                  <div
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg ${
+                      selectedRecord.weight
+                        ? "bg-white border border-gray-200"
+                        : "bg-gray-100"
+                    }`}
+                  >
+                    <span
+                      className={`font-bold ${
+                        selectedRecord.weight
+                          ? "text-gray-900"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {selectedRecord.weight
+                        ? `${selectedRecord.weight} kg`
+                        : "Not recorded"}
+                    </span>
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm font-medium text-gray-500 mb-1">
+                    Hemoglobin
+                  </p>
+                  <div
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg ${
+                      selectedRecord.hemoglobin
+                        ? "bg-white border border-gray-200"
+                        : "bg-gray-100"
+                    }`}
+                  >
+                    <Droplets
+                      className={`w-4 h-4 ${
+                        selectedRecord.hemoglobin
+                          ? "text-red-500"
+                          : "text-gray-400"
+                      }`}
+                    />
+                    <span
+                      className={`font-bold ${
+                        selectedRecord.hemoglobin
+                          ? "text-gray-900"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {selectedRecord.hemoglobin
+                        ? `${selectedRecord.hemoglobin} g/dL`
+                        : "Not tested"}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">EDD</p>
-              <p className="font-semibold">
-                {formatDateForInput(selectedRecord.edd || "N/A")}
-              </p>
+
+            {/* Medications & Vaccinations */}
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100">
+              <div className="flex items-center gap-3 mb-4">
+                <Shield className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Medications & Vaccinations
+                </h3>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <Syringe className="w-5 h-5 text-gray-600" />
+                    <span className="font-medium text-gray-800">
+                      Tetanus Vaccination
+                    </span>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      selectedRecord.tetanus_vaccination
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {selectedRecord.tetanus_vaccination
+                      ? "Completed"
+                      : "Pending"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <Pill className="w-5 h-5 text-gray-600" />
+                    <span className="font-medium text-gray-800">
+                      Iron Supplement
+                    </span>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      selectedRecord.iron_supplement
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {selectedRecord.iron_supplement ? "Taking" : "Not Taking"}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500 font-medium">Prenatal Visits</p>
-              <p className="font-semibold">
-                {selectedRecord.prenatal_visits || "N/A"}
-              </p>
+
+            {/* Delivery Information (Conditional) */}
+            {selectedRecord.delivery_date && (
+              <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <Baby className="w-5 h-5 text-yellow-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Delivery Information
+                  </h3>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Delivery Date
+                    </p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {formatDateForInput(selectedRecord.delivery_date)}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 mb-1">
+                        Type
+                      </p>
+                      <div className="inline-flex items-center gap-1 px-3 py-1.5 bg-white rounded-lg border border-gray-200">
+                        <span className="font-medium text-gray-900">
+                          {selectedRecord.delivery_type || "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 mb-1">
+                        Baby Weight
+                      </p>
+                      <div className="inline-flex items-center gap-1 px-3 py-1.5 bg-white rounded-lg border border-gray-200">
+                        <Weight className="w-4 h-4 text-gray-500" />
+                        <span className="font-medium text-gray-900">
+                          {selectedRecord.baby_weight
+                            ? `${selectedRecord.baby_weight} kg`
+                            : "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Complications & Notes */}
+            <div className="md:col-span-2 bg-gradient-to-br from-gray-50 to-slate-50 rounded-2xl p-6 border border-gray-200">
+              <div className="flex items-center gap-3 mb-4">
+                <AlertCircle className="w-5 h-5 text-gray-600" />
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Complications & Notes
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-2">
+                    Complications
+                  </p>
+                  <div className="bg-white p-4 rounded-xl border border-gray-200 min-h-[100px]">
+                    <p className="text-gray-900 leading-relaxed">
+                      {selectedRecord.complications ||
+                        "No complications reported"}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-2">
+                    Additional Notes
+                  </p>
+                  <div className="bg-white p-4 rounded-xl border border-gray-200 min-h-[100px]">
+                    <p className="text-gray-900 leading-relaxed">
+                      {selectedRecord.notes || "No additional notes"}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500 font-medium">Blood Pressure</p>
-              <p className="font-semibold">
-                {selectedRecord.blood_pressure || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Weight (kg)</p>
-              <p className="font-semibold">{selectedRecord.weight || "N/A"}</p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Hemoglobin (g/dL)</p>
-              <p className="font-semibold">
-                {selectedRecord.hemoglobin || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Tetanus Vaccination</p>
-              <p className="font-semibold">
-                {selectedRecord.tetanus_vaccination ? "Yes" : "No"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Iron Supplement</p>
-              <p className="font-semibold">
-                {selectedRecord.iron_supplement ? "Yes" : "No"}
-              </p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Complications</p>
-              <p className="font-semibold">
-                {selectedRecord.complications || "None"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Delivery Date</p>
-              <p className="font-semibold">
-                {formatDateForInput(selectedRecord.delivery_date || "N/A")}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Delivery Type</p>
-              <p className="font-semibold">
-                {selectedRecord.delivery_type || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Baby Weight (kg)</p>
-              <p className="font-semibold">
-                {selectedRecord.baby_weight || "N/A"}
-              </p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Notes</p>
-              <p className="font-semibold">{selectedRecord.notes || "N/A"}</p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Last Updated</p>
-              <p className="font-semibold">
-                {new Date(selectedRecord.updated_at).toLocaleDateString()}
-              </p>
+          </div>
+
+          {/* Footer Actions */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Info className="w-4 h-4" />
+                <span>
+                  Record created on{" "}
+                  {new Date(
+                    selectedRecord.created_at || selectedRecord.updated_at
+                  ).toLocaleDateString()}
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedRecord(null)}
+                className="px-5 py-2.5 bg-gradient-to-r from-[#58A1D3] to-[#0F4C81] text-white rounded-xl hover:shadow-lg transition-all duration-200 font-medium"
+              >
+                Close Details
+              </button>
             </div>
           </div>
         </div>
