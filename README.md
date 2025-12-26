@@ -1,3 +1,17 @@
+# UIMS 
+
+
+Front-end in Upper Ichon Management System(UIMS) <br>
+  This project make to get our fucking Degree <br>
+    Project Members;<br>
+    Barola, Camille -Xamilla<br>
+    Barola, Samantha Kate<br>
+    Cabales, Joshua Anthony<br>
+    Edigo, Jetler<br>
+    Montederamos, Marion Dave <br>
+    Requiso, Harris <br>
+
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
