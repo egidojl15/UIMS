@@ -1468,7 +1468,13 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
                 selectedResident.last_name,
                 selectedResident.suffix,
               ]
-                .filter((part) => part && part !== "null")
+                .filter(
+                  (part) =>
+                    part &&
+                    part !== "null" &&
+                    part !== "0" &&
+                    String(part).trim() !== ""
+                )
                 .join(" ")
                 .trim();
 
