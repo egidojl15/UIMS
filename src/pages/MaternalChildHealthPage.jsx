@@ -690,31 +690,108 @@ const CreateMaternalRecordModal = ({
     notes: "",
   });
 
-  const handleSubmit = (e) => {
+  const [activeTab, setActiveTab] = useState("basic");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!formData.resident_id) {
       addNotification("error", "Validation Error", "Please select a resident");
       return;
     }
-    handleCreateMaternal(formData);
-    setShowCreateModal(false);
-    setFormData({ ...formData, resident_id: "" }); // Reset resident_id
+
+    setIsSubmitting(true);
+    try {
+      await handleCreateMaternal(formData);
+      setShowCreateModal(false);
+    } catch (error) {
+      // Error handling is done in handleCreateMaternal
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const calculateEDD = (lmpDate) => {
+    if (!lmpDate) return "";
+    const lmp = new Date(lmpDate);
+    const edd = new Date(lmp);
+    edd.setDate(edd.getDate() + 280); // 40 weeks from LMP
+    return edd.toISOString().split("T")[0];
+  };
+
+  const handleLMPChange = (date) => {
+    setFormData((prev) => ({
+      ...prev,
+      lmp_date: date,
+      edd: calculateEDD(date),
+    }));
+  };
+
+  const isFormValid = () => {
+    return formData.resident_id && formData.lmp_date;
+  };
+
+  // Helper function to calculate age from date string
+  const calculateAgeFromDOB = (dob) => {
+    if (!dob) return "N/A";
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
+
+  const tabs = [
+    { id: "basic", label: "Basic Info", icon: User, required: true },
+    { id: "pregnancy", label: "Pregnancy", icon: Calendar, required: true },
+    { id: "health", label: "Health Metrics", icon: HeartPulse },
+    { id: "delivery", label: "Delivery", icon: Baby },
+    { id: "notes", label: "Notes", icon: FileText },
+  ];
+
+  const getCurrentResident = () => {
+    return residents.find(
+      (r) =>
+        r.resident_id === parseInt(formData.resident_id) ||
+        r.resident_id === formData.resident_id
+    );
+  };
+
+  const currentResident = getCurrentResident();
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-6xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
+        {/* Enhanced Header */}
         <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
-                Add Maternal Health Record
-              </h2>
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+                <HeartPulse className="text-white" size={28} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  Add Maternal Health Record
+                </h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
+                  <p className="text-white/80 text-sm">
+                    Create a new maternal health record
+                  </p>
+                </div>
+              </div>
             </div>
             <button
               onClick={() => setShowCreateModal(false)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group backdrop-blur-sm"
+              aria-label="Close modal"
             >
               <X
                 size={24}
@@ -723,238 +800,840 @@ const CreateMaternalRecordModal = ({
             </button>
           </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div className="flex-1 overflow-y-auto px-2">
-            <form
-              onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Resident *
-                </label>
-                <select
-                  value={formData.resident_id}
-                  onChange={(e) =>
-                    setFormData({ ...formData, resident_id: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  required
-                >
-                  <option value="">Select Resident</option>
-                  {residents.map((r) => (
-                    <option key={r.resident_id} value={r.resident_id}>
-                      {r.first_name} {r.last_name} (ID: {r.resident_id})
-                    </option>
-                  ))}
-                </select>
+
+        <div className="flex h-[calc(90vh-120px)]">
+          {/* Sidebar Navigation */}
+          <div className="w-64 border-r border-gray-200 bg-gradient-to-b from-gray-50 to-white p-6">
+            <div className="mb-8">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                Record Sections
+              </h3>
+              <div className="space-y-2">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  const isComplete =
+                    tab.id === "basic"
+                      ? formData.resident_id
+                      : tab.id === "pregnancy"
+                      ? formData.lmp_date
+                      : true;
+
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 group ${
+                        isActive
+                          ? "bg-white shadow-md border border-[#58A1D3]/20"
+                          : "hover:bg-white/50 hover:shadow-sm"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`p-2 rounded-lg transition-colors ${
+                            isActive
+                              ? "bg-[#58A1D3] text-white"
+                              : isComplete && !isActive
+                              ? "bg-green-100 text-green-600"
+                              : "bg-gray-100 text-gray-600 group-hover:bg-[#58A1D3]/10"
+                          }`}
+                        >
+                          {isComplete && !isActive ? (
+                            <CheckCircle className="w-4 h-4" />
+                          ) : (
+                            <Icon size={18} />
+                          )}
+                        </div>
+                        <div className="text-left">
+                          <span
+                            className={`font-medium ${
+                              isActive ? "text-[#0F4C81]" : "text-gray-700"
+                            }`}
+                          >
+                            {tab.label}
+                          </span>
+                          {tab.required && (
+                            <span className="text-xs text-red-500 ml-2">*</span>
+                          )}
+                        </div>
+                      </div>
+                      {isActive ? (
+                        <ChevronRight className="text-[#58A1D3]" size={18} />
+                      ) : isComplete ? (
+                        <CheckCircle className="text-green-500" size={16} />
+                      ) : null}
+                    </button>
+                  );
+                })}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  LMP Date (Last Menstrual Period)
-                </label>
-                <input
-                  type="date"
-                  value={formData.lmp_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, lmp_date: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
+            </div>
+
+            {/* Selected Resident Info */}
+            {currentResident && (
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100 mb-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <User className="text-blue-600 flex-shrink-0" size={18} />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800 mb-1">
+                      Selected Resident
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      {currentResident.first_name} {currentResident.last_name}
+                    </p>
+                    <p className="text-xs text-blue-600">
+                      Age: {calculateAgeFromDOB(currentResident.date_of_birth)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100">
+              <div className="flex items-start gap-3">
+                <Info
+                  className="text-amber-600 mt-0.5 flex-shrink-0"
+                  size={16}
                 />
+                <div>
+                  <p className="text-sm font-medium text-amber-800 mb-1">
+                    Quick Tips
+                  </p>
+                  <ul className="text-xs text-amber-700 space-y-1">
+                    <li className="flex items-start gap-1">
+                      <div className="w-1 h-1 bg-amber-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <span>Fields marked with * are required</span>
+                    </li>
+                    <li className="flex items-start gap-1">
+                      <div className="w-1 h-1 bg-amber-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <span>LMP date will auto-calculate EDD</span>
+                    </li>
+                    <li className="flex items-start gap-1">
+                      <div className="w-1 h-1 bg-amber-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <span>
+                        Delivery info is optional for ongoing pregnancies
+                      </span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  EDD (Estimated Date of Delivery)
-                </label>
-                <input
-                  type="date"
-                  value={formData.edd}
-                  onChange={(e) =>
-                    setFormData({ ...formData, edd: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
+            </div>
+          </div>
+
+          {/* Main Form Content */}
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 overflow-y-auto p-8">
+              <form onSubmit={handleSubmit} id="maternal-form">
+                {/* Basic Information Tab */}
+                {activeTab === "basic" && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div className="mb-8">
+                      <div className="flex items-center gap-3 mb-4">
+                        <User className="w-6 h-6 text-[#0F4C81]" />
+                        <h3 className="text-xl font-bold text-gray-900">
+                          Select Resident
+                        </h3>
+                      </div>
+                      <p className="text-gray-600 mb-6">
+                        Choose the pregnant resident to create a maternal health
+                        record.
+                      </p>
+
+                      <div className="space-y-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Resident <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <select
+                              value={formData.resident_id}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  resident_id: e.target.value,
+                                })
+                              }
+                              className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200 bg-white appearance-none"
+                              required
+                            >
+                              <option value="">
+                                Select a resident from the list...
+                              </option>
+                              {residents.map((r) => (
+                                <option
+                                  key={r.resident_id}
+                                  value={r.resident_id}
+                                >
+                                  {r.first_name} {r.last_name} • Age:{" "}
+                                  {calculateAgeFromDOB(r.date_of_birth)} • ID:{" "}
+                                  {r.resident_id}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
+                          </div>
+                          {formData.resident_id && (
+                            <div className="mt-4 p-4 bg-green-50 rounded-xl border border-green-100 animate-fadeIn">
+                              <div className="flex items-center gap-3">
+                                <CheckCircle
+                                  className="text-green-600 flex-shrink-0"
+                                  size={20}
+                                />
+                                <p className="text-sm text-green-800">
+                                  Resident selected. You can proceed to the next
+                                  section.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {currentResident && (
+                          <div className="bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl p-4 border border-gray-200">
+                            <h4 className="text-sm font-medium text-gray-900 mb-3">
+                              Resident Information
+                            </h4>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p className="text-gray-500">Full Name</p>
+                                <p className="font-medium text-gray-900">
+                                  {currentResident.first_name}{" "}
+                                  {currentResident.last_name}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">Age</p>
+                                <p className="font-medium text-gray-900">
+                                  {calculateAgeFromDOB(
+                                    currentResident.date_of_birth
+                                  )}{" "}
+                                  years
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">Date of Birth</p>
+                                <p className="font-medium text-gray-900">
+                                  {formatDateForInput(
+                                    currentResident.date_of_birth
+                                  )}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">Gender</p>
+                                <p className="font-medium text-gray-900">
+                                  {currentResident.gender || "N/A"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Pregnancy Information Tab */}
+                {activeTab === "pregnancy" && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div className="mb-8">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Calendar className="w-6 h-6 text-[#0F4C81]" />
+                        <h3 className="text-xl font-bold text-gray-900">
+                          Pregnancy Details
+                        </h3>
+                      </div>
+                      <p className="text-gray-600 mb-6">
+                        Enter pregnancy-related information.
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            LMP Date (Last Menstrual Period){" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="date"
+                              value={formData.lmp_date}
+                              onChange={(e) => handleLMPChange(e.target.value)}
+                              className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200"
+                              required
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Date of last menstrual period
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            EDD (Estimated Delivery Date)
+                          </label>
+                          <div className="relative">
+                            <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="date"
+                              value={formData.edd}
+                              readOnly
+                              className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 bg-gray-50 rounded-xl text-gray-600"
+                            />
+                            {formData.edd && (
+                              <div className="absolute -bottom-6 left-0 text-xs text-gray-500">
+                                Auto-calculated based on LMP (40 weeks)
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Expected delivery date
+                          </p>
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Prenatal Visits
+                          </label>
+                          <div className="relative">
+                            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium">
+                              #
+                            </div>
+                            <input
+                              type="number"
+                              value={formData.prenatal_visits}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  prenatal_visits: e.target.value,
+                                })
+                              }
+                              className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200"
+                              min="0"
+                              placeholder="Number of prenatal visits completed"
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Number of prenatal checkups attended
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Health Metrics Tab */}
+                {activeTab === "health" && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div className="mb-8">
+                      <div className="flex items-center gap-3 mb-4">
+                        <HeartPulse className="w-6 h-6 text-[#0F4C81]" />
+                        <h3 className="text-xl font-bold text-gray-900">
+                          Health Metrics
+                        </h3>
+                      </div>
+                      <p className="text-gray-600 mb-6">
+                        Record current health measurements and medications.
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Blood Pressure
+                          </label>
+                          <div className="relative">
+                            <Activity className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="text"
+                              value={formData.blood_pressure}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  blood_pressure: e.target.value,
+                                })
+                              }
+                              className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200"
+                              placeholder="e.g., 120/80 mmHg"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Weight (kg)
+                          </label>
+                          <div className="relative">
+                            <Weight className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="number"
+                              value={formData.weight}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  weight: e.target.value,
+                                })
+                              }
+                              className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200"
+                              step="0.1"
+                              min="0"
+                              placeholder="Current weight in kilograms"
+                            />
+                            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">
+                              kg
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Hemoglobin (g/dL)
+                          </label>
+                          <div className="relative">
+                            <Droplets className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="number"
+                              value={formData.hemoglobin}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  hemoglobin: e.target.value,
+                                })
+                              }
+                              className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200"
+                              step="0.1"
+                              min="0"
+                              placeholder="Hemoglobin level"
+                            />
+                            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">
+                              g/dL
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2 space-y-6 pt-4">
+                          <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <Shield className="w-5 h-5 text-[#58A1D3]" />
+                            Medications & Vaccinations
+                          </h4>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="flex items-center justify-between p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-[#58A1D3]/30 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`p-2 rounded-lg ${
+                                    formData.tetanus_vaccination
+                                      ? "bg-green-100 text-green-600"
+                                      : "bg-gray-100 text-gray-600"
+                                  }`}
+                                >
+                                  <Syringe size={18} />
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-800 block">
+                                    Tetanus Vaccination
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    Protects against tetanus infection
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="relative">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.tetanus_vaccination}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      tetanus_vaccination: e.target.checked,
+                                    })
+                                  }
+                                  className="sr-only"
+                                  id="tetanus"
+                                />
+                                <label
+                                  htmlFor="tetanus"
+                                  className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all duration-200 ${
+                                    formData.tetanus_vaccination
+                                      ? "bg-green-500"
+                                      : "bg-gray-300"
+                                  }`}
+                                >
+                                  <div
+                                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
+                                      formData.tetanus_vaccination
+                                        ? "translate-x-6"
+                                        : "translate-x-0"
+                                    }`}
+                                  />
+                                </label>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-[#58A1D3]/30 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`p-2 rounded-lg ${
+                                    formData.iron_supplement
+                                      ? "bg-green-100 text-green-600"
+                                      : "bg-gray-100 text-gray-600"
+                                  }`}
+                                >
+                                  <Pill size={18} />
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-800 block">
+                                    Iron Supplement
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    Prevents anemia during pregnancy
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="relative">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.iron_supplement}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      iron_supplement: e.target.checked,
+                                    })
+                                  }
+                                  className="sr-only"
+                                  id="iron"
+                                />
+                                <label
+                                  htmlFor="iron"
+                                  className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all duration-200 ${
+                                    formData.iron_supplement
+                                      ? "bg-green-500"
+                                      : "bg-gray-300"
+                                  }`}
+                                >
+                                  <div
+                                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
+                                      formData.iron_supplement
+                                        ? "translate-x-6"
+                                        : "translate-x-0"
+                                    }`}
+                                  />
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Delivery Tab */}
+                {activeTab === "delivery" && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div className="mb-8">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Baby className="w-6 h-6 text-[#0F4C81]" />
+                        <h3 className="text-xl font-bold text-gray-900">
+                          Delivery Information
+                        </h3>
+                      </div>
+                      <p className="text-gray-600 mb-6">
+                        Enter delivery details (optional for ongoing
+                        pregnancies).
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Delivery Date
+                          </label>
+                          <div className="relative">
+                            <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="date"
+                              value={formData.delivery_date}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  delivery_date: e.target.value,
+                                })
+                              }
+                              className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200"
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Leave empty if pregnancy is ongoing
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Delivery Type
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={formData.delivery_type}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  delivery_type: e.target.value,
+                                })
+                              }
+                              className="w-full pl-4 pr-10 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200 appearance-none bg-white"
+                            >
+                              <option value="">Select delivery type...</option>
+                              <option value="Normal">
+                                Normal Vaginal Delivery
+                              </option>
+                              <option value="Cesarean">
+                                Cesarean Section (C-section)
+                              </option>
+                              <option value="Assisted">
+                                Assisted Vaginal Delivery
+                              </option>
+                            </select>
+                            <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Baby Weight (kg)
+                          </label>
+                          <div className="relative">
+                            <Weight className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                              type="number"
+                              value={formData.baby_weight}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  baby_weight: e.target.value,
+                                })
+                              }
+                              className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200"
+                              step="0.1"
+                              min="0"
+                              placeholder="Baby's birth weight"
+                            />
+                            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">
+                              kg
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Complications
+                          </label>
+                          <div className="relative">
+                            <AlertCircle className="absolute left-4 top-4 text-gray-400 w-5 h-5" />
+                            <textarea
+                              value={formData.complications}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  complications: e.target.value,
+                                })
+                              }
+                              className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200 resize-none"
+                              rows="4"
+                              placeholder="Any complications during pregnancy or delivery. Leave empty if none."
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Document any complications or concerns
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes Tab */}
+                {activeTab === "notes" && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div className="mb-8">
+                      <div className="flex items-center gap-3 mb-4">
+                        <FileText className="w-6 h-6 text-[#0F4C81]" />
+                        <h3 className="text-xl font-bold text-gray-900">
+                          Additional Notes
+                        </h3>
+                      </div>
+                      <p className="text-gray-600 mb-6">
+                        Add any additional information, observations, or special
+                        instructions.
+                      </p>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                          Notes
+                        </label>
+                        <div className="relative">
+                          <FileText className="absolute left-4 top-4 text-gray-400 w-5 h-5" />
+                          <textarea
+                            value={formData.notes}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                notes: e.target.value,
+                              })
+                            }
+                            className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-2 focus:ring-[#58A1D3]/20 transition-all duration-200 resize-none"
+                            rows="8"
+                            placeholder="Enter any additional notes, observations, recommendations, or special instructions..."
+                          />
+                        </div>
+                        <p className="text-sm text-gray-500 mt-2">
+                          This information will be included in the maternal
+                          health record for future reference.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Summary Preview */}
+                    <div className="bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl p-6 border border-gray-200">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Info className="w-5 h-5 text-gray-600" />
+                        Summary Preview
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">Resident</p>
+                          <p className="font-medium text-gray-900">
+                            {currentResident
+                              ? `${currentResident.first_name} ${currentResident.last_name}`
+                              : "Not selected"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Pregnancy Status</p>
+                          <p className="font-medium text-gray-900">
+                            {formData.delivery_date ? "Delivered" : "Ongoing"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">LMP Date</p>
+                          <p className="font-medium text-gray-900">
+                            {formData.lmp_date || "Not entered"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">EDD</p>
+                          <p className="font-medium text-gray-900">
+                            {formData.edd || "Not calculated"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </form>
+            </div>
+
+            {/* Footer Navigation */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="px-5 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">Progress:</span>
+                    <div className="flex gap-1">
+                      {tabs.map((tab) => (
+                        <div
+                          key={tab.id}
+                          className={`w-2 h-2 rounded-full ${
+                            tab.id === "basic" && formData.resident_id
+                              ? "bg-green-500"
+                              : tab.id === "pregnancy" && formData.lmp_date
+                              ? "bg-green-500"
+                              : tab.id === "health"
+                              ? "bg-blue-500"
+                              : tab.id === "delivery"
+                              ? "bg-blue-500"
+                              : tab.id === "notes"
+                              ? "bg-blue-500"
+                              : "bg-gray-300"
+                          }`}
+                          title={`${tab.label}: ${
+                            tab.id === "basic" && formData.resident_id
+                              ? "Complete"
+                              : tab.id === "pregnancy" && formData.lmp_date
+                              ? "Complete"
+                              : "Pending"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    {tabs.map((tab, index) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                          activeTab === tab.id
+                            ? "bg-[#58A1D3] scale-125"
+                            : "bg-gray-300 hover:bg-gray-400"
+                        }`}
+                        aria-label={`Go to ${tab.label}`}
+                      />
+                    ))}
+                  </div>
+
+                  {activeTab !== "notes" ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currentIndex = tabs.findIndex(
+                          (t) => t.id === activeTab
+                        );
+                        if (currentIndex < tabs.length - 1) {
+                          setActiveTab(tabs[currentIndex + 1].id);
+                        }
+                      }}
+                      className="px-5 py-2.5 bg-gradient-to-r from-[#58A1D3] to-[#0F4C81] text-white rounded-xl hover:shadow-lg transition-all duration-200 font-medium flex items-center gap-2"
+                    >
+                      Continue
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      form="maternal-form"
+                      disabled={!isFormValid() || isSubmitting}
+                      className={`px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all duration-200 ${
+                        isFormValid()
+                          ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg"
+                          : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      }`}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-5 h-5" />
+                          Save Maternal Record
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Prenatal Visits
-                </label>
-                <input
-                  type="number"
-                  value={formData.prenatal_visits}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      prenatal_visits: e.target.value,
-                    })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Blood Pressure
-                </label>
-                <input
-                  type="text"
-                  value={formData.blood_pressure}
-                  onChange={(e) =>
-                    setFormData({ ...formData, blood_pressure: e.target.value })
-                  }
-                  placeholder="e.g., 120/80"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Weight (kg)
-                </label>
-                <input
-                  type="number"
-                  value={formData.weight}
-                  onChange={(e) =>
-                    setFormData({ ...formData, weight: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  step="0.1"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Hemoglobin (g/dL)
-                </label>
-                <input
-                  type="number"
-                  value={formData.hemoglobin}
-                  onChange={(e) =>
-                    setFormData({ ...formData, hemoglobin: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  step="0.1"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tetanus Vaccination
-                </label>
-                <input
-                  type="checkbox"
-                  checked={formData.tetanus_vaccination}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      tetanus_vaccination: e.target.checked,
-                    })
-                  }
-                  className="w-5 h-5 text-[#58A1D3] border-gray-300 rounded focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Iron Supplement
-                </label>
-                <input
-                  type="checkbox"
-                  checked={formData.iron_supplement}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      iron_supplement: e.target.checked,
-                    })
-                  }
-                  className="w-5 h-5 text-[#58A1D3] border-gray-300 rounded focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Complications
-                </label>
-                <textarea
-                  value={formData.complications}
-                  onChange={(e) =>
-                    setFormData({ ...formData, complications: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  rows="3"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delivery Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.delivery_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, delivery_date: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delivery Type
-                </label>
-                <select
-                  value={formData.delivery_type}
-                  onChange={(e) =>
-                    setFormData({ ...formData, delivery_type: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                >
-                  <option value="">Select Delivery Type</option>
-                  <option value="Normal">Normal</option>
-                  <option value="Cesarean">Cesarean</option>
-                  <option value="Assisted">Assisted</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Baby Weight (kg)
-                </label>
-                <input
-                  type="number"
-                  value={formData.baby_weight}
-                  onChange={(e) =>
-                    setFormData({ ...formData, baby_weight: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  step="0.1"
-                  min="0"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  rows="3"
-                />
-              </div>
-              <div className="md:col-span-2 flex justify-end space-x-3 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#58A1D3] text-white rounded-lg hover:bg-[#0F4C81]"
-                >
-                  Save Record
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
