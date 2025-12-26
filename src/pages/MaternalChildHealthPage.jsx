@@ -24,7 +24,10 @@ import {
   ChevronRight,
   ChevronLeft,
   Save,
+  Loader2,
   AlertTriangle,
+  Check,
+  RefreshCw,
   Info,
   Activity, // Add this for blood pressure icon
 } from "lucide-react";
@@ -572,20 +575,72 @@ const ViewImmunizationRecordModal = ({
     selectedRecord.dob || selectedRecord.date_of_birth
   );
 
+  const formatDate = (dateString) => {
+    if (!dateString || dateString === "N/A") return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "short",
+    });
+  };
+
+  const getStatusBadge = (record) => {
+    if (!record.next_dose_date) return null;
+    const nextDate = new Date(record.next_dose_date);
+    const today = new Date();
+    const daysUntil = Math.ceil((nextDate - today) / (1000 * 60 * 60 * 24));
+
+    if (daysUntil <= 0) {
+      return {
+        text: "Due Now",
+        color: "bg-red-100 text-red-800 border-red-300",
+      };
+    } else if (daysUntil <= 7) {
+      return {
+        text: "Due Soon",
+        color: "bg-amber-100 text-amber-800 border-amber-300",
+      };
+    } else if (daysUntil <= 30) {
+      return {
+        text: "Upcoming",
+        color: "bg-blue-100 text-blue-800 border-blue-300",
+      };
+    }
+    return {
+      text: "Scheduled",
+      color: "bg-green-100 text-green-800 border-green-300",
+    };
+  };
+
+  const status = getStatusBadge(selectedRecord);
+  const hasNextDose =
+    selectedRecord.next_dose_date && selectedRecord.next_dose_date !== "N/A";
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[80vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white/98 backdrop-blur-xl rounded-3xl w-full max-w-2xl shadow-2xl shadow-cyan-500/10 border border-gray-200/50 max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] via-[#2D6FA5] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
-                Child Immunization Details
-              </h2>
+              <div className="relative">
+                <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
+                <div className="absolute inset-0 bg-cyan-300 rounded-full animate-ping opacity-75"></div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">
+                  Immunization Record
+                </h2>
+                <p className="text-white/80 text-sm mt-1 font-medium">
+                  Detailed vaccine information
+                </p>
+              </div>
             </div>
             <button
               onClick={() => setSelectedRecord(null)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-white/90 hover:text-white hover:bg-white/15 rounded-full p-2 transition-all duration-300 group backdrop-blur-sm"
+              aria-label="Close modal"
             >
               <X
                 size={24}
@@ -594,79 +649,199 @@ const ViewImmunizationRecordModal = ({
             </button>
           </div>
         </div>
-        <div className="p-8 overflow-y-auto max-h-[calc(80vh-120px)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-gray-500 font-medium">Child Name</p>
-              <p className="font-semibold">{selectedRecord.child_name}</p>
+
+        {/* Body */}
+        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+          {/* Child Info Card */}
+          <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-6 mb-8 border border-gray-100 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">
+                  Child's Name
+                </p>
+                <p className="text-xl font-bold text-gray-900">
+                  {selectedRecord.child_name}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">
+                  Age
+                </p>
+                <p className="text-xl font-bold text-gray-900">{childAge}</p>
+              </div>
+              <div>
+                <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">
+                  Mother's Name
+                </p>
+                <p className="text-xl font-bold text-gray-900">
+                  {selectedRecord.mother_name || "—"}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500 font-medium">Age</p>
-              <p className="font-semibold">{childAge}</p>
+          </div>
+
+          {/* Vaccine Details */}
+          <div className="space-y-8">
+            {/* Vaccine Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-gray-500 font-medium">Vaccine Name</p>
+                  {status && (
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${status.color}`}
+                    >
+                      {status.text}
+                    </span>
+                  )}
+                </div>
+                <p className="text-2xl font-bold text-[#0F4C81]">
+                  {selectedRecord.vaccine_name}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-gray-500 font-medium mb-2">Batch Number</p>
+                <p className="text-lg font-semibold bg-gray-50 px-4 py-2 rounded-xl border border-gray-200">
+                  {selectedRecord.batch_no || "—"}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500 font-medium">Mother's Name</p>
-              <p className="font-semibold">
-                {selectedRecord.mother_name || "N/A"}
-              </p>
+
+            {/* Dates Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-blue-50/50 rounded-2xl p-5 border border-blue-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  <p className="text-gray-700 font-semibold">
+                    Date Administered
+                  </p>
+                </div>
+                <p className="text-xl font-bold text-gray-900">
+                  {formatDate(selectedRecord.date_given)}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Given by:{" "}
+                  <span className="font-semibold text-gray-700">
+                    {selectedRecord.given_by || "—"}
+                  </span>
+                </p>
+              </div>
+
+              {hasNextDose && (
+                <div className="bg-amber-50/50 rounded-2xl p-5 border border-amber-100">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Calendar className="w-5 h-5 text-amber-600" />
+                    <p className="text-gray-700 font-semibold">
+                      Next Dose Date
+                    </p>
+                  </div>
+                  <p className="text-xl font-bold text-gray-900">
+                    {formatDate(selectedRecord.next_dose_date)}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {status?.text.toLowerCase() === "due now" ? (
+                      <span className="text-red-600 font-semibold">
+                        ⚠️ Immediate action required
+                      </span>
+                    ) : (
+                      "Mark your calendar"
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Vaccine Name</p>
-              <p className="font-semibold">{selectedRecord.vaccine_name}</p>
+
+            {/* Health Information */}
+            <div className="space-y-6">
+              <div>
+                <p className="text-gray-700 font-semibold mb-3 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-green-600" />
+                  Adverse Reactions
+                </p>
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <p
+                    className={`font-medium ${
+                      selectedRecord.adverse_reactions
+                        ? "text-gray-800"
+                        : "text-gray-500 italic"
+                    }`}
+                  >
+                    {selectedRecord.adverse_reactions ||
+                      "No adverse reactions reported"}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-gray-700 font-semibold mb-3 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-gray-600" />
+                  Additional Notes
+                </p>
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 min-h-[80px]">
+                  <p
+                    className={`${
+                      selectedRecord.notes
+                        ? "text-gray-800"
+                        : "text-gray-500 italic"
+                    }`}
+                  >
+                    {selectedRecord.notes || "No additional notes"}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500 font-medium">Date Given</p>
-              <p className="font-semibold">
-                {formatDateForInput(selectedRecord.date_given || "N/A")}
-              </p>
+
+            {/* Meta Information */}
+            <div className="pt-6 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                <div className="flex items-center gap-3 text-gray-600">
+                  <Clock className="w-4 h-4" />
+                  <div>
+                    <p className="font-medium">Record Created</p>
+                    <p className="font-semibold text-gray-800">
+                      {formatDate(selectedRecord.created_at)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-gray-600">
+                  <RefreshCw className="w-4 h-4" />
+                  <div>
+                    <p className="font-medium">Last Updated</p>
+                    <p className="font-semibold text-gray-800">
+                      {formatDate(selectedRecord.updated_at)}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-500 font-medium">Batch Number</p>
-              <p className="font-semibold">
-                {selectedRecord.batch_no || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Next Dose Date</p>
-              <p className="font-semibold">
-                {formatDateForInput(selectedRecord.next_dose_date || "N/A")}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Given By</p>
-              <p className="font-semibold">
-                {selectedRecord.given_by || "N/A"}
-              </p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Adverse Reactions</p>
-              <p className="font-semibold">
-                {selectedRecord.adverse_reactions || "None"}
-              </p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Notes</p>
-              <p className="font-semibold">{selectedRecord.notes || "N/A"}</p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Created at</p>
-              <p className="font-semibold">
-                {formatDateForInput(selectedRecord.created_at || "N/A")}
-              </p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-gray-500 font-medium">Last Updated</p>
-              <p className="font-semibold">
-                {new Date(selectedRecord.updated_at).toLocaleDateString()}
-              </p>
-            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 bg-gradient-to-t from-white to-gray-50/80 px-8 py-5 rounded-b-3xl border-t border-gray-200/50 backdrop-blur-sm">
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setSelectedRecord(null)}
+              className="px-6 py-2.5 text-gray-700 hover:text-gray-900 font-medium rounded-xl hover:bg-gray-100 transition-all duration-300"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => {
+                // Add edit functionality here
+                console.log("Edit record:", selectedRecord);
+              }}
+              className="px-6 py-2.5 bg-gradient-to-r from-[#0F4C81] to-[#2D6FA5] text-white font-medium rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
+            >
+              Edit Record
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
 };
-
 const CreateMaternalRecordModal = ({
   setShowCreateModal,
   handleCreateMaternal,
@@ -1082,7 +1257,7 @@ const CreateMaternalRecordModal = ({
                             />
                             {formData.edd && (
                               <div className="absolute -bottom-6 left-0 text-xs text-gray-500">
-                                Auto-calculated based on LMP (40 weeks)
+                                Based on LMP (40 weeks)
                               </div>
                             )}
                           </div>
@@ -1178,9 +1353,6 @@ const CreateMaternalRecordModal = ({
                               min="0"
                               placeholder="Current weight in kilograms"
                             />
-                            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">
-                              kg
-                            </span>
                           </div>
                         </div>
 
@@ -1204,9 +1376,6 @@ const CreateMaternalRecordModal = ({
                               min="0"
                               placeholder="Hemoglobin level"
                             />
-                            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">
-                              g/dL
-                            </span>
                           </div>
                         </div>
 
@@ -1416,9 +1585,6 @@ const CreateMaternalRecordModal = ({
                               min="0"
                               placeholder="Baby's birth weight"
                             />
-                            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">
-                              kg
-                            </span>
                           </div>
                         </div>
 
@@ -2826,34 +2992,175 @@ const EditImmunizationRecordModal = ({
     notes: record.notes || "",
   });
 
-  const handleSubmit = (e) => {
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [childs, setChilds] = useState([]);
+  const [mothers, setMothers] = useState([]);
+
+  // Filter residents into children and adults
+  useEffect(() => {
+    const childList = residents.filter((r) => {
+      const age = calculateAgeFromDOB(r.date_of_birth);
+      return age && age.years < 18;
+    });
+    const motherList = residents.filter(
+      (r) => r.gender === "Female" && r.age >= 18
+    );
+
+    setChilds(childList);
+    setMothers(motherList);
+  }, [residents]);
+
+  const calculateAgeFromDOB = (dob) => {
+    if (!dob) return null;
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let years = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      years--;
+    }
+    return years;
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.child_resident_id) {
+      newErrors.child_resident_id = "Child selection is required";
+    }
+
+    if (!formData.vaccine_name.trim()) {
+      newErrors.vaccine_name = "Vaccine name is required";
+    }
+
+    if (formData.date_given) {
+      const givenDate = new Date(formData.date_given);
+      const today = new Date();
+      if (givenDate > today) {
+        newErrors.date_given = "Date given cannot be in the future";
+      }
+    }
+
+    if (formData.next_dose_date && formData.date_given) {
+      const nextDate = new Date(formData.next_dose_date);
+      const givenDate = new Date(formData.date_given);
+      if (nextDate <= givenDate) {
+        newErrors.next_dose_date = "Next dose must be after the given date";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: null }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.child_resident_id || !formData.vaccine_name) {
+
+    if (!validateForm()) {
       addNotification(
         "error",
         "Validation Error",
-        "Child and vaccine name are required"
+        "Please fix the errors in the form"
       );
       return;
     }
-    handleEditImmunization(record.id, formData);
-    setShowEditModal(false);
+
+    setIsSubmitting(true);
+    try {
+      await handleEditImmunization(record.id, formData);
+      addNotification(
+        "success",
+        "Record Updated",
+        "Immunization record has been updated successfully"
+      );
+      setShowEditModal(false);
+    } catch (error) {
+      addNotification(
+        "error",
+        "Update Failed",
+        "Failed to update the immunization record"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
+  const handleQuickDate = (days) => {
+    const today = new Date();
+    const futureDate = new Date(today);
+    futureDate.setDate(today.getDate() + days);
+    const formattedDate = futureDate.toISOString().split("T")[0];
+    setFormData((prev) => ({ ...prev, next_dose_date: formattedDate }));
+  };
+
+  const getVaccineSuggestions = () => {
+    const commonVaccines = [
+      "BCG",
+      "Hepatitis B (1st dose)",
+      "Hepatitis B (2nd dose)",
+      "Hepatitis B (3rd dose)",
+      "DPT-HepB-Hib (Pentavalent 1)",
+      "DPT-HepB-Hib (Pentavalent 2)",
+      "DPT-HepB-Hib (Pentavalent 3)",
+      "Oral Polio Vaccine (OPV 1)",
+      "Oral Polio Vaccine (OPV 2)",
+      "Oral Polio Vaccine (OPV 3)",
+      "Inactivated Polio Vaccine (IPV)",
+      "PCV 1 (Pneumococcal)",
+      "PCV 2 (Pneumococcal)",
+      "PCV 3 (Pneumococcal)",
+      "Measles-Mumps-Rubella (MMR 1)",
+      "Measles-Mumps-Rubella (MMR 2)",
+      "Varicella (Chickenpox)",
+      "Influenza (Seasonal)",
+      "Rotavirus (1st dose)",
+      "Rotavirus (2nd dose)",
+      "Hepatitis A",
+      "Typhoid",
+      "HPV (Human Papillomavirus)",
+    ];
+    return commonVaccines;
+  };
+
+  const vaccineSuggestions = getVaccineSuggestions();
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-4xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white/98 backdrop-blur-xl rounded-3xl w-full max-w-3xl shadow-2xl shadow-cyan-500/10 border border-gray-200/50 max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] via-[#2D6FA5] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">
-                Edit Child Immunization Record
-              </h2>
+              <div className="relative">
+                <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
+                <div className="absolute inset-0 bg-cyan-300 rounded-full animate-ping opacity-75"></div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">
+                  Edit Immunization Record
+                </h2>
+                <p className="text-white/80 text-sm mt-1 font-medium">
+                  Update vaccination details for {record.child_name}
+                </p>
+              </div>
             </div>
             <button
               onClick={() => setShowEditModal(false)}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
+              className="text-white/90 hover:text-white hover:bg-white/15 rounded-full p-2 transition-all duration-300 group backdrop-blur-sm"
+              aria-label="Close modal"
             >
               <X
                 size={24}
@@ -2862,169 +3169,280 @@ const EditImmunizationRecordModal = ({
             </button>
           </div>
         </div>
+
+        {/* Body */}
         <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div className="flex-1 overflow-y-auto px-2">
-            <form
-              onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Child & Mother Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <User className="w-4 h-4" />
                   Child *
                 </label>
                 <select
                   value={formData.child_resident_id}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      child_resident_id: e.target.value,
-                    })
+                    handleChange("child_resident_id", e.target.value)
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
+                  className={`w-full p-3 border ${
+                    errors.child_resident_id
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  } rounded-xl focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent transition-all duration-300`}
                   required
                 >
-                  <option value="">Select Child</option>
-                  {residents.map((r) => (
-                    <option key={r.resident_id} value={r.resident_id}>
-                      {r.first_name} {r.last_name} (ID: {r.resident_id})
-                    </option>
-                  ))}
+                  <option value="">Select a child</option>
+                  {childs.map((child) => {
+                    const age = calculateAgeFromDOB(child.date_of_birth);
+                    return (
+                      <option key={child.resident_id} value={child.resident_id}>
+                        {child.first_name} {child.last_name}
+                        {age ? ` (${age} years)` : ""}
+                        {child.date_of_birth
+                          ? ` • DOB: ${new Date(
+                              child.date_of_birth
+                            ).toLocaleDateString()}`
+                          : ""}
+                      </option>
+                    );
+                  })}
                 </select>
+                {errors.child_resident_id && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.child_resident_id}
+                  </p>
+                )}
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mother
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Mother (Optional)
                 </label>
                 <select
                   value={formData.mother_resident_id}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      mother_resident_id: e.target.value,
-                    })
+                    handleChange("mother_resident_id", e.target.value)
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent transition-all duration-300"
                 >
-                  <option value="">Select Mother (Optional)</option>
-                  {residents.map((r) => (
-                    <option key={r.resident_id} value={r.resident_id}>
-                      {r.first_name} {r.last_name} (ID: {r.resident_id})
+                  <option value="">Select mother (optional)</option>
+                  {mothers.map((mother) => (
+                    <option key={mother.resident_id} value={mother.resident_id}>
+                      {mother.first_name} {mother.last_name}
+                      {mother.age ? ` (${mother.age} years)` : ""}
                     </option>
                   ))}
                 </select>
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Vaccine Name *
-                </label>
+            </div>
+
+            {/* Vaccine Information */}
+            <div className="space-y-4">
+              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <Syringe className="w-4 h-4" />
+                Vaccine Information *
+              </label>
+
+              <div className="relative">
                 <input
                   type="text"
                   value={formData.vaccine_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, vaccine_name: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
+                  onChange={(e) => handleChange("vaccine_name", e.target.value)}
+                  list="vaccine-suggestions"
+                  className={`w-full p-3 border ${
+                    errors.vaccine_name
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  } rounded-xl focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent transition-all duration-300`}
+                  placeholder="Enter vaccine name or select from common vaccines"
                   required
                 />
+                <datalist id="vaccine-suggestions">
+                  {vaccineSuggestions.map((vaccine, index) => (
+                    <option key={index} value={vaccine} />
+                  ))}
+                </datalist>
+                {errors.vaccine_name && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.vaccine_name}
+                  </p>
+                )}
               </div>
+            </div>
+
+            {/* Dates Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
                   Date Given
                 </label>
                 <input
                   type="date"
                   value={formData.date_given}
-                  onChange={(e) =>
-                    setFormData({ ...formData, date_given: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
+                  onChange={(e) => handleChange("date_given", e.target.value)}
+                  className={`w-full p-3 border ${
+                    errors.date_given
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  } rounded-xl focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent transition-all duration-300`}
+                  max={new Date().toISOString().split("T")[0]}
                 />
+                {errors.date_given && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.date_given}
+                  </p>
+                )}
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Batch Number
-                </label>
-                <input
-                  type="text"
-                  value={formData.batch_no}
-                  onChange={(e) =>
-                    setFormData({ ...formData, batch_no: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Next Dose Date
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Next Dose Date
+                  </label>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleQuickDate(30)}
+                      className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                    >
+                      30d
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickDate(60)}
+                      className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                    >
+                      60d
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickDate(90)}
+                      className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                    >
+                      90d
+                    </button>
+                  </div>
+                </div>
                 <input
                   type="date"
                   value={formData.next_dose_date}
                   onChange={(e) =>
-                    setFormData({ ...formData, next_dose_date: e.target.value })
+                    handleChange("next_dose_date", e.target.value)
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
+                  className={`w-full p-3 border ${
+                    errors.next_dose_date
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  } rounded-xl focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent transition-all duration-300`}
+                  min={
+                    formData.date_given ||
+                    new Date().toISOString().split("T")[0]
+                  }
+                />
+                {errors.next_dose_date && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.next_dose_date}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Batch & Administered By */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Batch/Lot Number
+                </label>
+                <input
+                  type="text"
+                  value={formData.batch_no}
+                  onChange={(e) => handleChange("batch_no", e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent transition-all duration-300"
+                  placeholder="Enter batch number"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Given By
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Administered By
                 </label>
                 <input
                   type="text"
                   value={formData.given_by}
-                  onChange={(e) =>
-                    setFormData({ ...formData, given_by: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
+                  onChange={(e) => handleChange("given_by", e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent transition-all duration-300"
+                  placeholder="Enter name of healthcare provider"
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Adverse Reactions
-                </label>
-                <textarea
-                  value={formData.adverse_reactions}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      adverse_reactions: e.target.value,
-                    })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  rows="3"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#58A1D3]"
-                  rows="3"
-                />
-              </div>
-              <div className="md:col-span-2 flex justify-end space-x-3 mt-4">
+            </div>
+
+            {/* Adverse Reactions */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Adverse Reactions
+              </label>
+              <textarea
+                value={formData.adverse_reactions}
+                onChange={(e) =>
+                  handleChange("adverse_reactions", e.target.value)
+                }
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent transition-all duration-300 min-h-[100px]"
+                placeholder="Note any adverse reactions experienced after vaccination"
+              />
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Additional Notes
+              </label>
+              <textarea
+                value={formData.notes}
+                onChange={(e) => handleChange("notes", e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent transition-all duration-300 min-h-[100px]"
+                placeholder="Any additional notes or observations..."
+              />
+            </div>
+
+            {/* Form Actions */}
+            <div className="pt-6 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-6 py-3 text-gray-700 hover:text-gray-900 font-medium rounded-xl hover:bg-gray-100 border border-gray-300 transition-all duration-300 flex-1 sm:flex-none"
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#58A1D3] text-white rounded-lg hover:bg-[#0F4C81]"
+                  disabled={isSubmitting}
+                  className="px-6 py-3 bg-gradient-to-r from-[#0F4C81] to-[#2D6FA5] text-white font-medium rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center gap-2 flex-1 sm:flex-none disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  Update Record
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-5 h-5" />
+                      Update Immunization Record
+                    </>
+                  )}
                 </button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>
