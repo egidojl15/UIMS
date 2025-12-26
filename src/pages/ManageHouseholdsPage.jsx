@@ -1013,20 +1013,20 @@ const ManageHouseholdsPage = () => {
                 {viewingMembers.members && viewingMembers.members.length > 0 ? (
                   <div className="space-y-4">
                     {viewingMembers.members.map((member) => {
-                      // Build full name properly (no more "DelaCruz0" or double spaces)
+                      // Build full name properly - filter out invalid suffixes
                       const fullName = [
                         member.first_name?.trim(),
                         member.middle_name?.trim(),
                         member.last_name?.trim(),
-                        // Only show suffix if it's a real string and not "0" or 0
+                        // Only include suffix if it's valid (not "0", not empty)
                         member.suffix &&
-                        member.suffix !== "0" &&
-                        member.suffix !== 0 &&
-                        String(member.suffix).trim()
+                        String(member.suffix).trim() !== "0" &&
+                        String(member.suffix).trim() !== "" &&
+                        String(member.suffix).toLowerCase() !== "null"
                           ? String(member.suffix).trim()
                           : null,
                       ]
-                        .filter(Boolean)
+                        .filter(Boolean) // Remove null/undefined/empty values
                         .join(" ");
 
                       // Safe age calculation (handles invalid dates)
