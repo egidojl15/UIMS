@@ -199,10 +199,10 @@ const ViewDeathModal = ({ selectedDeath, setSelectedDeath, calculateAge }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
-      {/* Changed max-w-lg → max-w-md and added w-full for mobile */}
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 overflow-hidden animate-scaleIn">
+      {/* FULL WIDTH on mobile, wider on tablet/desktop + scrollable */}
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl border border-gray-100 overflow-hidden flex flex-col animate-scaleIn">
         {/* Header */}
-        <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-6 py-4 border-b border-gray-600">
+        <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-6 py-4 border-b border-gray-600 flex-shrink-0">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -227,8 +227,8 @@ const ViewDeathModal = ({ selectedDeath, setSelectedDeath, calculateAge }) => {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
+        {/* Scrollable Content */}
+        <div className="p-4 sm:p-6 overflow-y-auto flex-grow">
           <div className="space-y-6">
             {/* Resident Information */}
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
@@ -329,16 +329,16 @@ const ViewDeathModal = ({ selectedDeath, setSelectedDeath, calculateAge }) => {
               </div>
             )}
           </div>
+        </div>
 
-          {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
-            <button
-              onClick={() => setSelectedDeath(null)}
-              className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-            >
-              Close
-            </button>
-          </div>
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 flex justify-end flex-shrink-0">
+          <button
+            onClick={() => setSelectedDeath(null)}
+            className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
