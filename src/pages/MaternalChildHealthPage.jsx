@@ -3445,13 +3445,6 @@ const EditImmunizationRecordModal = ({
     (r) => r.resident_id == formData.mother_resident_id
   );
 
-  // Filter children (residents under 18)
-  const childResidents = residents.filter((r) => {
-    if (!r.date_of_birth) return true;
-    const age = getAge(r.date_of_birth);
-    return typeof age === "number" ? age < 18 : true;
-  });
-
   const handleChildChange = (childId) => {
     const child = residents.find((r) => r.resident_id == childId);
 
