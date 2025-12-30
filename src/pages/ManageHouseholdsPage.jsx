@@ -1013,6 +1013,7 @@ const ManageHouseholdsPage = () => {
                 {viewingMembers.members && viewingMembers.members.length > 0 ? (
                   <div className="space-y-4">
                     {viewingMembers.members.map((member) => {
+                      console.log("🔍 Member data:", member); // ADD THIS LINE
                       // Build full name properly - filter out invalid suffixes
                       const fullName = [
                         member.first_name?.trim(),
