@@ -2741,6 +2741,8 @@ const CreateImmunizationRecordModal = ({
   handleCreateImmunization,
   residents,
   addNotification,
+  calculateAgeFromDOB, // ADD THIS
+  vaccineOptions, // ADD THIS
 }) => {
   const [formData, setFormData] = useState({
     child_resident_id: "",
@@ -2762,37 +2764,16 @@ const CreateImmunizationRecordModal = ({
   const [selectedChild, setSelectedChild] = useState(null);
   const [selectedMother, setSelectedMother] = useState(null);
 
-  // Simple helper function inside component
-  const getAge = (dob) => {
-    if (!dob) return "N/A";
-    try {
-      const birthDate = new Date(dob);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birthDate.getDate())
-      ) {
-        age--;
-      }
-      return age;
-    } catch (error) {
-      return "N/A";
-    }
-  };
-
-  // Filter children (residents under 18)
+  // Replace the childResidents and motherResidents arrays with:
   const childResidents = residents.filter((r) => {
     if (!r.date_of_birth) return true;
-    const age = getAge(r.date_of_birth);
+    const age = calculateAgeFromDOB(r.date_of_birth);
     return typeof age === "number" ? age < 18 : true;
   });
 
-  // Filter adult females for mother selection
   const motherResidents = residents.filter((r) => {
     if (!r.date_of_birth) return r.gender === "Female";
-    const age = getAge(r.date_of_birth);
+    const age = calculateAgeFromDOB(r.date_of_birth);
     return typeof age === "number" ? age >= 18 && r.gender === "Female" : false;
   });
 
@@ -3436,6 +3417,8 @@ const EditImmunizationRecordModal = ({
   residents,
   addNotification,
   record,
+  calculateAgeFromDOB, // ADD THIS
+  vaccineOptions, // ADD THIS
 }) => {
   const [formData, setFormData] = useState({
     child_resident_id: record.child_resident_id || "",
@@ -3454,26 +3437,6 @@ const EditImmunizationRecordModal = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
-
-  // Simple helper function
-  const getAge = (dob) => {
-    if (!dob) return "N/A";
-    try {
-      const birthDate = new Date(dob);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birthDate.getDate())
-      ) {
-        age--;
-      }
-      return age;
-    } catch (error) {
-      return "N/A";
-    }
-  };
 
   const selectedChild = residents.find(
     (r) => r.resident_id == formData.child_resident_id
@@ -4057,6 +4020,42 @@ const MaternalChildHealthPage = () => {
   const [selectedReportId, setSelectedReportId] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const [purokOptions, setPurokOptions] = useState([]);
+
+  // ADD THESE HELPER FUNCTIONS HERE (inside the component)
+  const calculateAgeFromDOB = (dob) => {
+    if (!dob) return "N/A";
+    try {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+      return age;
+    } catch (error) {
+      return "N/A";
+    }
+  };
+
+  const vaccineOptions = [
+    "BCG",
+    "Hepatitis B",
+    "Pentavalent (DPT-HepB-Hib)",
+    "Oral Polio Vaccine (OPV)",
+    "Inactivated Polio Vaccine (IPV)",
+    "Pneumococcal Conjugate Vaccine (PCV)",
+    "Measles, Mumps, Rubella (MMR)",
+    "Rotavirus",
+    "Influenza",
+    "Varicella (Chickenpox)",
+    "Tetanus Toxoid (TT)",
+    "COVID-19 Vaccine",
+    "Other",
+  ];
 
   // Notification handlers
   const removeNotification = (id) => {
@@ -5147,6 +5146,8 @@ const MaternalChildHealthPage = () => {
           handleCreateImmunization={handleCreateImmunization}
           residents={residents}
           addNotification={addNotification}
+          calculateAgeFromDOB={calculateAgeFromDOB} // ADD THIS
+          vaccineOptions={vaccineOptions} // ADD THIS
         />
       )}
       {showImmunizationEdit && editImmunizationRecord && (
@@ -5156,6 +5157,8 @@ const MaternalChildHealthPage = () => {
           residents={residents}
           addNotification={addNotification}
           record={editImmunizationRecord}
+          calculateAgeFromDOB={calculateAgeFromDOB} // ADD THIS
+          vaccineOptions={vaccineOptions} // ADD THIS
         />
       )}
       {recordToDelete && (
