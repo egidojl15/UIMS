@@ -1190,6 +1190,46 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
     age: "",
   });
 
+  // Add this function after all your state declarations
+  const updateResidentHouseholds = async (householdId) => {
+    try {
+      console.log("Updating resident households:", {
+        householdId,
+        selectedMembers,
+        selectedMembersCount: selectedMembers.length,
+      });
+
+      if (selectedMembers.length === 0) {
+        console.log("No members to assign");
+        return;
+      }
+
+      // Update selected members to belong to this household
+      for (const residentId of selectedMembers) {
+        console.log(
+          "Assigning resident",
+          residentId,
+          "to household",
+          householdId
+        );
+        await residentsAPI.updateHousehold(residentId, householdId);
+      }
+
+      addNotification(
+        "success",
+        "Members Assigned",
+        `${selectedMembers.length} member(s) assigned to household`
+      );
+    } catch (error) {
+      console.error("Error updating resident households:", error);
+      addNotification(
+        "error",
+        "Assignment Failed",
+        "Failed to assign members to household"
+      );
+    }
+  };
+
   useEffect(() => {
     if (household) {
       setFormData({
@@ -1256,6 +1296,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
 
       console.log("Submitting household data:", submitData);
       console.log("Household ID:", household?.household_id);
+      console.log("Selected members to assign:", selectedMembers); // Debug log
 
       if (household) {
         // Update existing household
@@ -1581,6 +1622,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
     return null;
   };
 
+  // Update your existing handleMemberAssignment function to use updateResidentHouseholds:
   const handleMemberAssignment = async (householdId) => {
     try {
       // Get current members of this household
@@ -1601,9 +1643,20 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
         await residentsAPI.updateHousehold(residentId, null);
       }
 
-      // Add members to household
-      for (const residentId of membersToAdd) {
-        await residentsAPI.updateHousehold(residentId, householdId);
+      // Add members to household using the new function
+      if (membersToAdd.length > 0) {
+        // Temporarily set selectedMembers to just the new members
+        const originalSelectedMembers = [...selectedMembers];
+        setSelectedMembers(membersToAdd);
+
+        // Wait a moment for state to update
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        // Update the residents
+        await updateResidentHouseholds(householdId);
+
+        // Restore original selected members
+        setSelectedMembers(originalSelectedMembers);
       }
 
       if (membersToAdd.length > 0 || membersToRemove.length > 0) {
