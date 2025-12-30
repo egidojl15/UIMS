@@ -2734,6 +2734,8 @@ const EditMaternalRecordModal = ({
   );
 };
 
+// Replace the entire function with this simplified version:
+
 const CreateImmunizationRecordModal = ({
   setShowCreateModal,
   handleCreateImmunization,
@@ -2760,34 +2762,39 @@ const CreateImmunizationRecordModal = ({
   const [selectedChild, setSelectedChild] = useState(null);
   const [selectedMother, setSelectedMother] = useState(null);
 
-  // Filter children (residents under 18)
-  const childResidents = residents.filter((r) => {
-    if (!r.date_of_birth) return true;
-    const age = calculateAgeFromDOB(r.date_of_birth);
-    return age < 18;
-  });
-
-  // Filter adult females for mother selection
-  const motherResidents = residents.filter((r) => {
-    if (!r.date_of_birth) return r.gender === "Female";
-    const age = calculateAgeFromDOB(r.date_of_birth);
-    return age >= 18 && r.gender === "Female";
-  });
-
-  const calculateAgeFromDOB = (dob) => {
+  // Simple helper function inside component
+  const getAge = (dob) => {
     if (!dob) return "N/A";
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
+    try {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+      return age;
+    } catch (error) {
+      return "N/A";
     }
-    return age;
   };
+
+  // // Filter children (residents under 18)
+  // const childResidents = residents.filter((r) => {
+  //   if (!r.date_of_birth) return true;
+  //   const age = getAge(r.date_of_birth);
+  //   return typeof age === "number" ? age < 18 : true;
+  // });
+
+  // // Filter adult females for mother selection
+  // const motherResidents = residents.filter((r) => {
+  //   if (!r.date_of_birth) return r.gender === "Female";
+  //   const age = getAge(r.date_of_birth);
+  //   return typeof age === "number" ? age >= 18 && r.gender === "Female" : false;
+  // });
 
   const handleChildChange = (childId) => {
     const child = residents.find((r) => r.resident_id == childId);
@@ -2799,18 +2806,9 @@ const CreateImmunizationRecordModal = ({
         (r) => r.household_id === child.household_id
       );
 
-      // Find parents
-      const father = householdMembers.find(
-        (r) =>
-          r.gender === "Male" &&
-          (r.civil_status === "Married" || r.relationship_to_head === "Head")
-      );
-
-      const mother = householdMembers.find(
-        (r) =>
-          r.gender === "Female" &&
-          (r.civil_status === "Married" || r.relationship_to_head === "Spouse")
-      );
+      // Find parents (simplified logic)
+      const father = householdMembers.find((r) => r.gender === "Male");
+      const mother = householdMembers.find((r) => r.gender === "Female");
 
       setFormData((prev) => ({
         ...prev,
@@ -2834,8 +2832,11 @@ const CreateImmunizationRecordModal = ({
       newErrors.vaccine_name = "Vaccine name is required";
     }
 
-    if (formData.date_given && new Date(formData.date_given) > new Date()) {
-      newErrors.date_given = "Date given cannot be in the future";
+    if (formData.date_given) {
+      const givenDate = new Date(formData.date_given);
+      if (givenDate > new Date()) {
+        newErrors.date_given = "Date given cannot be in the future";
+      }
     }
 
     if (formData.next_dose_date && formData.date_given) {
@@ -2873,21 +2874,6 @@ const CreateImmunizationRecordModal = ({
       setIsSubmitting(false);
     }
   };
-
-  const vaccineOptions = [
-    "BCG",
-    "Hepatitis B",
-    "Pentavalent (DPT-HepB-Hib)",
-    "Oral Polio Vaccine (OPV)",
-    "Inactivated Polio Vaccine (IPV)",
-    "Pneumococcal Conjugate Vaccine (PCV)",
-    "Measles, Mumps, Rubella (MMR)",
-    "Rotavirus",
-    "Influenza",
-    "Varicella (Chickenpox)",
-    "Tetanus Toxoid (TT)",
-    "COVID-19 Vaccine",
-  ];
 
   const isFormValid = () => {
     return formData.child_resident_id && formData.vaccine_name?.trim();
@@ -3468,45 +3454,43 @@ const EditImmunizationRecordModal = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
-  const [selectedChild, setSelectedChild] = useState(
-    residents.find((r) => r.resident_id == record.child_resident_id)
+
+  // Simple helper function
+  const getAge = (dob) => {
+    if (!dob) return "N/A";
+    try {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+      return age;
+    } catch (error) {
+      return "N/A";
+    }
+  };
+
+  const selectedChild = residents.find(
+    (r) => r.resident_id == formData.child_resident_id
   );
-  const [selectedMother, setSelectedMother] = useState(
-    residents.find((r) => r.resident_id == record.mother_resident_id)
+  const selectedMother = residents.find(
+    (r) => r.resident_id == formData.mother_resident_id
   );
 
   // Filter children (residents under 18)
   const childResidents = residents.filter((r) => {
     if (!r.date_of_birth) return true;
-    const age = calculateAgeFromDOB(r.date_of_birth);
-    return age < 18;
+    const age = getAge(r.date_of_birth);
+    return typeof age === "number" ? age < 18 : true;
   });
-
-  // Filter adult females for mother selection
-  const motherResidents = residents.filter((r) => {
-    if (!r.date_of_birth) return r.gender === "Female";
-    const age = calculateAgeFromDOB(r.date_of_birth);
-    return age >= 18 && r.gender === "Female";
-  });
-
-  const calculateAgeFromDOB = (dob) => {
-    if (!dob) return "N/A";
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  };
 
   const handleChildChange = (childId) => {
     const child = residents.find((r) => r.resident_id == childId);
-    setSelectedChild(child);
 
     if (child) {
       // Find household members
@@ -3515,17 +3499,8 @@ const EditImmunizationRecordModal = ({
       );
 
       // Find parents
-      const father = householdMembers.find(
-        (r) =>
-          r.gender === "Male" &&
-          (r.civil_status === "Married" || r.relationship_to_head === "Head")
-      );
-
-      const mother = householdMembers.find(
-        (r) =>
-          r.gender === "Female" &&
-          (r.civil_status === "Married" || r.relationship_to_head === "Spouse")
-      );
+      const father = householdMembers.find((r) => r.gender === "Male");
+      const mother = householdMembers.find((r) => r.gender === "Female");
 
       setFormData((prev) => ({
         ...prev,
@@ -3596,21 +3571,6 @@ const EditImmunizationRecordModal = ({
       setIsSubmitting(false);
     }
   };
-
-  const vaccineOptions = [
-    "BCG",
-    "Hepatitis B",
-    "Pentavalent (DPT-HepB-Hib)",
-    "Oral Polio Vaccine (OPV)",
-    "Inactivated Polio Vaccine (IPV)",
-    "Pneumococcal Conjugate Vaccine (PCV)",
-    "Measles, Mumps, Rubella (MMR)",
-    "Rotavirus",
-    "Influenza",
-    "Varicella (Chickenpox)",
-    "Tetanus Toxoid (TT)",
-    "COVID-19 Vaccine",
-  ];
 
   const isFormValid = () => {
     return formData.child_resident_id && formData.vaccine_name?.trim();
