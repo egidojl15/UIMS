@@ -73,6 +73,39 @@ const ReportSelectionModal = ({ onSelectReport, onClose }) => {
     },
   ];
 
+  // Add this function inside MaternalChildHealthPage component,
+  // after other helper functions like handleEditImmunization:
+
+  const calculateAgeFromDOB = (dob) => {
+    if (!dob) return "N/A";
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
+
+  // Add this vaccine options array (after calculateAgeFromDOB):
+  const vaccineOptions = [
+    "BCG",
+    "Hepatitis B",
+    "Pentavalent (DPT-HepB-Hib)",
+    "Oral Polio Vaccine (OPV)",
+    "Inactivated Polio Vaccine (IPV)",
+    "Pneumococcal Conjugate Vaccine (PCV)",
+    "Measles, Mumps, Rubella (MMR)",
+    "Rotavirus",
+    "Influenza",
+    "Varicella (Chickenpox)",
+    "Tetanus Toxoid (TT)",
+  ];
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-3xl shadow-2xl border border-white/20">
@@ -4154,39 +4187,6 @@ const MaternalChildHealthPage = () => {
       record.vaccine_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (record.date_given && record.date_given.includes(searchQuery))
   );
-
-  // Add this function inside MaternalChildHealthPage component,
-  // after other helper functions like handleEditImmunization:
-
-  const calculateAgeFromDOB = (dob) => {
-    if (!dob) return "N/A";
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  };
-
-  // Add this vaccine options array (after calculateAgeFromDOB):
-  const vaccineOptions = [
-    "BCG",
-    "Hepatitis B",
-    "Pentavalent (DPT-HepB-Hib)",
-    "Oral Polio Vaccine (OPV)",
-    "Inactivated Polio Vaccine (IPV)",
-    "Pneumococcal Conjugate Vaccine (PCV)",
-    "Measles, Mumps, Rubella (MMR)",
-    "Rotavirus",
-    "Influenza",
-    "Varicella (Chickenpox)",
-    "Tetanus Toxoid (TT)",
-  ];
 
   // Report generation functions
   const handleGenerateMaternalChildHealthReport = async (filters) => {
