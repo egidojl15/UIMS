@@ -3438,6 +3438,19 @@ const EditImmunizationRecordModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // Add these filter functions inside the component
+  const childResidents = residents.filter((r) => {
+    if (!r.date_of_birth) return true;
+    const age = calculateAgeFromDOB(r.date_of_birth);
+    return typeof age === "number" ? age < 18 : true;
+  });
+
+  const motherResidents = residents.filter((r) => {
+    if (!r.date_of_birth) return r.gender === "Female";
+    const age = calculateAgeFromDOB(r.date_of_birth);
+    return typeof age === "number" ? age >= 18 && r.gender === "Female" : false;
+  });
+
   const selectedChild = residents.find(
     (r) => r.resident_id == formData.child_resident_id
   );
