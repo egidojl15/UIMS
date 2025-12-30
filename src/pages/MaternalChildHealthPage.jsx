@@ -2782,19 +2782,19 @@ const CreateImmunizationRecordModal = ({
     }
   };
 
-  // // Filter children (residents under 18)
-  // const childResidents = residents.filter((r) => {
-  //   if (!r.date_of_birth) return true;
-  //   const age = getAge(r.date_of_birth);
-  //   return typeof age === "number" ? age < 18 : true;
-  // });
+  // Filter children (residents under 18)
+  const childResidents = residents.filter((r) => {
+    if (!r.date_of_birth) return true;
+    const age = getAge(r.date_of_birth);
+    return typeof age === "number" ? age < 18 : true;
+  });
 
-  // // Filter adult females for mother selection
-  // const motherResidents = residents.filter((r) => {
-  //   if (!r.date_of_birth) return r.gender === "Female";
-  //   const age = getAge(r.date_of_birth);
-  //   return typeof age === "number" ? age >= 18 && r.gender === "Female" : false;
-  // });
+  // Filter adult females for mother selection
+  const motherResidents = residents.filter((r) => {
+    if (!r.date_of_birth) return r.gender === "Female";
+    const age = getAge(r.date_of_birth);
+    return typeof age === "number" ? age >= 18 && r.gender === "Female" : false;
+  });
 
   const handleChildChange = (childId) => {
     const child = residents.find((r) => r.resident_id == childId);
