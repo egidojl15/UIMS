@@ -2144,7 +2144,7 @@ const ManageResidentsPage = () => {
     try {
       const data = await householdsAPI.getAll();
       if (data.success) {
-        setStandaloneHouseholds(data.data || []);
+        setStandaloneHouseholds(data.households || []);
       }
     } catch (error) {
       console.error("Error fetching households:", error);
