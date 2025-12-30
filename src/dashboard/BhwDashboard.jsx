@@ -50,17 +50,17 @@ const bhwUser = {
 
 const navItems = [
   { name: "BHW Dashboard", key: "", icon: HomeIcon },
-  { name: "Manage Residents", key: "manage-residents", icon: Users },
-  { name: "Manage Households", key: "manage-households", icon: HomeIcon },
+  { name: "Resident Management", key: "manage-residents", icon: Users },
+  { name: "Household Management", key: "manage-households", icon: HomeIcon },
   { name: "Health Records", key: "health-records", icon: HeartPulse },
   {
     name: "Maternal & Child Health",
     key: "maternal-child-health",
     icons: [Baby, Syringe],
   }, // New item
-  { name: "Medical Referral", key: "medical-referral", icon: ClipboardPlus },
+  { name: "Medical Referrals", key: "medical-referral", icon: ClipboardPlus },
   // { name: "Generate Reports", key: "generate-reports", icon: FileText },
-  { name: "Death Reports", key: "death-reports", icon: Skull }, // New item
+  { name: "Death Records", key: "death-reports", icon: Skull }, // New item
 ];
 
 const purokOptions = [
