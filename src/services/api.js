@@ -296,19 +296,24 @@ export const residentsAPI = {
 
       // Add all resident fields to FormData
       Object.keys(residentData).forEach((key) => {
-        if (key === "photo_file" && residentData[key]) {
-          // Add the photo file
-          formData.append("photo", residentData[key]);
-        } else if (
-          residentData[key] !== null &&
-          residentData[key] !== undefined
-        ) {
-          // Add other fields, converting booleans to strings
-          if (typeof residentData[key] === "boolean") {
-            formData.append(key, residentData[key] ? "1" : "0");
-          } else {
-            formData.append(key, residentData[key]);
-          }
+        const value = residentData[key];
+
+        // Special handling for photo file
+        if (key === "photo_file" && value) {
+          formData.append("photo", value);
+          return;
+        }
+
+        // Skip only if value is null or undefined
+        if (value === null || value === undefined) {
+          return;
+        }
+
+        // Append everything else (including empty strings "", false, 0)
+        if (typeof value === "boolean") {
+          formData.append(key, value ? "1" : "0");
+        } else {
+          formData.append(key, value);
         }
       });
 
@@ -342,21 +347,24 @@ export const residentsAPI = {
 
       // Add all resident fields to FormData
       Object.keys(residentData).forEach((key) => {
-        if (key === "photo_file" && residentData[key]) {
-          // Add the photo file if it exists and is a File object
-          console.log("Adding photo file:", residentData[key]);
-          formData.append("photo", residentData[key]);
-        } else if (
-          residentData[key] !== null &&
-          residentData[key] !== undefined &&
-          key !== "photo_file"
-        ) {
-          // Add other fields, converting booleans to strings
-          if (typeof residentData[key] === "boolean") {
-            formData.append(key, residentData[key] ? "1" : "0");
-          } else {
-            formData.append(key, residentData[key]);
-          }
+        const value = residentData[key];
+
+        // Special handling for photo file
+        if (key === "photo_file" && value) {
+          formData.append("photo", value);
+          return;
+        }
+
+        // Skip only if value is null or undefined (and skip photo_file if no value)
+        if (value === null || value === undefined || key === "photo_file") {
+          return;
+        }
+
+        // Append everything else (including empty strings "", false, 0)
+        if (typeof value === "boolean") {
+          formData.append(key, value ? "1" : "0");
+        } else {
+          formData.append(key, value);
         }
       });
 
@@ -378,7 +386,6 @@ export const residentsAPI = {
       throw error.response?.data || error;
     }
   },
-
   updateHousehold: async (id, householdId) => {
     try {
       const response = await api.put(`/residents/${id}`, {
