@@ -866,6 +866,7 @@ const EditResidentModal = ({
               <input
                 type="file"
                 accept="image/*"
+                name="photo"
                 onChange={handleFileChange}
                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
@@ -1358,16 +1359,25 @@ const AddResidentModal = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const age = calculateAge(residentForm.date_of_birth);
-    // Create updated form data with calculated senior citizen status
-    const updatedForm = {
-      ...residentForm,
-      is_senior_citizen: age >= 60 ? 1 : 0,
-    };
-    // Update the form state
-    setResidentForm(updatedForm);
-    // Call the submit function with updated data
-    handleResidentSubmit(e, updatedForm.photo_file);
+
+    const formElement = e.currentTarget; // the <form>
+    const formData = new FormData(formElement);
+
+    // Auto-calculate senior citizen
+    const birthdate = formData.get("date_of_birth");
+    if (birthdate) {
+      const age = calculateAge(birthdate);
+      formData.set("is_senior_citizen", age >= 60 ? "1" : "0");
+    }
+
+    // Debug: Check what we're sending
+    console.log("=== SUBMITTING RESIDENT ===");
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
+    // Pass the FormData directly to the handler
+    handleResidentSubmit(formData);
   };
 
   // ——— RELIGION DROPDOWN DATA ———
@@ -1436,6 +1446,7 @@ const AddResidentModal = ({
               <input
                 type="file"
                 accept="image/*"
+                name="photo"
                 onChange={handleFileChange}
                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
