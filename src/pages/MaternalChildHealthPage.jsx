@@ -2777,137 +2777,33 @@ const CreateImmunizationRecordModal = ({
     return typeof age === "number" ? age >= 18 && r.gender === "Female" : false;
   });
 
-  // Replace the handleChildChange function in CreateImmunizationRecordModal:
   const handleChildChange = (childId) => {
     const child = residents.find((r) => r.resident_id == childId);
     setSelectedChild(child);
 
     if (child) {
-      // Find all household members
+      // Find household members
       const householdMembers = residents.filter(
-        (r) => r.household_id === child.household_id && r.is_active === 1
+        (r) => r.household_id === child.household_id
       );
 
-      // Filter out the child
-      const potentialParents = householdMembers.filter(
-        (r) => r.resident_id !== child.resident_id
-      );
-
-      // Find mother - prioritize by relationship, then by age/gender
-      const findMother = () => {
-        // First, look for spouse or household head who is female
-        const motherByRelationship = potentialParents.find(
-          (r) =>
-            r.gender === "Female" &&
-            (r.relationship_to_head === "Spouse" ||
-              r.relationship_to_head === "Household Head")
-        );
-
-        if (motherByRelationship) return motherByRelationship;
-
-        // Second, look for adult female (18+)
-        const adultFemale = potentialParents.find(
-          (r) =>
-            r.gender === "Female" && calculateAgeFromDOB(r.date_of_birth) >= 18
-        );
-
-        if (adultFemale) return adultFemale;
-
-        // Third, any female in household
-        const anyFemale = potentialParents.find((r) => r.gender === "Female");
-
-        return anyFemale;
-      };
-
-      // Find father - similar logic
-      const findFather = () => {
-        const fatherByRelationship = potentialParents.find(
-          (r) =>
-            r.gender === "Male" && r.relationship_to_head === "Household Head"
-        );
-
-        if (fatherByRelationship) return fatherByRelationship;
-
-        const adultMale = potentialParents.find(
-          (r) =>
-            r.gender === "Male" && calculateAgeFromDOB(r.date_of_birth) >= 18
-        );
-
-        if (adultMale) return adultMale;
-
-        const anyMale = potentialParents.find((r) => r.gender === "Male");
-
-        return anyMale;
-      };
-
-      // Find primary parent/guardian
-      const findPrimaryParent = () => {
-        // First, household head
-        const householdHead = potentialParents.find(
-          (r) => r.relationship_to_head === "Household Head"
-        );
-
-        if (householdHead) return householdHead;
-
-        // Second, spouse
-        const spouse = potentialParents.find(
-          (r) => r.relationship_to_head === "Spouse"
-        );
-
-        if (spouse) return spouse;
-
-        // Third, oldest adult
-        const adults = potentialParents.filter(
-          (r) => calculateAgeFromDOB(r.date_of_birth) >= 18
-        );
-        if (adults.length > 0) {
-          // Sort by age (oldest first)
-          adults.sort((a, b) => {
-            const ageA = calculateAgeFromDOB(a.date_of_birth);
-            const ageB = calculateAgeFromDOB(b.date_of_birth);
-            return ageB - ageA;
-          });
-          return adults[0];
-        }
-
-        // Return first household member if no adult found
-        return potentialParents[0];
-      };
-
-      const mother = findMother();
-      const father = findFather();
-      const primaryParent = findPrimaryParent();
+      // Find parents (simplified logic)
+      const father = householdMembers.find((r) => r.gender === "Male");
+      const mother = householdMembers.find((r) => r.gender === "Female");
 
       setFormData((prev) => ({
         ...prev,
         child_resident_id: childId,
-        parent_name: primaryParent
-          ? `${primaryParent.first_name} ${primaryParent.last_name}`
-          : "",
+        parent_name: mother ? `${mother.first_name} ${mother.last_name}` : "",
         father_name: father ? `${father.first_name} ${father.last_name}` : "",
         mother_name: mother ? `${mother.first_name} ${mother.last_name}` : "",
         mother_resident_id: mother ? mother.resident_id : "",
       }));
-
-      setSelectedMother(mother);
-    } else {
-      // Reset if child not found
-      setFormData((prev) => ({
-        ...prev,
-        child_resident_id: childId,
-        parent_name: "",
-        father_name: "",
-        mother_name: "",
-        mother_resident_id: "",
-      }));
-      setSelectedMother(null);
     }
   };
 
-  // Update the validateForm function
   const validateForm = () => {
     const newErrors = {};
-    const today = new Date();
 
     if (!formData.child_resident_id) {
       newErrors.child_resident_id = "Please select a child";
@@ -2919,43 +2815,24 @@ const CreateImmunizationRecordModal = ({
 
     if (formData.date_given) {
       const givenDate = new Date(formData.date_given);
-      if (givenDate > today) {
+      if (givenDate > new Date()) {
         newErrors.date_given = "Date given cannot be in the future";
-      }
-
-      // Validate child age at vaccination
-      if (selectedChild && selectedChild.date_of_birth) {
-        const birthDate = new Date(selectedChild.date_of_birth);
-        const childAgeAtVaccination =
-          givenDate.getFullYear() - birthDate.getFullYear();
-
-        if (childAgeAtVaccination < 0) {
-          newErrors.date_given =
-            "Vaccination date cannot be before child's birth";
-        } else if (childAgeAtVaccination > 18) {
-          newErrors.date_given =
-            "Child appears to be over 18 years old at vaccination";
-        }
       }
     }
 
     if (formData.next_dose_date && formData.date_given) {
       const givenDate = new Date(formData.date_given);
       const nextDoseDate = new Date(formData.next_dose_date);
-
       if (nextDoseDate <= givenDate) {
         newErrors.next_dose_date =
           "Next dose date must be after the given date";
-      }
-
-      if (nextDoseDate < today) {
-        newErrors.next_dose_date = "Next dose date is in the past";
       }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -3107,70 +2984,90 @@ const CreateImmunizationRecordModal = ({
               </div>
 
               {/* Parent Information Section */}
-              <div className="mt-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-100">
-                <h4 className="text-sm font-medium text-blue-800 mb-2">
-                  Household Information
-                </h4>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="text-gray-600">Household ID:</span>
-                      <span className="font-medium ml-2">
-                        {selectedChild.household_id || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">
-                        Child's Relationship:
-                      </span>
-                      <span className="font-medium ml-2">
-                        {selectedChild.relationship_to_head || "N/A"}
-                      </span>
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <Users className="w-5 h-5 text-purple-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Parent/Guardian Information
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mother
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <select
+                        value={formData.mother_resident_id}
+                        onChange={(e) => {
+                          const mother = residents.find(
+                            (r) => r.resident_id == e.target.value
+                          );
+                          setSelectedMother(mother);
+                          setFormData((prev) => ({
+                            ...prev,
+                            mother_resident_id: e.target.value,
+                            mother_name: mother
+                              ? `${mother.first_name} ${mother.last_name}`
+                              : "",
+                          }));
+                        }}
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-white appearance-none"
+                      >
+                        <option value="">Select mother (optional)...</option>
+                        {motherResidents.map((r) => (
+                          <option key={r.resident_id} value={r.resident_id}>
+                            {r.first_name} {r.last_name} • Age:{" "}
+                            {calculateAgeFromDOB(r.date_of_birth)}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
                     </div>
                   </div>
 
-                  {/* Show detected parents */}
-                  <div className="pt-2 border-t border-blue-200">
-                    <p className="text-xs text-blue-600 mb-2">
-                      Auto-detected from household:
-                    </p>
-                    <div className="space-y-2">
-                      {formData.mother_name && (
-                        <div className="flex items-center gap-2">
-                          <User className="w-3 h-3 text-green-600" />
-                          <span className="text-xs">
-                            <span className="font-medium">Mother:</span>{" "}
-                            {formData.mother_name}
-                            {selectedMother &&
-                              selectedMother.relationship_to_head &&
-                              ` (${selectedMother.relationship_to_head})`}
-                          </span>
-                        </div>
-                      )}
-                      {formData.father_name && (
-                        <div className="flex items-center gap-2">
-                          <User className="w-3 h-3 text-blue-600" />
-                          <span className="text-xs">
-                            <span className="font-medium">Father:</span>{" "}
-                            {formData.father_name}
-                          </span>
-                        </div>
-                      )}
-                      {formData.parent_name && (
-                        <div className="flex items-center gap-2">
-                          <Users className="w-3 h-3 text-purple-600" />
-                          <span className="text-xs">
-                            <span className="font-medium">
-                              Primary Contact:
-                            </span>{" "}
-                            {formData.parent_name}
-                          </span>
-                        </div>
-                      )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Father Name
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.father_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            father_name: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="Father's name"
+                      />
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      You can manually edit these fields if incorrect
-                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Parent/Guardian
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.parent_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            parent_name: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="Primary parent/guardian name"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4148,35 +4045,6 @@ const MaternalChildHealthPage = () => {
     } catch (error) {
       return "N/A";
     }
-  };
-
-  // Add this function in MaternalChildHealthPage.jsx after calculateAgeFromDOB
-  const getHouseholdRelationships = (householdId) => {
-    if (!householdId) return [];
-
-    const householdMembers = residents.filter(
-      (r) => r.household_id === householdId && r.is_active === 1
-    );
-
-    // Sort by relationship importance
-    const sortedMembers = [...householdMembers].sort((a, b) => {
-      const relationshipOrder = {
-        "Household Head": 1,
-        Spouse: 2,
-        Child: 3,
-        Parent: 4,
-        Sibling: 5,
-        "Other Relative": 6,
-        "Non-relative": 7,
-      };
-
-      const orderA = relationshipOrder[a.relationship_to_head] || 8;
-      const orderB = relationshipOrder[b.relationship_to_head] || 8;
-
-      return orderA - orderB;
-    });
-
-    return sortedMembers;
   };
 
   const vaccineOptions = [
