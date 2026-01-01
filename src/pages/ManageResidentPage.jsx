@@ -1360,24 +1360,33 @@ const AddResidentModal = ({
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const formElement = e.currentTarget; // the <form>
+    // Get the actual <form> element
+    const formElement = e.currentTarget;
+
+    // Create FormData from all inputs (including file)
     const formData = new FormData(formElement);
 
-    // Auto-calculate senior citizen
+    // Auto-calculate is_senior_citizen based on date_of_birth
     const birthdate = formData.get("date_of_birth");
     if (birthdate) {
       const age = calculateAge(birthdate);
       formData.set("is_senior_citizen", age >= 60 ? "1" : "0");
+    } else {
+      formData.set("is_senior_citizen", "0");
     }
 
-    // Debug: Check what we're sending
-    console.log("=== SUBMITTING RESIDENT ===");
+    // Optional: Debug – remove later
+    console.log("=== SENDING TO API ===");
     for (let [key, value] of formData.entries()) {
-      console.log(key, value);
+      if (value instanceof File) {
+        console.log(key, `[File: ${value.name}, size: ${value.size} bytes]`);
+      } else {
+        console.log(key, value);
+      }
     }
 
-    // Pass the FormData directly to the handler
-    handleResidentSubmit(formData);
+    // Now correctly pass the FormData
+    standaloneHandleResidentSubmit(formData);
   };
 
   // ——— RELIGION DROPDOWN DATA ———
