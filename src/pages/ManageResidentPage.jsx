@@ -2186,38 +2186,118 @@ const ManageResidentsPage = () => {
     return matchesSearch && matchesPurok;
   });
 
-  // Standalone handle resident submission
-  const standaloneHandleResidentSubmit = async (formData) => {
+  // Replace the standaloneHandleResidentSubmit function in ManageResidentsPage.jsx
+  // This fixes the issue where Secretary/Captain dashboards can't add residents
+
+  const standaloneHandleResidentSubmit = async (formDataOrEvent) => {
     try {
-      let result;
-      if (standaloneEditResident) {
-        result = await residentsAPI.update(
-          standaloneEditResident.resident_id,
-          formData
-        );
-        standaloneAddNotification(
-          "success",
-          "Success",
-          "Resident updated successfully"
-        );
+      console.log("=== STANDALONE RESIDENT SUBMIT ===");
+      console.log("Received:", formDataOrEvent);
+
+      let submitData;
+
+      // Check if this is a FormData object (from the form submission)
+      if (formDataOrEvent instanceof FormData) {
+        // Convert FormData to plain object
+        submitData = {};
+
+        // Extract all form fields
+        for (let [key, value] of formDataOrEvent.entries()) {
+          // Handle checkboxes (convert "on" to true, missing to false)
+          if (
+            key === "is_4ps" ||
+            key === "is_registered_voter" ||
+            key === "is_pwd"
+          ) {
+            submitData[key] = value === "on" || value === "1" || value === true;
+          }
+          // Handle photo file
+          else if (key === "photo" && value instanceof File) {
+            submitData.photo_file = value;
+          }
+          // Handle empty values
+          else if (value === "" || value === "null" || value === "undefined") {
+            submitData[key] = null;
+          }
+          // Handle regular fields
+          else {
+            submitData[key] = value;
+          }
+        }
+
+        console.log("Converted FormData to:", submitData);
       } else {
-        result = await residentsAPI.create(formData);
+        // If it's already an object, use it directly
+        submitData = formDataOrEvent;
+      }
+
+      // Validate required fields
+      if (
+        !submitData.first_name ||
+        !submitData.last_name ||
+        !submitData.date_of_birth ||
+        !submitData.gender ||
+        !submitData.civil_status ||
+        !submitData.purok
+      ) {
+        standaloneAddNotification(
+          "error",
+          "Validation Error",
+          "Please fill in all required fields: First Name, Last Name, Date of Birth, Gender, Civil Status, and Purok"
+        );
+        return;
+      }
+
+      // Call the API
+      const result = await residentsAPI.create(submitData);
+
+      if (result.success) {
         standaloneAddNotification(
           "success",
           "Success",
           "Resident created successfully"
         );
-      }
 
-      if (result.success) {
-        standaloneFetchResidents();
+        // Refresh the residents list
+        await standaloneFetchResidents();
+
+        // Close the form and reset
         setStandaloneShowResidentForm(false);
-        setStandaloneEditResident(null);
-        setStandaloneResidentForm({});
+        setStandaloneResidentForm({
+          first_name: "",
+          middle_name: "",
+          last_name: "",
+          suffix: "",
+          date_of_birth: "",
+          gender: "",
+          civil_status: "",
+          contact_number: "",
+          email: "",
+          religion: "",
+          occupation: "",
+          educational_attainment: "",
+          purok: "",
+          is_4ps: false,
+          is_registered_voter: false,
+          is_pwd: false,
+          photo_file: null,
+        });
+      } else {
+        standaloneAddNotification(
+          "error",
+          "Error",
+          result.message || "Failed to create resident"
+        );
       }
     } catch (error) {
       console.error("Error saving resident:", error);
-      standaloneAddNotification("error", "Error", "Failed to save resident");
+      standaloneAddNotification(
+        "error",
+        "Error",
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to save resident"
+      );
     }
   };
 
@@ -3695,12 +3775,12 @@ const ManageResidentsPage = () => {
         />
       )}
 
-      {standaloneShowResidentForm && (
+      {showResidentForm && (
         <AddResidentModal
-          residentForm={standaloneResidentForm}
-          setResidentForm={setStandaloneResidentForm}
-          handleResidentSubmit={standaloneHandleResidentSubmit} // ← This is the good one!
-          setShowResidentForm={setStandaloneShowResidentForm}
+          residentForm={residentForm}
+          setResidentForm={setResidentForm}
+          handleResidentSubmit={handleResidentSubmit}
+          setShowResidentForm={setShowResidentForm}
           purokOptions={purokOptions}
           households={households}
           filteredResidents={filteredResidents}
