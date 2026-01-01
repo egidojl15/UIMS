@@ -1360,35 +1360,28 @@ const AddResidentModal = ({
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Get the actual <form> element
+    // Create FormData directly from the form (includes file + all fields)
     const formElement = e.currentTarget;
-
-    // Create FormData from all inputs (including file)
     const formData = new FormData(formElement);
 
-    // Auto-calculate is_senior_citizen based on date_of_birth
+    // Auto-calculate is_senior_citizen
     const birthdate = formData.get("date_of_birth");
-    if (birthdate) {
-      const age = calculateAge(birthdate);
-      formData.set("is_senior_citizen", age >= 60 ? "1" : "0");
-    } else {
-      formData.set("is_senior_citizen", "0");
-    }
+    const age = birthdate ? calculateAge(birthdate) : 0;
+    formData.set("is_senior_citizen", age >= 60 ? "1" : "0");
 
-    // Optional: Debug – remove later
-    console.log("=== SENDING TO API ===");
+    // Optional: See what we're sending (remove later if you want)
+    console.log("=== SUBMITTING RESIDENT ===");
     for (let [key, value] of formData.entries()) {
       if (value instanceof File) {
-        console.log(key, `[File: ${value.name}, size: ${value.size} bytes]`);
+        console.log(key, `File: ${value.name} (${value.size} bytes)`);
       } else {
-        console.log(key, value);
+        console.log(key, value || "(empty)");
       }
     }
 
-    // Now correctly pass the FormData
-    standaloneHandleResidentSubmit(formData);
+    // Call the perfect handler passed from parent
+    handleResidentSubmit(formData);
   };
-
   // ——— RELIGION DROPDOWN DATA ———
   const [showReligionDropdown, setShowReligionDropdown] = useState(false);
 
@@ -3702,14 +3695,15 @@ const ManageResidentsPage = () => {
         />
       )}
 
-      {showResidentForm && (
+      {standaloneShowResidentForm && (
         <AddResidentModal
-          residentForm={residentForm}
-          setResidentForm={setResidentForm}
-          handleResidentSubmit={handleResidentSubmit}
-          setShowResidentForm={setShowResidentForm}
+          residentForm={standaloneResidentForm}
+          setResidentForm={setStandaloneResidentForm}
+          handleResidentSubmit={standaloneHandleResidentSubmit} // ← This is the good one!
+          setShowResidentForm={setStandaloneShowResidentForm}
           purokOptions={purokOptions}
           households={households}
+          filteredResidents={filteredResidents}
         />
       )}
 
