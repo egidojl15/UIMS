@@ -1177,6 +1177,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
     contact_number: "",
   });
   const [selectedHeadId, setSelectedHeadId] = useState("");
+  const [selectedSpouseId, setSelectedSpouseId] = useState("");
   const [loading, setLoading] = useState(false);
   const [allResidents, setAllResidents] = useState([]);
   const [selectedMembers, setSelectedMembers] = useState([]);
@@ -1230,6 +1231,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
     }
   };
 
+  // Update the existing useEffect to set spouse ID
   useEffect(() => {
     if (household) {
       setFormData({
@@ -1239,20 +1241,68 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
         purok: household.purok || "",
         contact_number: household.contact_number || "",
       });
-      // Set current members as selected
-      setSelectedMembers(
-        household.members ? household.members.map((m) => m.resident_id) : []
-      );
+      setSelectedHeadId(household.household_head_id || "");
 
-      // If there's a household head, try to find them in the residents list
-      if (household.household_head_id) {
-        setSelectedHeadId(household.household_head_id);
+      // Set spouse ID if we can find it
+      if (household.spouse_name && allResidents.length > 0) {
+        const spouseResident = allResidents.find(
+          (resident) =>
+            `${resident.first_name} ${resident.middle_name} ${resident.last_name}`.includes(
+              household.spouse_name
+            ) || resident.full_name === household.spouse_name
+        );
+        if (spouseResident) {
+          setSelectedSpouseId(spouseResident.resident_id);
+        }
       }
     } else {
-      setSelectedMembers([]);
       setSelectedHeadId("");
+      setSelectedSpouseId("");
     }
-  }, [household]);
+  }, [household, allResidents]);
+
+  // Add spouse selection handler
+  const handleSpouseChange = (residentId) => {
+    setSelectedSpouseId(residentId);
+
+    if (residentId) {
+      const selectedResident = allResidents.find(
+        (r) => r.resident_id == residentId
+      );
+      if (selectedResident) {
+        const spouseName = [
+          selectedResident.first_name,
+          selectedResident.middle_name,
+          selectedResident.last_name,
+          selectedResident.suffix,
+        ]
+          .filter(
+            (part) =>
+              part &&
+              part !== "null" &&
+              part !== "0" &&
+              String(part).trim() !== ""
+          )
+          .join(" ")
+          .trim();
+
+        setFormData((prev) => ({
+          ...prev,
+          spouse_name: spouseName,
+        }));
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        spouse_name: "",
+      }));
+    }
+  };
+
+  // Filter residents for spouse dropdown (exclude the selected head)
+  const availableForSpouse = allResidents.filter(
+    (resident) => !selectedHeadId || resident.resident_id != selectedHeadId
+  );
 
   useEffect(() => {
     fetchResidents();
@@ -1292,6 +1342,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
       const submitData = {
         ...formData,
         household_head_id: selectedHeadId || null,
+        spouse_id: selectedSpouseId || null, // Add spouse_id
       };
 
       console.log("Submitting household data:", submitData);
@@ -1763,27 +1814,41 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
                 Spouse Name
                 {formData.spouse_name && selectedHeadId && (
                   <span className="ml-2 text-xs text-green-600 font-normal">
-                    (Auto-filled based on marital status)
+                    (Selected from residents)
                   </span>
                 )}
               </label>
+              {/* Spouse Dropdown */}
+              <select
+                value={selectedSpouseId}
+                onChange={(e) => handleSpouseChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#58A1D3] focus:border-[#58A1D3] mb-2"
+              >
+                <option value="">Select a resident as spouse (optional)</option>
+                {availableForSpouse.map((resident) => (
+                  <option
+                    key={resident.resident_id}
+                    value={resident.resident_id}
+                  >
+                    {resident.first_name} {resident.middle_name}{" "}
+                    {resident.last_name} {resident.suffix} - {resident.purok} (
+                    {resident.civil_status})
+                  </option>
+                ))}
+              </select>
+
+              {/* Manual input as backup */}
               <input
                 type="text"
                 name="spouse_name"
                 value={formData.spouse_name}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#58A1D3] focus:border-[#58A1D3]"
-                placeholder="Full name of spouse (optional)"
+                placeholder="Or enter spouse name manually"
               />
-              {selectedHeadId &&
-                allResidents.find((r) => r.resident_id == selectedHeadId)
-                  ?.civil_status === "Married" &&
-                !formData.spouse_name && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    No potential spouse found. You can manually enter the spouse
-                    name.
-                  </p>
-                )}
+              <p className="text-xs text-gray-500 mt-1">
+                You can select from residents above or enter the name manually
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
