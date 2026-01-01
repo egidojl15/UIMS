@@ -770,7 +770,7 @@ const EditResidentModal = ({
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     setIsUpdating(true); // NEW: Show loading
     const age = calculateAge(editResident.date_of_birth);
@@ -845,7 +845,7 @@ const EditResidentModal = ({
         </div>
         <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleEditSubmit}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             <div className="col-span-1 md:col-span-2 flex flex-col items-center">
@@ -1357,7 +1357,7 @@ const AddResidentModal = ({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleAddSubmit = (e) => {
     e.preventDefault();
 
     // Create FormData directly from the form (includes file + all fields)
@@ -1427,7 +1427,7 @@ const AddResidentModal = ({
         </div>
         <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleAddSubmit}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             <div className="col-span-1 md:col-span-2 flex flex-col items-center">
