@@ -1369,18 +1369,8 @@ const AddResidentModal = ({
     const age = birthdate ? calculateAge(birthdate) : 0;
     formData.set("is_senior_citizen", age >= 60 ? "1" : "0");
 
-    // Optional: See what we're sending (remove later if you want)
-    console.log("=== SUBMITTING RESIDENT ===");
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(key, `File: ${value.name} (${value.size} bytes)`);
-      } else {
-        console.log(key, value || "(empty)");
-      }
-    }
-
     // Call the perfect handler passed from parent
-    handleResidentSubmit(formData);
+    handleResidentSubmit(e);
   };
   // ——— RELIGION DROPDOWN DATA ———
   const [showReligionDropdown, setShowReligionDropdown] = useState(false);
@@ -2187,8 +2177,6 @@ const ManageResidentsPage = () => {
   });
 
   // Replace the standaloneHandleResidentSubmit function in ManageResidentsPage.jsx
-  // This fixes the issue where Secretary/Captain dashboards can't add residents
-
   const standaloneHandleResidentSubmit = async (formDataOrEvent) => {
     try {
       console.log("=== STANDALONE RESIDENT SUBMIT ===");
@@ -2196,14 +2184,16 @@ const ManageResidentsPage = () => {
 
       let submitData;
 
-      // Check if this is a FormData object (from the form submission)
-      if (formDataOrEvent instanceof FormData) {
-        // Convert FormData to plain object
-        submitData = {};
+      // Check if this is an Event object (form submission)
+      if (formDataOrEvent && formDataOrEvent.preventDefault) {
+        // It's an event - prevent default and create FormData
+        formDataOrEvent.preventDefault();
+        const form = formDataOrEvent.target;
+        const formData = new FormData(form);
 
-        // Extract all form fields
-        for (let [key, value] of formDataOrEvent.entries()) {
-          // Handle checkboxes (convert "on" to true, missing to false)
+        submitData = {};
+        for (let [key, value] of formData.entries()) {
+          // Handle checkboxes
           if (
             key === "is_4ps" ||
             key === "is_registered_voter" ||
@@ -2224,8 +2214,33 @@ const ManageResidentsPage = () => {
             submitData[key] = value;
           }
         }
-
-        console.log("Converted FormData to:", submitData);
+      }
+      // Check if this is a FormData object
+      else if (formDataOrEvent instanceof FormData) {
+        // Convert FormData to plain object
+        submitData = {};
+        for (let [key, value] of formDataOrEvent.entries()) {
+          // Handle checkboxes
+          if (
+            key === "is_4ps" ||
+            key === "is_registered_voter" ||
+            key === "is_pwd"
+          ) {
+            submitData[key] = value === "on" || value === "1" || value === true;
+          }
+          // Handle photo file
+          else if (key === "photo" && value instanceof File) {
+            submitData.photo_file = value;
+          }
+          // Handle empty values
+          else if (value === "" || value === "null" || value === "undefined") {
+            submitData[key] = null;
+          }
+          // Handle regular fields
+          else {
+            submitData[key] = value;
+          }
+        }
       } else {
         // If it's already an object, use it directly
         submitData = formDataOrEvent;
