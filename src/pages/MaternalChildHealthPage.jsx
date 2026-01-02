@@ -1378,9 +1378,6 @@ const CreateMaternalRecordModal = ({
                               </div>
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            Expected delivery date
-                          </p>
                         </div>
 
                         <div className="md:col-span-2">
