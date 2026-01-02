@@ -1007,6 +1007,7 @@ const EditResidentModal = ({
                 <option value="Married">Married</option>
                 <option value="Divorced">Divorced</option>
                 <option value="Widowed">Widowed</option>
+                <option value="Widower">Widower</option>
               </select>
             </div>
             {editResident.civil_status === "Married" && (
@@ -1572,6 +1573,7 @@ const AddResidentModal = ({
                 <option value="Married">Married</option>
                 <option value="Divorced">Divorced</option>
                 <option value="Widowed">Widowed</option>
+                <option value="Widower">Widower</option>
               </select>
             </div>
             {residentForm.civil_status === "Married" && (
