@@ -72,7 +72,7 @@ const DeathReportModal = ({
                   onChange={(e) =>
                     setDeathForm({ ...deathForm, resident_id: e.target.value })
                   }
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all appearance-none"
                   required
                 >
                   <option value="" disabled className="text-gray-400">
@@ -84,7 +84,7 @@ const DeathReportModal = ({
                     </option>
                   ))}
                 </select>
-                <div className="absolute right-3 top-3.5 text-gray-400">
+                <div className="absolute right-3 top-3.5 text-gray-400 pointer-events-none">
                   <svg
                     className="w-5 h-5"
                     fill="none"
