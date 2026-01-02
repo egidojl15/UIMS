@@ -1352,56 +1352,74 @@ export const childImmunizationAPI = {
   },
 };
 
-// Deaths API
+// Deaths API - Add this to your api.js file
 export const deathsAPI = {
   getAll: async () => {
     try {
+      console.log("📡 Fetching all death records...");
       const response = await api.get("/deaths");
+      console.log("✅ Death records fetched:", response.data);
       return response.data;
     } catch (error) {
+      console.error("❌ Get deaths error:", error);
       throw error.response?.data || error;
     }
   },
 
   create: async (deathData) => {
     try {
-      // Format date before sending
+      console.log("📡 Creating death record:", deathData);
+
+      // Ensure date is in YYYY-MM-DD format
       const formattedData = {
         ...deathData,
         date_of_death: deathData.date_of_death
-          ? new Date(deathData.date_of_death).toISOString().split("T")[0]
+          ? deathData.date_of_death.split("T")[0] // Remove time if present
           : null,
       };
 
+      console.log("📤 Sending formatted data:", formattedData);
+
       const response = await api.post("/deaths", formattedData);
+      console.log("✅ Death record created:", response.data);
       return response.data;
     } catch (error) {
+      console.error("❌ Create death error:", error.response?.data || error);
       throw error.response?.data || error;
     }
   },
 
   update: async (id, deathData) => {
     try {
-      // Format date before sending
+      console.log("📡 Updating death record:", id, deathData);
+
+      // Ensure date is in YYYY-MM-DD format
       const formattedData = {
         ...deathData,
         date_of_death: deathData.date_of_death
-          ? new Date(deathData.date_of_death).toISOString().split("T")[0]
+          ? deathData.date_of_death.split("T")[0] // Remove time if present
           : null,
       };
 
+      console.log("📤 Sending formatted data:", formattedData);
+
       const response = await api.put(`/deaths/${id}`, formattedData);
+      console.log("✅ Death record updated:", response.data);
       return response.data;
     } catch (error) {
+      console.error("❌ Update death error:", error.response?.data || error);
       throw error.response?.data || error;
     }
   },
 
   delete: async (id) => {
     try {
+      console.log("📡 Deleting death record:", id);
       const response = await api.delete(`/deaths/${id}`);
+      console.log("✅ Death record deleted:", response.data);
       return response.data;
     } catch (error) {
+      console.error("❌ Delete death error:", error.response?.data || error);
       throw error.response?.data || error;
     }
   },
