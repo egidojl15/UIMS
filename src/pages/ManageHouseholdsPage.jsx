@@ -1176,6 +1176,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
     purok: "",
     contact_number: "",
   });
+  const [existingMembers, setExistingMembers] = useState([]);
   const [selectedHeadId, setSelectedHeadId] = useState("");
   const [selectedSpouseId, setSelectedSpouseId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -1242,6 +1243,13 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
         contact_number: household.contact_number || "",
       });
       setSelectedHeadId(household.household_head_id || "");
+
+      // Load existing household members into selectedMembers
+      if (household.members && household.members.length > 0) {
+        const memberIds = household.members.map((member) => member.resident_id);
+        setSelectedMembers(memberIds);
+        setExistingMembers(memberIds); // Store for comparison
+      }
 
       // Set spouse ID if we can find it
       if (household.spouse_name && allResidents.length > 0) {
@@ -1342,23 +1350,23 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
       const submitData = {
         ...formData,
         household_head_id: selectedHeadId || null,
-        spouse_id: selectedSpouseId || null, // Add spouse_id
+        spouse_id: selectedSpouseId || null,
       };
 
       console.log("Submitting household data:", submitData);
-      console.log("Household ID:", household?.household_id);
-      console.log("Selected members to assign:", selectedMembers); // Debug log
+      console.log("Selected members to assign:", selectedMembers);
 
       if (household) {
         // Update existing household
-        console.log("Updating household with ID:", household.household_id);
         const response = await householdsAPI.update(
           household.household_id,
           submitData
         );
-        console.log("Update response:", response);
 
         if (response.success) {
+          // Update member assignments - IMPORTANT: Wait for this to complete
+          await handleMemberAssignment(household.household_id);
+
           // Log the activity
           await logUserActivity(
             "Update Household",
@@ -1366,12 +1374,10 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
             household.household_id,
             `Household ${household.household_number} - ${formData.household_head_name}`,
             "completed",
-            "Household information updated",
+            "Household information and members updated",
             "Household data modified successfully"
           );
 
-          // Update member assignments
-          await handleMemberAssignment(household.household_id);
           addNotification(
             "success",
             "Household Updated",
@@ -1387,11 +1393,14 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
         }
       } else {
         // Create new household
-        console.log("Creating new household");
         const response = await householdsAPI.create(submitData);
-        console.log("Create response:", response);
 
         if (response.success) {
+          // Assign members to new household - IMPORTANT: Wait for this to complete
+          if (selectedMembers.length > 0 || selectedHeadId) {
+            await handleMemberAssignment(response.household.household_id);
+          }
+
           // Log the activity
           await logUserActivity(
             "Create Household",
@@ -1399,14 +1408,10 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
             response.household.household_id,
             `Household ${response.household.household_number} - ${formData.household_head_name}`,
             "completed",
-            "New household created",
+            "New household created with members",
             "Household added to the system"
           );
 
-          // Assign members to new household
-          if (selectedMembers.length > 0) {
-            await handleMemberAssignment(response.household.household_id);
-          }
           addNotification(
             "success",
             "Household Created",
@@ -1494,10 +1499,15 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
     setManualMembers((prev) => prev.filter((m) => m.id !== memberId));
   };
 
-  // Filter residents based on search term AND exclude the selected head
+  // Filter residents for member selection - exclude already selected members and the head
   const filteredResidents = allResidents.filter((resident) => {
-    // Exclude the selected head of household from member options
+    // Exclude the selected head of household
     if (selectedHeadId && resident.resident_id == selectedHeadId) {
+      return false;
+    }
+
+    // Exclude already selected members
+    if (selectedMembers.includes(resident.resident_id)) {
       return false;
     }
 
@@ -1511,7 +1521,6 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
       resident.contact_number?.includes(searchLower)
     );
   });
-
   const handleHeadOfHouseholdChange = (residentId) => {
     setSelectedHeadId(residentId);
 
@@ -1673,48 +1682,72 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
     return null;
   };
 
-  // Update your existing handleMemberAssignment function to use updateResidentHouseholds:
   const handleMemberAssignment = async (householdId) => {
     try {
-      // Get current members of this household
-      const currentMembers = household?.members
-        ? household.members.map((m) => m.resident_id)
-        : [];
+      console.log("📊 Member assignment for household:", {
+        householdId,
+        selectedMembers,
+        selectedMembersCount: selectedMembers.length,
+        existingMembers,
+        existingCount: existingMembers.length,
+      });
 
-      // Find members to add and remove
-      const membersToAdd = selectedMembers.filter(
-        (id) => !currentMembers.includes(id)
-      );
-      const membersToRemove = currentMembers.filter(
-        (id) => !selectedMembers.includes(id)
+      // IMPORTANT: Include the household head in selected members if not already included
+      const allSelectedMembers = [
+        ...new Set([...selectedMembers, selectedHeadId].filter(Boolean)),
+      ];
+
+      console.log(
+        "📊 All selected members (including head):",
+        allSelectedMembers
       );
 
-      // Remove members from household
-      for (const residentId of membersToRemove) {
-        await residentsAPI.updateHousehold(residentId, null);
+      // Clear all existing assignments first
+      if (existingMembers.length > 0) {
+        console.log(
+          "🔄 Clearing existing member assignments:",
+          existingMembers
+        );
+        for (const residentId of existingMembers) {
+          // Only clear if resident is not in the new selection
+          if (!allSelectedMembers.includes(residentId)) {
+            await residentsAPI.updateHousehold(residentId, null);
+            console.log(`✅ Cleared household for resident ${residentId}`);
+          }
+        }
       }
 
-      // Add members to household using the new function
-      if (membersToAdd.length > 0) {
-        // Temporarily set selectedMembers to just the new members
-        const originalSelectedMembers = [...selectedMembers];
-        setSelectedMembers(membersToAdd);
-
-        // Wait a moment for state to update
-        await new Promise((resolve) => setTimeout(resolve, 0));
-
-        // Update the residents
-        await updateResidentHouseholds(householdId);
-
-        // Restore original selected members
-        setSelectedMembers(originalSelectedMembers);
+      // Assign new members (including head)
+      if (allSelectedMembers.length > 0) {
+        console.log("🔄 Assigning new members:", allSelectedMembers);
+        for (const residentId of allSelectedMembers) {
+          try {
+            await residentsAPI.updateHousehold(residentId, householdId);
+            console.log(
+              `✅ Assigned resident ${residentId} to household ${householdId}`
+            );
+          } catch (error) {
+            console.error(`❌ Failed to assign resident ${residentId}:`, error);
+          }
+        }
       }
 
-      if (membersToAdd.length > 0 || membersToRemove.length > 0) {
+      // Log activity
+      await logUserActivity(
+        "Update Household Members",
+        "household",
+        householdId,
+        `Household ${formData.household_number}`,
+        "completed",
+        `Updated household members (${allSelectedMembers.length} members)`,
+        "Household members updated successfully"
+      );
+
+      if (allSelectedMembers.length > 0) {
         addNotification(
           "success",
           "Members Updated",
-          "Household members updated successfully"
+          `Household members (${allSelectedMembers.length}) updated successfully`
         );
       }
     } catch (error) {
@@ -1724,6 +1757,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
         "Update Failed",
         "Failed to update household members"
       );
+      throw error; // Re-throw to prevent form submission
     }
   };
 
@@ -1973,9 +2007,45 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
                   </div>
                 )}
 
+                {/* Show selected members */}
                 {selectedMembers.length > 0 && (
-                  <div className="mt-2 text-sm text-gray-600">
-                    {selectedMembers.length} member(s) selected
+                  <div className="mt-3">
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Selected Members ({selectedMembers.length})
+                    </p>
+                    <div className="max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-2">
+                      {selectedMembers.map((memberId) => {
+                        const member = allResidents.find(
+                          (r) => r.resident_id == memberId
+                        );
+                        if (!member) return null;
+
+                        return (
+                          <div
+                            key={memberId}
+                            className="flex items-center justify-between p-2 bg-green-50 border border-green-100 rounded mb-1"
+                          >
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900">
+                                {member.first_name} {member.middle_name}{" "}
+                                {member.last_name} {member.suffix}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {member.gender} • {member.civil_status} •{" "}
+                                {member.purok}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleMemberToggle(memberId)}
+                              className="text-red-600 hover:text-red-800 p-1"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 
