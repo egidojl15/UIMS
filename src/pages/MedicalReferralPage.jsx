@@ -288,15 +288,26 @@ const EditReferralModal = ({
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     required
+                    disabled // Disabled for editing since resident shouldn't be changed
                   >
-                    <option value="">Select Resident</option>
-                    {residents.map((r) => (
-                      <option key={r.resident_id} value={r.resident_id}>
-                        {r.first_name} {r.middle_name || ""} {r.last_name} (ID:{" "}
-                        {r.resident_id})
-                      </option>
-                    ))}
+                    <option value={editReferral.resident_id}>
+                      {(() => {
+                        const resident = residents.find(
+                          (r) => r.resident_id === editReferral.resident_id
+                        );
+                        return resident
+                          ? `${resident.first_name} ${
+                              resident.middle_name || ""
+                            } ${resident.last_name} (ID: ${
+                              resident.resident_id
+                            })`
+                          : `Resident ID: ${editReferral.resident_id}`;
+                      })()}
+                    </option>
                   </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Resident cannot be changed for existing referrals
+                  </p>
                 </div>
 
                 <div>
@@ -453,8 +464,9 @@ const CreateReferralModal = ({
   setShowCreateModal,
   handleReferralCreate,
   bhwUser,
-  residents,
+  residents, // This now receives filtered residents (without existing referrals)
   bhws,
+  referrals, // Add referrals to check existing ones
 }) => {
   const [newReferral, setNewReferral] = useState({
     resident_id: "",
@@ -467,6 +479,15 @@ const CreateReferralModal = ({
   });
   const [error, setError] = useState(null);
 
+  // Filter out residents who already have referrals
+  const availableResidents = residents.filter((resident) => {
+    // Check if resident already has a referral
+    const hasExistingReferral = referrals.some(
+      (ref) => ref.resident_id === resident.resident_id
+    );
+    return !hasExistingReferral;
+  });
+
   const validateForm = () => {
     if (!newReferral.resident_id) return "Please select a resident.";
     if (!newReferral.bhw_id) return "Please select a BHW.";
@@ -474,6 +495,15 @@ const CreateReferralModal = ({
     if (!newReferral.referral_reason.trim())
       return "Referral Reason is required.";
     if (!newReferral.referral_date) return "Referral Date is required.";
+
+    // Check if resident already has a referral
+    const hasExistingReferral = referrals.some(
+      (ref) => ref.resident_id === Number(newReferral.resident_id)
+    );
+    if (hasExistingReferral) {
+      return "This resident already has a referral. Please select another resident.";
+    }
+
     return null;
   };
 
@@ -523,11 +553,12 @@ const CreateReferralModal = ({
             </div>
           )}
 
-          {residents.length === 0 && (
+          {availableResidents.length === 0 && (
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-lg">
-              <p className="font-medium">No Active Residents</p>
+              <p className="font-medium">No Available Residents</p>
               <p className="text-sm">
-                Please add residents to create referrals.
+                All residents already have referrals. You cannot create a new
+                referral for residents who already have one.
               </p>
             </div>
           )}
@@ -560,16 +591,21 @@ const CreateReferralModal = ({
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     required
-                    disabled={residents.length === 0}
+                    disabled={availableResidents.length === 0}
                   >
                     <option value="">Select Resident</option>
-                    {residents.map((r) => (
+                    {availableResidents.map((r) => (
                       <option key={r.resident_id} value={r.resident_id}>
                         {r.first_name} {r.middle_name || ""} {r.last_name} (ID:{" "}
                         {r.resident_id})
                       </option>
                     ))}
                   </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {availableResidents.length > 0
+                      ? `Showing ${availableResidents.length} available resident(s) without referrals`
+                      : "No available residents without referrals"}
+                  </p>
                 </div>
 
                 <div>
@@ -705,12 +741,12 @@ const CreateReferralModal = ({
                 type="submit"
                 disabled={
                   !!validateForm() ||
-                  residents.length === 0 ||
+                  availableResidents.length === 0 ||
                   bhws.length === 0
                 }
                 className={`px-4 py-2 text-white rounded-lg transition-colors font-medium ${
                   !!validateForm() ||
-                  residents.length === 0 ||
+                  availableResidents.length === 0 ||
                   bhws.length === 0
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-blue-600 hover:bg-blue-700"
@@ -768,7 +804,6 @@ const MedicalReferralPage = () => {
   }, []);
 
   // Keep ONLY this single useEffect for fetching all data:
-
   useEffect(() => {
     async function fetchData() {
       try {
@@ -784,7 +819,11 @@ const MedicalReferralPage = () => {
         }
 
         if (residentsRes.success) {
-          setResidents(residentsRes.data.filter((r) => r.is_active === 1));
+          // Filter only active residents
+          const activeResidents = residentsRes.data.filter(
+            (r) => r.is_active === 1
+          );
+          setResidents(activeResidents);
         }
 
         // ✅ FIXED: Process the BHWs response correctly
@@ -1230,17 +1269,35 @@ const MedicalReferralPage = () => {
           </button>
         </div>
       </div>
-      {residents.length === 0 && (
-        <div className="mb-4 p-2 bg-yellow-100 text-yellow-700 rounded">
-          No active residents available. Please add residents to create
-          referrals.
-        </div>
-      )}
+
+      {/* Show warning if all residents already have referrals */}
+      {(() => {
+        // Filter residents without referrals
+        const residentsWithoutReferrals = residents.filter((resident) => {
+          return !referrals.some(
+            (ref) => ref.resident_id === resident.resident_id
+          );
+        });
+
+        if (residentsWithoutReferrals.length === 0 && residents.length > 0) {
+          return (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-lg">
+              <p className="font-medium">All Residents Have Referrals</p>
+              <p className="text-sm">
+                All active residents already have referrals. You cannot create
+                new referrals until some referrals are completed or deleted.
+              </p>
+            </div>
+          );
+        }
+      })()}
+
       {bhws.length === 0 && (
         <div className="mb-4 p-2 bg-yellow-100 text-yellow-700 rounded">
           No active BHWs available. Please add BHWs to create referrals.
         </div>
       )}
+
       {/* Desktop Table View */}
       <div className="hidden lg:block bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="max-h-[85vh] overflow-y-auto overflow-x-auto">
@@ -1458,8 +1515,9 @@ const MedicalReferralPage = () => {
           setShowCreateModal={setShowCreateModal}
           handleReferralCreate={handleReferralCreate}
           bhwUser={bhwUser}
-          residents={residents}
+          residents={residents} // Pass all residents, filtering happens inside the modal
           bhws={bhws}
+          referrals={referrals} // Pass referrals to check for existing ones
         />
       )}
 
