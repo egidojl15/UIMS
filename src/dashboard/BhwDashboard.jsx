@@ -60,7 +60,7 @@ const navItems = [
   }, // New item
   { name: "Medical Referrals", key: "medical-referral", icon: ClipboardPlus },
   // { name: "Generate Reports", key: "generate-reports", icon: FileText },
-  { name: "Death Records", key: "death-reports", icon: Skull }, // New item
+  { name: "Deceased", key: "death-reports", icon: Skull }, // New item
 ];
 
 const purokOptions = [

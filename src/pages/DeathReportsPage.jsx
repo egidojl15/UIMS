@@ -12,7 +12,13 @@ const DeathReportModal = ({
   handleDeathSubmit,
   setShowDeathForm,
   residents,
+  deaths,
 }) => {
+  // Filter out residents who already have death records
+  const availableResidents = residents.filter(
+    (r) => !deaths.some((d) => d.resident_id === r.resident_id)
+  );
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
       <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl border border-gray-100 overflow-hidden animate-scaleIn">
@@ -65,7 +71,7 @@ const DeathReportModal = ({
                   <option value="" disabled className="text-gray-400">
                     Select a resident
                   </option>
-                  {residents.map((r) => (
+                  {availableResidents.map((r) => (
                     <option key={r.resident_id} value={r.resident_id}>
                       {`${r.first_name} ${r.last_name} (ID: ${r.resident_id})`}
                     </option>
@@ -87,6 +93,11 @@ const DeathReportModal = ({
                   </svg>
                 </div>
               </div>
+              {availableResidents.length === 0 && (
+                <p className="text-sm text-amber-600 mt-2">
+                  All residents already have death records.
+                </p>
+              )}
             </div>
 
             {/* Date of Death */}
@@ -171,6 +182,7 @@ const DeathReportModal = ({
             <button
               type="submit"
               className="px-5 py-2.5 text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors shadow-sm"
+              disabled={availableResidents.length === 0}
             >
               Save Death Record
             </button>
@@ -495,6 +507,7 @@ const EditDeathModal = ({
     </div>
   );
 };
+
 const DeathReportsPage = () => {
   const {
     deaths,
@@ -824,15 +837,15 @@ const DeathReportsPage = () => {
                 <div className="inline-flex items-center gap-2 mb-2">
                   <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
                   <span className="text-cyan-200 text-sm font-medium tracking-widest">
-                    DEATH REPORTS
+                    DECEASED REPORTS
                   </span>
                   <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
                 </div>
                 <h2 className="text-4xl font-bold mb-2 drop-shadow-lg">
-                  Death Records
+                  Deceased Records
                 </h2>
                 <p className="text-cyan-100 text-lg">
-                  Manage and track death records and vital statistics
+                  Manage and track deceased records and vital statistics
                 </p>
                 <p className="text-cyan-200 text-sm mt-2">
                   Today is{" "}
@@ -908,70 +921,63 @@ const DeathReportsPage = () => {
             </thead>
             <tbody>
               {deaths && deaths.length > 0 ? (
-                deaths.map((d, index) => {
-                  // Debug log
-                  console.log("Death record in table:", d);
-
-                  return (
-                    <tr
-                      key={d.id}
-                      className={`${
-                        index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                      } hover:bg-blue-50 transition-colors duration-200 border-b border-gray-200`}
-                    >
-                      <td className="py-4 px-2 border-r border-gray-200 font-medium text-[#0F4C81]">
-                        {d.id}
-                      </td>
-                      <td className="py-4 px-2 border-r border-gray-200">
-                        {d.resident_name}
-                      </td>
-                      <td className="py-4 px-2 border-r border-gray-200">
-                        {calculateAge(d.dob)}
-                      </td>
-                      <td className="py-4 px-2 border-r border-gray-200">
-                        {formatDateForInput(d.date_of_death)}
-                      </td>
-                      <td className="py-4 px-2 border-r border-gray-200">
-                        {d.cause_of_death || "N/A"}
-                      </td>
-                      <td className="py-4 px-2 border-r border-gray-200">
-                        {d.place_of_death || "N/A"}
-                      </td>
-                      <td className="py-4 px-2">
-                        <div className="flex justify-center space-x-2">
-                          <button
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            onClick={() => setSelectedDeath(d)}
-                            title="View Details"
-                          >
-                            <Eye size={18} />
-                          </button>
-                          <button
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            onClick={() => {
-                              console.log("Setting editDeath with:", d);
-                              // Make sure to spread all properties including resident_id
-                              setEditDeath({
-                                ...d,
-                                resident_id: d.resident_id,
-                              });
-                            }}
-                            title="Edit Record"
-                          >
-                            <Edit2 size={18} />
-                          </button>
-                          <button
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            onClick={() => setConfirmDelete(d)}
-                            title="Delete Record"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
+                deaths.map((d, index) => (
+                  <tr
+                    key={d.id}
+                    className={`${
+                      index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    } hover:bg-blue-50 transition-colors duration-200 border-b border-gray-200`}
+                  >
+                    <td className="py-4 px-2 border-r border-gray-200 font-medium text-[#0F4C81]">
+                      {d.id}
+                    </td>
+                    <td className="py-4 px-2 border-r border-gray-200">
+                      {d.resident_name}
+                    </td>
+                    <td className="py-4 px-2 border-r border-gray-200">
+                      {calculateAge(d.dob)}
+                    </td>
+                    <td className="py-4 px-2 border-r border-gray-200">
+                      {formatDateForInput(d.date_of_death)}
+                    </td>
+                    <td className="py-4 px-2 border-r border-gray-200">
+                      {d.cause_of_death || "N/A"}
+                    </td>
+                    <td className="py-4 px-2 border-r border-gray-200">
+                      {d.place_of_death || "N/A"}
+                    </td>
+                    <td className="py-4 px-2">
+                      <div className="flex justify-center space-x-2">
+                        <button
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          onClick={() => setSelectedDeath(d)}
+                          title="View Details"
+                        >
+                          <Eye size={18} />
+                        </button>
+                        <button
+                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                          onClick={() => {
+                            setEditDeath({
+                              ...d,
+                              resident_id: d.resident_id,
+                            });
+                          }}
+                          title="Edit Record"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          onClick={() => setConfirmDelete(d)}
+                          title="Delete Record"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               ) : (
                 <tr>
                   <td
@@ -1099,6 +1105,7 @@ const DeathReportsPage = () => {
           handleDeathSubmit={handleDeathSubmit}
           setShowDeathForm={setShowDeathForm}
           residents={residents}
+          deaths={deaths}
         />
       )}
 
@@ -1203,7 +1210,6 @@ const DeathReportsPage = () => {
             { key: "date_of_death", label: "Date of Death", type: "date" },
             { key: "cause_of_death", label: "Cause of Death", type: "text" },
             { key: "place_of_death", label: "Place of Death", type: "text" },
-
             { key: "notes", label: "Notes", type: "text" },
           ]}
         />
