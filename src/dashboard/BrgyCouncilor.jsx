@@ -1156,7 +1156,7 @@ const BrgyCouncilor = ({ children }) => {
       return <LogBookPage />;
     } else if (currentPath.includes("/activitylog")) {
       return <ActivityLogPage onClose={() => navigate("/dashboard/councilor")} />;
-    } else if (currentPath.include("/my-profile")) {
+    } else if (currentPath.include("/myprofile")) {
       return <Profile />;
     }else {
       return defaultContent;
