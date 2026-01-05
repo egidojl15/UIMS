@@ -43,6 +43,7 @@ import Complaints from "../pages/Complaints";
 import Blotter from "../pages/Blotter";
 import LogBookPage from "../pages/LogBookPage";
 import ActivityLogPage from "../pages/ActivityLogPage";
+import MyProfile from "../pages/MyProfile";
 
 /* -------------------------------------------------------------------------- */
 /*  NotificationBadge Component                                               */
@@ -1155,7 +1156,9 @@ const BrgyCouncilor = ({ children }) => {
       return <LogBookPage />;
     } else if (currentPath.includes("/activitylog")) {
       return <ActivityLogPage onClose={() => navigate("/dashboard/councilor")} />;
-    } else {
+    } else if (currentPath.includes("/my-profile")) {
+      return <MyProfile />;
+    }else {
       return defaultContent;
     }
   };
