@@ -983,6 +983,16 @@ const CreateMaternalRecordModal = ({
     notes: "",
   });
 
+  // Helper to get resident name from ID
+  const getResidentName = (residentId) => {
+    const resident = residents.find(
+      (r) => String(r.resident_id) === String(residentId)
+    );
+    return resident
+      ? `${resident.first_name} ${resident.last_name}`
+      : "Unknown Resident";
+  };
+
   // Helper to check if resident has an active record
   // Helper to check if resident has an active record
   const getResidentStatus = useCallback(
@@ -1005,16 +1015,6 @@ const CreateMaternalRecordModal = ({
     },
     [existingRecords]
   );
-
-  // Helper to get resident name from ID
-  const getResidentName = (residentId) => {
-    const resident = residents.find(
-      (r) => String(r.resident_id) === String(residentId)
-    );
-    return resident
-      ? `${resident.first_name} ${resident.last_name}`
-      : "Unknown Resident";
-  };
 
   const [activeTab, setActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1286,25 +1286,33 @@ const CreateMaternalRecordModal = ({
                               <option value="">
                                 Select a resident from the list...
                               </option>
-                              {residents.map((r) => (
-                                <option
-                                  key={r.resident_id}
-                                  value={r.resident_id}
-                                  disabled={!!hasActiveRecord} // Disable if they have an active record
-                                  className={
-                                    hasActiveRecord
-                                      ? "text-gray-400 bg-gray-100"
-                                      : ""
-                                  }
-                                >
-                                  {r.first_name} {r.last_name}
-                                  {hasActiveRecord
-                                    ? ` (Has ${hasActiveRecord})`
-                                    : ` • Age: ${calculateAgeFromDOB(
-                                        r.date_of_birth
-                                      )} • ID: ${r.resident_id}`}
-                                </option>
-                              ))}
+                              {residents.map((r) => {
+                                // Check if this resident has an active record
+                                const residentStatus = getResidentStatus(
+                                  r.resident_id
+                                );
+                                const hasActiveRecord = !!residentStatus;
+
+                                return (
+                                  <option
+                                    key={r.resident_id}
+                                    value={r.resident_id}
+                                    disabled={hasActiveRecord}
+                                    className={
+                                      hasActiveRecord
+                                        ? "text-gray-400 bg-gray-100"
+                                        : ""
+                                    }
+                                  >
+                                    {r.first_name} {r.last_name}
+                                    {hasActiveRecord
+                                      ? ` (Has ${residentStatus})`
+                                      : ` • Age: ${calculateAgeFromDOB(
+                                          r.date_of_birth
+                                        )} • ID: ${r.resident_id}`}
+                                  </option>
+                                );
+                              })}
                             </select>
                             <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
                           </div>
@@ -2052,17 +2060,6 @@ const EditMaternalRecordModal = ({
 
   const isFormValid = () => {
     return formData.resident_id && formData.lmp_date;
-  };
-
-  // Helper to get resident name from ID
-  const getResidentName = (residentId) => {
-    const resident = residents.find(
-      (r) =>
-        r.resident_id === parseInt(residentId) || r.resident_id === residentId
-    );
-    return resident
-      ? `${resident.first_name} ${resident.last_name}`
-      : "Unknown Resident";
   };
 
   const tabs = [
