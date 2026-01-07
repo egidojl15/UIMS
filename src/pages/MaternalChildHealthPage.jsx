@@ -2807,8 +2807,14 @@ const CreateImmunizationRecordModal = ({
       newErrors.child_resident_id = "Please select a child";
     }
 
+    // Modified logic for vaccine validation
     if (!formData.vaccine_name?.trim()) {
       newErrors.vaccine_name = "Vaccine name is required";
+    } else if (
+      formData.vaccine_name === "other" &&
+      !formData.custom_vaccine?.trim()
+    ) {
+      newErrors.custom_vaccine = "Please specify the vaccine name";
     }
 
     if (formData.date_given) {
@@ -2845,7 +2851,18 @@ const CreateImmunizationRecordModal = ({
 
     setIsSubmitting(true);
     try {
-      await handleCreateImmunization(formData);
+      // Create a copy of the data to submit
+      const submissionData = { ...formData };
+
+      // If "other" is selected, use the custom input value
+      if (submissionData.vaccine_name === "other") {
+        submissionData.vaccine_name = submissionData.custom_vaccine;
+      }
+
+      // Remove the temporary custom_vaccine field before sending
+      delete submissionData.custom_vaccine;
+
+      await handleCreateImmunization(submissionData);
       setShowCreateModal(false);
     } catch (error) {
       // Error handled in parent
@@ -3108,7 +3125,7 @@ const CreateImmunizationRecordModal = ({
                             {vaccine}
                           </option>
                         ))}
-                        <option value="other">Other (specify below)</option>
+                        <option value="other">(Specify Below)</option>
                       </select>
                       <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
                     </div>
@@ -3116,6 +3133,40 @@ const CreateImmunizationRecordModal = ({
                       <p className="mt-2 text-sm text-red-600">
                         {errors.vaccine_name}
                       </p>
+                    )}
+
+                    {/* NEW: Conditional Input for "Other" */}
+                    {formData.vaccine_name === "other" && (
+                      <div className="mt-3 animate-fadeIn">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Specify Vaccine Name{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <Syringe className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                          <input
+                            type="text"
+                            value={formData.custom_vaccine || ""}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                custom_vaccine: e.target.value,
+                              }))
+                            }
+                            className={`w-full pl-12 pr-4 py-3.5 border-2 ${
+                              errors.custom_vaccine
+                                ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                                : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
+                            } rounded-xl transition-all duration-200`}
+                            placeholder="Enter specific vaccine name"
+                          />
+                        </div>
+                        {errors.custom_vaccine && (
+                          <p className="mt-2 text-sm text-red-600">
+                            {errors.custom_vaccine}
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -4468,6 +4519,7 @@ const MaternalChildHealthPage = () => {
           mother_name: mother
             ? `${mother.first_name} ${mother.last_name}`
             : "N/A",
+          created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
         setImmunizationRecords((prev) => [...prev, newRecord]);
