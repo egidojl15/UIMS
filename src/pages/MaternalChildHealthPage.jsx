@@ -2761,13 +2761,14 @@ const CreateImmunizationRecordModal = ({
   const [selectedChild, setSelectedChild] = useState(null);
   const [selectedMother, setSelectedMother] = useState(null);
 
-  // Replace the childResidents and motherResidents arrays with:
+  // Filter for children 5 years old and below (standard for immunization tracking)
   const childResidents = residents.filter((r) => {
-    if (!r.date_of_birth) return true;
+    if (!r.date_of_birth) return true; // Include if DOB is missing
     const age = calculateAgeFromDOB(r.date_of_birth);
-    return typeof age === "number" ? age < 18 : true;
+    return typeof age === "number" ? age <= 5 : true; // Changed to 5 years and below
   });
 
+  // Filter for potential mothers (18+ years old, Female)
   const motherResidents = residents.filter((r) => {
     if (!r.date_of_birth) return r.gender === "Female";
     const age = calculateAgeFromDOB(r.date_of_birth);
@@ -3435,13 +3436,14 @@ const EditImmunizationRecordModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Add these filter functions inside the component
+  // Filter for children 5 years old and below (standard for immunization tracking)
   const childResidents = residents.filter((r) => {
-    if (!r.date_of_birth) return true;
+    if (!r.date_of_birth) return true; // Include if DOB is missing
     const age = calculateAgeFromDOB(r.date_of_birth);
-    return typeof age === "number" ? age < 18 : true;
+    return typeof age === "number" ? age <= 5 : true; // Changed to 5 years and below
   });
 
+  // Filter for potential mothers (18+ years old, Female)
   const motherResidents = residents.filter((r) => {
     if (!r.date_of_birth) return r.gender === "Female";
     const age = calculateAgeFromDOB(r.date_of_birth);
