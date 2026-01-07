@@ -964,6 +964,7 @@ const CreateMaternalRecordModal = ({
   handleCreateMaternal,
   residents,
   addNotification,
+  existingRecords,
 }) => {
   const [formData, setFormData] = useState({
     resident_id: "",
@@ -981,6 +982,20 @@ const CreateMaternalRecordModal = ({
     baby_weight: "",
     notes: "",
   });
+
+  // Helper to check if resident has an active record
+  const getResidentStatus = (residentId) => {
+    // Find if this resident has any maternal records
+    const residentRecords = existingRecords.filter(
+      (r) =>
+        r.resident_id === residentId || r.resident_id === parseInt(residentId)
+    );
+
+    // Check if any of those records are "active" (no delivery date yet)
+    const hasActivePregnancy = residentRecords.some((r) => !r.delivery_date);
+
+    return hasActivePregnancy ? "Active Record" : null;
+  };
 
   const [activeTab, setActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1256,9 +1271,14 @@ const CreateMaternalRecordModal = ({
                                 <option
                                   key={r.resident_id}
                                   value={r.resident_id}
+                                  disabled={!!status} // Disable if they have an active record
                                 >
-                                  {r.first_name} {r.last_name} • Age:{" "}
-                                  {calculateAgeFromDOB(r.date_of_birth)} • ID:{" "}
+                                  {r.first_name} {r.last_name}
+                                  {status
+                                    ? ` (Has ${status})`
+                                    : ` • Age: ${calculateAgeFromDOB(
+                                        r.date_of_birth
+                                      )}`}
                                   {r.resident_id}
                                 </option>
                               ))}
@@ -2740,6 +2760,7 @@ const CreateImmunizationRecordModal = ({
   addNotification,
   calculateAgeFromDOB, // ADD THIS
   vaccineOptions, // ADD THIS
+  existingRecords, // <--- Receive this prop
 }) => {
   const [formData, setFormData] = useState({
     child_resident_id: "",
@@ -2755,6 +2776,21 @@ const CreateImmunizationRecordModal = ({
     adverse_reactions: "",
     notes: "",
   });
+
+  // NEW HELPER: Get list of vaccines this child already has
+  const getTakenVaccines = () => {
+    if (!formData.child_resident_id) return [];
+
+    return existingRecords
+      .filter(
+        (r) =>
+          r.child_resident_id == formData.child_resident_id && // Match child
+          r.vaccine_name // Ensure vaccine name exists
+      )
+      .map((r) => r.vaccine_name.toLowerCase()); // Return array of vaccine names
+  };
+
+  const takenVaccines = getTakenVaccines();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -3118,14 +3154,29 @@ const CreateImmunizationRecordModal = ({
                             : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
                         } rounded-xl transition-all duration-200 bg-white appearance-none`}
                         required
+                        disabled={!formData.child_resident_id} // Optional: Disable if no child selected
                       >
                         <option value="">Select vaccine...</option>
-                        {vaccineOptions.map((vaccine, index) => (
-                          <option key={index} value={vaccine}>
-                            {vaccine}
-                          </option>
-                        ))}
-                        <option value="other">(Specify Below)</option>
+                        {vaccineOptions.map((vaccine, index) => {
+                          // Check if child already has this specific vaccine
+                          const isTaken = takenVaccines.includes(
+                            vaccine.toLowerCase()
+                          );
+
+                          return (
+                            <option
+                              key={index}
+                              value={vaccine}
+                              disabled={isTaken}
+                              className={
+                                isTaken ? "text-gray-400 bg-gray-50" : ""
+                              }
+                            >
+                              {vaccine} {isTaken ? "(Already Received)" : ""}
+                            </option>
+                          );
+                        })}
+                        <option value="other">Other (Specify Below)</option>
                       </select>
                       <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
                     </div>
@@ -5186,6 +5237,7 @@ const MaternalChildHealthPage = () => {
           handleCreateMaternal={handleCreateMaternal}
           residents={residents}
           addNotification={addNotification}
+          existingRecords={maternalRecords}
         />
       )}
       {showMaternalEdit && editMaternalRecord && (
@@ -5205,6 +5257,7 @@ const MaternalChildHealthPage = () => {
           addNotification={addNotification}
           calculateAgeFromDOB={calculateAgeFromDOB} // ADD THIS
           vaccineOptions={vaccineOptions} // ADD THIS
+          existingRecords={immunizationRecords}
         />
       )}
       {showImmunizationEdit && editImmunizationRecord && (
