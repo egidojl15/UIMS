@@ -984,17 +984,36 @@ const CreateMaternalRecordModal = ({
   });
 
   // Helper to check if resident has an active record
-  const getResidentStatus = (residentId) => {
-    // Find if this resident has any maternal records
-    const residentRecords = existingRecords.filter(
-      (r) =>
-        r.resident_id === residentId || r.resident_id === parseInt(residentId)
+  // Helper to check if resident has an active record
+  const getResidentStatus = useCallback(
+    (residentId) => {
+      if (!residentId) return null;
+
+      // Find if this resident has any maternal records
+      const residentRecords = existingRecords.filter(
+        (r) => String(r.resident_id) === String(residentId)
+      );
+
+      if (residentRecords.length === 0) {
+        return null; // No records at all
+      }
+
+      // Check if any of those records are "active" (no delivery date yet)
+      const hasActivePregnancy = residentRecords.some((r) => !r.delivery_date);
+
+      return hasActivePregnancy ? "Active Pregnancy Record" : "Existing Record";
+    },
+    [existingRecords]
+  );
+
+  // Helper to get resident name from ID
+  const getResidentName = (residentId) => {
+    const resident = residents.find(
+      (r) => String(r.resident_id) === String(residentId)
     );
-
-    // Check if any of those records are "active" (no delivery date yet)
-    const hasActivePregnancy = residentRecords.some((r) => !r.delivery_date);
-
-    return hasActivePregnancy ? "Active Record" : null;
+    return resident
+      ? `${resident.first_name} ${resident.last_name}`
+      : "Unknown Resident";
   };
 
   const [activeTab, setActiveTab] = useState("basic");
@@ -1271,33 +1290,61 @@ const CreateMaternalRecordModal = ({
                                 <option
                                   key={r.resident_id}
                                   value={r.resident_id}
-                                  disabled={!!status} // Disable if they have an active record
+                                  disabled={!!hasActiveRecord} // Disable if they have an active record
+                                  className={
+                                    hasActiveRecord
+                                      ? "text-gray-400 bg-gray-100"
+                                      : ""
+                                  }
                                 >
                                   {r.first_name} {r.last_name}
-                                  {status
-                                    ? ` (Has ${status})`
+                                  {hasActiveRecord
+                                    ? ` (Has ${hasActiveRecord})`
                                     : ` • Age: ${calculateAgeFromDOB(
                                         r.date_of_birth
-                                      )}`}
-                                  {r.resident_id}
+                                      )} • ID: ${r.resident_id}`}
                                 </option>
                               ))}
                             </select>
                             <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
                           </div>
                           {formData.resident_id && (
-                            <div className="mt-4 p-4 bg-green-50 rounded-xl border border-green-100 animate-fadeIn">
-                              <div className="flex items-center gap-3">
-                                <CheckCircle
-                                  className="text-green-600 flex-shrink-0"
-                                  size={20}
-                                />
-                                <p className="text-sm text-green-800">
-                                  Resident selected. You can proceed to the next
-                                  section.
-                                </p>
-                              </div>
-                            </div>
+                            <>
+                              {getResidentStatus(formData.resident_id) ? (
+                                <div className="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-100 animate-fadeIn">
+                                  <div className="flex items-center gap-3">
+                                    <AlertTriangle
+                                      className="text-yellow-600 flex-shrink-0"
+                                      size={20}
+                                    />
+                                    <div>
+                                      <p className="text-sm font-medium text-yellow-800 mb-1">
+                                        Resident has existing record
+                                      </p>
+                                      <p className="text-xs text-yellow-600">
+                                        {getResidentName(formData.resident_id)}{" "}
+                                        already has an active pregnancy record.
+                                        Please select a different resident or
+                                        edit the existing record.
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="mt-4 p-4 bg-green-50 rounded-xl border border-green-100 animate-fadeIn">
+                                  <div className="flex items-center gap-3">
+                                    <CheckCircle
+                                      className="text-green-600 flex-shrink-0"
+                                      size={20}
+                                    />
+                                    <p className="text-sm text-green-800">
+                                      Resident selected. You can proceed to the
+                                      next section.
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
 
@@ -2977,13 +3024,35 @@ const CreateImmunizationRecordModal = ({
                         required
                       >
                         <option value="">Select a child...</option>
-                        {childResidents.map((r) => (
-                          <option key={r.resident_id} value={r.resident_id}>
-                            {r.first_name} {r.last_name} • Age:{" "}
-                            {calculateAgeFromDOB(r.date_of_birth)} • ID:{" "}
-                            {r.resident_id}
-                          </option>
-                        ))}
+                        {childResidents.map((r) => {
+                          // Check if child already has this specific vaccine (you already have this logic)
+                          // Also check if they have ANY immunization record
+                          const hasAnyImmunization = existingRecords.some(
+                            (record) =>
+                              String(record.child_resident_id) ===
+                              String(r.resident_id)
+                          );
+
+                          return (
+                            <option
+                              key={r.resident_id}
+                              value={r.resident_id}
+                              disabled={hasAnyImmunization} // Optional: disable if they have any record
+                              className={
+                                hasAnyImmunization
+                                  ? "text-gray-400 bg-gray-50"
+                                  : ""
+                              }
+                            >
+                              {r.first_name} {r.last_name} • Age:{" "}
+                              {calculateAgeFromDOB(r.date_of_birth)} • ID:{" "}
+                              {r.resident_id}
+                              {hasAnyImmunization
+                                ? " (Has existing immunization)"
+                                : ""}
+                            </option>
+                          );
+                        })}
                       </select>
                       <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
                     </div>
