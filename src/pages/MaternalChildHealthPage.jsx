@@ -823,117 +823,40 @@ const ViewImmunizationRecordModal = ({
                 <h3 className="text-lg font-semibold text-gray-900">
                   Parent/Guardian Information
                 </h3>
-                {/* ADD THIS LINE: */}
-                <span className="text-xs text-gray-500">(Auto-filled)</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mother
+                    Mother's Name
                   </label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    {/* REPLACE the select with this input: */}
-                    <input
-                      type="text"
-                      value={formData.mother_name}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          mother_name: e.target.value,
-                        }))
-                      }
-                      className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-gray-50"
-                      placeholder="Mother's name"
-                      readOnly
-                    />
+                  <div className="p-4 bg-white rounded-xl border border-gray-200">
+                    <p className="font-medium text-gray-900">
+                      {selectedRecord.mother_name || "N/A"}
+                    </p>
                   </div>
-                  {/* ADD THIS LINE: */}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Auto-filled based on household
-                  </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Father Name
+                    Father's Name
                   </label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    {/* REPLACE the input with this: */}
-                    <input
-                      type="text"
-                      value={formData.father_name}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          father_name: e.target.value,
-                        }))
-                      }
-                      className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-gray-50"
-                      placeholder="Father's name"
-                      readOnly
-                    />
+                  <div className="p-4 bg-white rounded-xl border border-gray-200">
+                    <p className="font-medium text-gray-900">
+                      {selectedRecord.father_name || "N/A"}
+                    </p>
                   </div>
-                  {/* ADD THIS LINE: */}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Auto-filled based on household
-                  </p>
                 </div>
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Parent/Guardian
                   </label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      value={formData.parent_name}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          parent_name: e.target.value,
-                        }))
-                      }
-                      className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
-                      placeholder="Primary parent/guardian name"
-                    />
+                  <div className="p-4 bg-white rounded-xl border border-gray-200">
+                    <p className="font-medium text-gray-900">
+                      {selectedRecord.parent_name || "N/A"}
+                    </p>
                   </div>
-                  {/* ADD THIS LINE: */}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Primary contact person (editable)
-                  </p>
-                </div>
-
-                {/* ADD THIS NEW SECTION: */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select Different Mother (Optional)
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <select
-                      value={formData.mother_resident_id}
-                      onChange={(e) => handleMotherChange(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-white appearance-none"
-                    >
-                      <option value="">
-                        Select different mother (optional)...
-                      </option>
-                      {motherResidents.map((r) => (
-                        <option key={r.resident_id} value={r.resident_id}>
-                          {r.first_name} {r.last_name} • Age:{" "}
-                          {calculateAgeFromDOB(r.date_of_birth)}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Use this if the auto-filled mother is incorrect
-                  </p>
                 </div>
               </div>
             </div>
