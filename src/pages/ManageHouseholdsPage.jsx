@@ -1019,6 +1019,14 @@ const ManageHouseholdsPage = () => {
                         member.first_name?.trim(),
                         member.middle_name?.trim(),
                         member.last_name?.trim(),
+                        // ✅ FIXED: Only include suffix if it's valid (not "0", not empty, not null)
+                        member.suffix &&
+                        member.suffix !== 0 &&
+                        member.suffix !== "0" &&
+                        String(member.suffix).trim() !== "" &&
+                        String(member.suffix).toLowerCase() !== "null"
+                          ? String(member.suffix).trim()
+                          : null,
                       ]
                         .filter(Boolean) // Remove null/undefined/empty values
                         .join(" ");
@@ -1274,6 +1282,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
           selectedResident.first_name,
           selectedResident.middle_name,
           selectedResident.last_name,
+          selectedResident.suffix,
         ]
           .filter(
             (part) =>
@@ -1504,7 +1513,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
 
     // Apply search filter
     const fullName =
-      `${resident.first_name} ${resident.middle_name} ${resident.last_name}`.toLowerCase();
+      `${resident.first_name} ${resident.middle_name} ${resident.last_name} ${resident.suffix}`.toLowerCase();
     const searchLower = memberSearchTerm.toLowerCase();
     return (
       fullName.includes(searchLower) ||
@@ -1526,6 +1535,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
             selectedResident.first_name,
             selectedResident.middle_name,
             selectedResident.last_name,
+            selectedResident.suffix,
           ]
             .filter(
               (part) =>
@@ -1565,6 +1575,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
                 selectedResident.first_name,
                 selectedResident.middle_name,
                 selectedResident.last_name,
+                selectedResident.suffix,
               ]
                 .filter(
                   (part) =>
@@ -1586,6 +1597,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
               potentialSpouse.first_name,
               potentialSpouse.middle_name,
               potentialSpouse.last_name,
+              potentialSpouse.suffix,
             ]
               .filter(
                 (part) =>
@@ -1969,7 +1981,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-gray-900 truncate">
                                 {resident.first_name} {resident.middle_name}{" "}
-                                {resident.last_name}
+                                {resident.last_name} {resident.suffix}
                               </p>
                               <p className="text-xs text-gray-500">
                                 {resident.gender} • {resident.civil_status} •{" "}
@@ -2016,7 +2028,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
                             <div className="flex-1">
                               <p className="text-sm font-medium text-gray-900">
                                 {member.first_name} {member.middle_name}{" "}
-                                {member.last_name}
+                                {member.last_name} {member.suffix}
                               </p>
                               <p className="text-xs text-gray-500">
                                 {member.gender} • {member.civil_status} •{" "}
