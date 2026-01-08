@@ -839,7 +839,7 @@ const ViewImmunizationRecordModal = ({
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Parent/Guardian
+                    Guardian(optional)
                   </label>
                   <div className="p-4 bg-white rounded-xl border border-gray-200">
                     <p className="font-medium text-gray-900">
@@ -3270,7 +3270,7 @@ const CreateImmunizationRecordModal = ({
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Parent/Guardian
+                      Guardian(optional)
                     </label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -4107,7 +4107,7 @@ const EditImmunizationRecordModal = ({
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Parent/Guardian
+                      Guardian(optional)
                     </label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
