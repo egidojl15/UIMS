@@ -3837,6 +3837,22 @@ const EditImmunizationRecordModal = ({
     }
   };
 
+  // Add this function after handleChildChange:
+  const handleMotherChange = (motherId) => {
+    const mother = residents.find((r) => r.resident_id == motherId);
+
+    if (mother) {
+      setFormData((prev) => ({
+        ...prev,
+        mother_resident_id: motherId,
+        mother_name: `${mother.first_name} ${mother.last_name}`,
+        // Update parent/guardian name if not already set
+        parent_name:
+          prev.parent_name || `${mother.first_name} ${mother.last_name}`,
+      }));
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -3898,6 +3914,69 @@ const EditImmunizationRecordModal = ({
     return resident
       ? `${resident.first_name} ${resident.last_name}`
       : "Unknown";
+  };
+
+  // Add this helper function inside EditImmunizationRecordModal, after state declarations:
+  const findParentsForChild = (child) => {
+    if (!child || !child.household_id) {
+      return { father: null, mother: null, guardian: null };
+    }
+
+    // Get all residents in the same household
+    const householdMembers = residents.filter(
+      (r) => r.household_id === child.household_id
+    );
+
+    let father = null;
+    let mother = null;
+    let guardian = null;
+
+    // Try to find parents using relationship field if it exists
+    householdMembers.forEach((member) => {
+      if (member.relationship) {
+        const relationship = member.relationship.toLowerCase();
+        if (relationship.includes("father") || relationship.includes("dad")) {
+          father = member;
+        }
+        if (relationship.includes("mother") || relationship.includes("mom")) {
+          mother = member;
+        }
+        if (
+          relationship.includes("guardian") ||
+          relationship.includes("parent")
+        ) {
+          guardian = member;
+        }
+      }
+    });
+
+    // Fallback: If no relationship field, use age and gender
+    if (!father) {
+      const adultMales = householdMembers.filter((m) => {
+        if (m.resident_id === child.resident_id) return false; // Exclude child
+        if (m.gender !== "Male") return false;
+        if (!m.date_of_birth) return true;
+        const age = calculateAgeFromDOB(m.date_of_birth);
+        return typeof age === "number" && age >= 18;
+      });
+      father = adultMales[0] || null;
+    }
+
+    if (!mother) {
+      const adultFemales = householdMembers.filter((m) => {
+        if (m.resident_id === child.resident_id) return false; // Exclude child
+        if (m.gender !== "Female") return false;
+        if (!m.date_of_birth) return true;
+        const age = calculateAgeFromDOB(m.date_of_birth);
+        return typeof age === "number" && age >= 18;
+      });
+      mother = adultFemales[0] || null;
+    }
+
+    // Set guardian as mother by default, or father if no mother
+    guardian = mother || father || null;
+
+    return { father, mother, guardian };
   };
 
   return (
@@ -4042,6 +4121,121 @@ const EditImmunizationRecordModal = ({
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Parent Information Section */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <Users className="w-5 h-5 text-purple-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Parent/Guardian Information
+                  </h3>
+                  <span className="text-xs text-gray-500">(Auto-filled)</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mother
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.mother_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            mother_name: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-gray-50"
+                        placeholder="Mother's name"
+                        readOnly
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Auto-filled based on household
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Father Name
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.father_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            father_name: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-gray-50"
+                        placeholder="Father's name"
+                        readOnly
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Auto-filled based on household
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Parent/Guardian
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.parent_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            parent_name: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="Primary parent/guardian name"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Primary contact person (editable)
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Different Mother (Optional)
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <select
+                        value={formData.mother_resident_id}
+                        onChange={(e) => handleMotherChange(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-white appearance-none"
+                      >
+                        <option value="">
+                          Select different mother (optional)...
+                        </option>
+                        {motherResidents.map((r) => (
+                          <option key={r.resident_id} value={r.resident_id}>
+                            {r.first_name} {r.last_name} • Age:{" "}
+                            {calculateAgeFromDOB(r.date_of_birth)}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Use this if the auto-filled mother is incorrect
+                    </p>
+                  </div>
                 </div>
               </div>
 
