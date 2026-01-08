@@ -2017,14 +2017,6 @@ const EditMaternalRecordModal = ({
     notes: record.notes || "",
   });
 
-  // ADD THIS HELPER FUNCTION HERE
-  const getResidentName = (residentId) => {
-    const resident = residents.find((r) => r.resident_id == residentId);
-    return resident
-      ? `${resident.first_name} ${resident.last_name}`
-      : "Unknown";
-  };
-
   const [activeTab, setActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -2807,14 +2799,13 @@ const CreateImmunizationRecordModal = ({
   handleCreateImmunization,
   residents,
   addNotification,
-  calculateAgeFromDOB,
-  vaccineOptions,
-  existingRecords,
+  calculateAgeFromDOB, // ADD THIS
+  vaccineOptions, // ADD THIS
+  existingRecords, // <--- Receive this prop
 }) => {
   const [formData, setFormData] = useState({
     child_resident_id: "",
     mother_resident_id: "",
-    father_resident_id: "", // Added specific ID for father
     parent_name: "",
     father_name: "",
     mother_name: "",
@@ -2827,105 +2818,136 @@ const CreateImmunizationRecordModal = ({
     notes: "",
   });
 
-  // Helper: Get list of vaccines this child already has
+  // NEW HELPER: Get list of vaccines this child already has
   const getTakenVaccines = () => {
     if (!formData.child_resident_id) return [];
+
     return existingRecords
       .filter(
         (r) =>
-          r.child_resident_id == formData.child_resident_id && r.vaccine_name
+          r.child_resident_id == formData.child_resident_id && // Match child
+          r.vaccine_name // Ensure vaccine name exists
       )
-      .map((r) => r.vaccine_name.toLowerCase());
+      .map((r) => r.vaccine_name.toLowerCase()); // Return array of vaccine names
   };
 
   const takenVaccines = getTakenVaccines();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [selectedChild, setSelectedChild] = useState(null);
+  const [selectedMother, setSelectedMother] = useState(null);
 
-  // --- 1. FILTER RESIDENTS FOR DROPDOWNS ---
-
-  // Filter: Children (0-5 years)
+  // Filter for children 5 years old and below (standard for immunization tracking)
   const childResidents = residents.filter((r) => {
-    if (!r.date_of_birth) return true;
+    if (!r.date_of_birth) return true; // Include if DOB is missing
     const age = calculateAgeFromDOB(r.date_of_birth);
-    return typeof age === "number" ? age <= 5 : true;
+    return typeof age === "number" ? age <= 5 : true; // Changed to 5 years and below
   });
 
-  // Filter: Potential Mothers (Female, 15+ years)
+  // Filter for potential mothers (18+ years old, Female)
   const motherResidents = residents.filter((r) => {
-    if (r.gender !== "Female") return false;
-    if (!r.date_of_birth) return true;
+    if (!r.date_of_birth) return r.gender === "Female";
     const age = calculateAgeFromDOB(r.date_of_birth);
-    return typeof age === "number" ? age >= 15 : true;
+    return typeof age === "number" ? age >= 18 && r.gender === "Female" : false;
   });
 
-  // Filter: Potential Fathers (Male, 15+ years)
-  const fatherResidents = residents.filter((r) => {
-    if (r.gender !== "Male") return false;
-    if (!r.date_of_birth) return true;
-    const age = calculateAgeFromDOB(r.date_of_birth);
-    return typeof age === "number" ? age >= 15 : true;
-  });
-
-  // --- 2. HANDLERS (No more auto-guessing) ---
-
+  // REPLACE the existing handleChildChange function with this:
   const handleChildChange = (childId) => {
     const child = residents.find((r) => r.resident_id == childId);
     setSelectedChild(child);
-    // Only set the child ID. We do NOT auto-fill parents anymore.
-    setFormData((prev) => ({
-      ...prev,
-      child_resident_id: childId,
-    }));
+
+    if (child) {
+      // Find parents using the new function
+      const { father, mother, guardian } = findParentsForChild(child);
+
+      // Update form data with found parents
+      setFormData((prev) => ({
+        ...prev,
+        child_resident_id: childId,
+        father_name: father ? `${father.first_name} ${father.last_name}` : "",
+        mother_name: mother ? `${mother.first_name} ${mother.last_name}` : "",
+        mother_resident_id: mother ? mother.resident_id : "",
+        parent_name: guardian
+          ? `${guardian.first_name} ${guardian.last_name}`
+          : "",
+      }));
+
+      // If mother found, pre-select her
+      if (mother) {
+        setSelectedMother(mother);
+      }
+    } else {
+      // Reset form if no child selected
+      setFormData((prev) => ({
+        ...prev,
+        child_resident_id: childId,
+        father_name: "",
+        mother_name: "",
+        mother_resident_id: "",
+        parent_name: "",
+      }));
+      setSelectedMother(null);
+    }
   };
 
+  // Add this function after handleChildChange:
   const handleMotherChange = (motherId) => {
     const mother = residents.find((r) => r.resident_id == motherId);
-    setFormData((prev) => ({
-      ...prev,
-      mother_resident_id: motherId,
-      mother_name: mother ? `${mother.first_name} ${mother.last_name}` : "",
-      // Convenience: Auto-fill "Parent/Guardian" text if it's currently empty
-      parent_name:
-        !prev.parent_name && mother
-          ? `${mother.first_name} ${mother.last_name}`
-          : prev.parent_name,
-    }));
-  };
+    setSelectedMother(mother);
 
-  const handleFatherChange = (fatherId) => {
-    const father = residents.find((r) => r.resident_id == fatherId);
-    setFormData((prev) => ({
-      ...prev,
-      father_resident_id: fatherId,
-      father_name: father ? `${father.first_name} ${father.last_name}` : "",
-      // Convenience: Auto-fill "Parent/Guardian" text if it's currently empty
-      parent_name:
-        !prev.parent_name && father
-          ? `${father.first_name} ${father.last_name}`
-          : prev.parent_name,
-    }));
+    if (mother) {
+      setFormData((prev) => ({
+        ...prev,
+        mother_resident_id: motherId,
+        mother_name: `${mother.first_name} ${mother.last_name}`,
+        // Update parent/guardian name if not already set
+        parent_name:
+          prev.parent_name || `${mother.first_name} ${mother.last_name}`,
+      }));
+    }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.child_resident_id)
+
+    if (!formData.child_resident_id) {
       newErrors.child_resident_id = "Please select a child";
-    if (!formData.vaccine_name?.trim())
+    }
+
+    // Modified logic for vaccine validation
+    if (!formData.vaccine_name?.trim()) {
       newErrors.vaccine_name = "Vaccine name is required";
-    else if (
+    } else if (
       formData.vaccine_name === "other" &&
       !formData.custom_vaccine?.trim()
     ) {
       newErrors.custom_vaccine = "Please specify the vaccine name";
     }
+
+    if (formData.date_given) {
+      const givenDate = new Date(formData.date_given);
+      if (givenDate > new Date()) {
+        newErrors.date_given = "Date given cannot be in the future";
+      }
+    }
+
+    if (formData.next_dose_date && formData.date_given) {
+      const givenDate = new Date(formData.date_given);
+      const nextDoseDate = new Date(formData.next_dose_date);
+      if (nextDoseDate <= givenDate) {
+        newErrors.next_dose_date =
+          "Next dose date must be after the given date";
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validateForm()) {
       addNotification(
         "error",
@@ -2937,12 +2959,16 @@ const CreateImmunizationRecordModal = ({
 
     setIsSubmitting(true);
     try {
+      // Create a copy of the data to submit
       const submissionData = { ...formData };
+
+      // If "other" is selected, use the custom input value
       if (submissionData.vaccine_name === "other") {
         submissionData.vaccine_name = submissionData.custom_vaccine;
       }
+
+      // Remove the temporary custom_vaccine field before sending
       delete submissionData.custom_vaccine;
-      // Note: We send father_name string, backend might ignore father_resident_id unless you add that column
 
       await handleCreateImmunization(submissionData);
       setShowCreateModal(false);
@@ -2957,10 +2983,73 @@ const CreateImmunizationRecordModal = ({
     return formData.child_resident_id && formData.vaccine_name?.trim();
   };
 
+  // Add this function inside CreateImmunizationRecordModal, after the state declarations:
+  const findParentsForChild = (child) => {
+    if (!child || !child.household_id) {
+      return { father: null, mother: null, guardian: null };
+    }
+
+    // Get all residents in the same household
+    const householdMembers = residents.filter(
+      (r) => r.household_id === child.household_id
+    );
+
+    let father = null;
+    let mother = null;
+    let guardian = null;
+
+    // Try to find parents using relationship field if it exists
+    householdMembers.forEach((member) => {
+      if (member.relationship) {
+        const relationship = member.relationship.toLowerCase();
+        if (relationship.includes("father") || relationship.includes("dad")) {
+          father = member;
+        }
+        if (relationship.includes("mother") || relationship.includes("mom")) {
+          mother = member;
+        }
+        if (
+          relationship.includes("guardian") ||
+          relationship.includes("parent")
+        ) {
+          guardian = member;
+        }
+      }
+    });
+
+    // Fallback: If no relationship field, use age and gender
+    if (!father) {
+      const adultMales = householdMembers.filter((m) => {
+        if (m.resident_id === child.resident_id) return false; // Exclude child
+        if (m.gender !== "Male") return false;
+        if (!m.date_of_birth) return true;
+        const age = calculateAgeFromDOB(m.date_of_birth);
+        return typeof age === "number" && age >= 18;
+      });
+      father = adultMales[0] || null;
+    }
+
+    if (!mother) {
+      const adultFemales = householdMembers.filter((m) => {
+        if (m.resident_id === child.resident_id) return false; // Exclude child
+        if (m.gender !== "Female") return false;
+        if (!m.date_of_birth) return true;
+        const age = calculateAgeFromDOB(m.date_of_birth);
+        return typeof age === "number" && age >= 18;
+      });
+      mother = adultFemales[0] || null;
+    }
+
+    // Set guardian as mother by default, or father if no mother
+    guardian = mother || father || null;
+
+    return { father, mother, guardian };
+  };
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-5xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        {/* Header */}
+        {/* Enhanced Header */}
         <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
@@ -2974,7 +3063,7 @@ const CreateImmunizationRecordModal = ({
                 <div className="flex items-center gap-2 mt-1">
                   <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
                   <p className="text-white/80 text-sm">
-                    Record vaccination details manually
+                    Record vaccination details for a child
                   </p>
                 </div>
               </div>
@@ -2982,6 +3071,7 @@ const CreateImmunizationRecordModal = ({
             <button
               onClick={() => setShowCreateModal(false)}
               className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group backdrop-blur-sm"
+              aria-label="Close modal"
             >
               <X
                 size={24}
@@ -3016,42 +3106,84 @@ const CreateImmunizationRecordModal = ({
                         onChange={(e) => handleChildChange(e.target.value)}
                         className={`w-full pl-12 pr-4 py-3.5 border-2 ${
                           errors.child_resident_id
-                            ? "border-red-300"
-                            : "border-gray-300"
-                        } rounded-xl bg-white appearance-none`}
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                            : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
+                        } rounded-xl transition-all duration-200 bg-white appearance-none`}
                         required
                       >
                         <option value="">Select a child...</option>
                         {childResidents.map((r) => {
+                          // Check if child already has this specific vaccine (you already have this logic)
+                          // Also check if they have ANY immunization record
                           const hasAnyImmunization = existingRecords.some(
                             (record) =>
                               String(record.child_resident_id) ===
                               String(r.resident_id)
                           );
+
                           return (
-                            <option key={r.resident_id} value={r.resident_id}>
+                            <option
+                              key={r.resident_id}
+                              value={r.resident_id}
+                              disabled={hasAnyImmunization} // Optional: disable if they have any record
+                              className={
+                                hasAnyImmunization
+                                  ? "text-gray-400 bg-gray-50"
+                                  : ""
+                              }
+                            >
                               {r.first_name} {r.last_name} • Age:{" "}
-                              {calculateAgeFromDOB(r.date_of_birth)}
+                              {calculateAgeFromDOB(r.date_of_birth)} • ID:{" "}
+                              {r.resident_id}
+                              {hasAnyImmunization
+                                ? " (Has existing immunization)"
+                                : ""}
                             </option>
                           );
                         })}
                       </select>
                       <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
                     </div>
+                    {errors.child_resident_id && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.child_resident_id}
+                      </p>
+                    )}
                   </div>
 
                   {selectedChild && (
-                    <div className="md:col-span-2 p-4 bg-white rounded-xl border border-gray-200">
-                      <div className="flex gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-500">Name:</span>{" "}
-                          <strong>
-                            {selectedChild.first_name} {selectedChild.last_name}
-                          </strong>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">DOB:</span>{" "}
-                          {formatDateForInput(selectedChild.date_of_birth)}
+                    <div className="md:col-span-2">
+                      <div className="p-4 bg-white rounded-xl border border-gray-200">
+                        <h4 className="text-sm font-medium text-gray-900 mb-2">
+                          Selected Child Details
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-500">Name</p>
+                            <p className="font-medium text-gray-900">
+                              {selectedChild.first_name}{" "}
+                              {selectedChild.last_name}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">Age</p>
+                            <p className="font-medium text-gray-900">
+                              {calculateAgeFromDOB(selectedChild.date_of_birth)}{" "}
+                              years
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">Date of Birth</p>
+                            <p className="font-medium text-gray-900">
+                              {formatDateForInput(selectedChild.date_of_birth)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">Gender</p>
+                            <p className="font-medium text-gray-900">
+                              {selectedChild.gender || "N/A"}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -3059,7 +3191,7 @@ const CreateImmunizationRecordModal = ({
                 </div>
               </div>
 
-              {/* Parents Section (MANUAL DROPDOWNS) */}
+              {/* Parent Information Section */}
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
                 <div className="flex items-center gap-3 mb-4">
                   <Users className="w-5 h-5 text-purple-600" />
@@ -3069,7 +3201,6 @@ const CreateImmunizationRecordModal = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Mother Select */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Mother
@@ -3078,13 +3209,26 @@ const CreateImmunizationRecordModal = ({
                       <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <select
                         value={formData.mother_resident_id}
-                        onChange={(e) => handleMotherChange(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white appearance-none"
+                        onChange={(e) => {
+                          const mother = residents.find(
+                            (r) => r.resident_id == e.target.value
+                          );
+                          setSelectedMother(mother);
+                          setFormData((prev) => ({
+                            ...prev,
+                            mother_resident_id: e.target.value,
+                            mother_name: mother
+                              ? `${mother.first_name} ${mother.last_name}`
+                              : "",
+                          }));
+                        }}
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-white appearance-none"
                       >
                         <option value="">Select mother (optional)...</option>
                         {motherResidents.map((r) => (
                           <option key={r.resident_id} value={r.resident_id}>
-                            {r.first_name} {r.last_name}
+                            {r.first_name} {r.last_name} • Age:{" "}
+                            {calculateAgeFromDOB(r.date_of_birth)}
                           </option>
                         ))}
                       </select>
@@ -3092,33 +3236,30 @@ const CreateImmunizationRecordModal = ({
                     </div>
                   </div>
 
-                  {/* Father Select */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Father
+                      Father Name
                     </label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <select
-                        value={formData.father_resident_id}
-                        onChange={(e) => handleFatherChange(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white appearance-none"
-                      >
-                        <option value="">Select father (optional)...</option>
-                        {fatherResidents.map((r) => (
-                          <option key={r.resident_id} value={r.resident_id}>
-                            {r.first_name} {r.last_name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={formData.father_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            father_name: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="Father's name"
+                      />
                     </div>
                   </div>
 
-                  {/* Guardian Name Manual Override */}
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Parent/Guardian Name
+                      Parent/Guardian
                     </label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -3131,14 +3272,10 @@ const CreateImmunizationRecordModal = ({
                             parent_name: e.target.value,
                           }))
                         }
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl"
-                        placeholder="Primary contact person (e.g., Mother, Father, or Guardian)"
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="Primary parent/guardian name"
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      This name appears on reports. It auto-fills when you
-                      select a parent, but you can edit it.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -3150,6 +3287,7 @@ const CreateImmunizationRecordModal = ({
                   <h3 className="text-lg font-semibold text-gray-900">
                     Vaccine Details
                   </h3>
+                  <span className="text-sm text-red-500">* Required</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -3169,22 +3307,27 @@ const CreateImmunizationRecordModal = ({
                         }
                         className={`w-full pl-12 pr-4 py-3.5 border-2 ${
                           errors.vaccine_name
-                            ? "border-red-300"
-                            : "border-gray-300"
-                        } rounded-xl bg-white appearance-none`}
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                            : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
+                        } rounded-xl transition-all duration-200 bg-white appearance-none`}
                         required
+                        disabled={!formData.child_resident_id} // Optional: Disable if no child selected
                       >
                         <option value="">Select vaccine...</option>
                         {vaccineOptions.map((vaccine, index) => {
+                          // Check if child already has this specific vaccine
                           const isTaken = takenVaccines.includes(
                             vaccine.toLowerCase()
                           );
+
                           return (
                             <option
                               key={index}
                               value={vaccine}
                               disabled={isTaken}
-                              className={isTaken ? "text-gray-400" : ""}
+                              className={
+                                isTaken ? "text-gray-400 bg-gray-50" : ""
+                              }
                             >
                               {vaccine} {isTaken ? "(Already Received)" : ""}
                             </option>
@@ -3194,22 +3337,66 @@ const CreateImmunizationRecordModal = ({
                       </select>
                       <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
                     </div>
+                    {errors.vaccine_name && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.vaccine_name}
+                      </p>
+                    )}
 
+                    {/* NEW: Conditional Input for "Other" */}
                     {formData.vaccine_name === "other" && (
-                      <div className="mt-3">
-                        <input
-                          type="text"
-                          placeholder="Enter specific vaccine name"
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              custom_vaccine: e.target.value,
-                            }))
-                          }
-                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl"
-                        />
+                      <div className="mt-3 animate-fadeIn">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Specify Vaccine Name{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <Syringe className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                          <input
+                            type="text"
+                            value={formData.custom_vaccine || ""}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                custom_vaccine: e.target.value,
+                              }))
+                            }
+                            className={`w-full pl-12 pr-4 py-3.5 border-2 ${
+                              errors.custom_vaccine
+                                ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                                : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
+                            } rounded-xl transition-all duration-200`}
+                            placeholder="Enter specific vaccine name"
+                          />
+                        </div>
+                        {errors.custom_vaccine && (
+                          <p className="mt-2 text-sm text-red-600">
+                            {errors.custom_vaccine}
+                          </p>
+                        )}
                       </div>
                     )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Batch Number
+                    </label>
+                    <div className="relative">
+                      <FileText className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.batch_no}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            batch_no: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="e.g., BATCH-12345"
+                      />
+                    </div>
                   </div>
 
                   <div>
@@ -3228,8 +3415,17 @@ const CreateImmunizationRecordModal = ({
                           }))
                         }
                         max={new Date().toISOString().split("T")[0]}
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl"
+                        className={`w-full pl-12 pr-4 py-3.5 border-2 ${
+                          errors.date_given
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                            : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
+                        } rounded-xl transition-all duration-200`}
                       />
+                      {errors.date_given && (
+                        <p className="mt-2 text-sm text-red-600">
+                          {errors.date_given}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -3248,9 +3444,842 @@ const CreateImmunizationRecordModal = ({
                             next_dose_date: e.target.value,
                           }))
                         }
-                        min={formData.date_given}
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl"
+                        min={
+                          formData.date_given ||
+                          new Date().toISOString().split("T")[0]
+                        }
+                        className={`w-full pl-12 pr-4 py-3.5 border-2 ${
+                          errors.next_dose_date
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                            : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
+                        } rounded-xl transition-all duration-200`}
                       />
+                      {errors.next_dose_date && (
+                        <p className="mt-2 text-sm text-red-600">
+                          {errors.next_dose_date}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Administered By
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.given_by}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            given_by: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="Healthcare provider name"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Information Section */}
+              <div className="bg-gradient-to-r from-gray-50 to-slate-50 rounded-2xl p-6 border border-gray-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <FileText className="w-5 h-5 text-gray-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Additional Information
+                  </h3>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Adverse Reactions
+                    </label>
+                    <div className="relative">
+                      <AlertCircle className="absolute left-4 top-4 text-gray-400 w-5 h-5" />
+                      <textarea
+                        value={formData.adverse_reactions}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            adverse_reactions: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 resize-none"
+                        rows="3"
+                        placeholder="Any adverse reactions or side effects observed. Leave empty if none."
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Notes
+                    </label>
+                    <div className="relative">
+                      <FileText className="absolute left-4 top-4 text-gray-400 w-5 h-5" />
+                      <textarea
+                        value={formData.notes}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            notes: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 resize-none"
+                        rows="3"
+                        placeholder="Additional notes, observations, or special instructions..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary Preview */}
+              {selectedChild && (
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Info className="w-5 h-5 text-amber-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Summary Preview
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-500">Child</p>
+                      <p className="font-medium text-gray-900">
+                        {selectedChild.first_name} {selectedChild.last_name}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Age</p>
+                      <p className="font-medium text-gray-900">
+                        {calculateAgeFromDOB(selectedChild.date_of_birth)} years
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Vaccine</p>
+                      <p className="font-medium text-gray-900">
+                        {formData.vaccine_name || "Not selected"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Date Given</p>
+                      <p className="font-medium text-gray-900">
+                        {formData.date_given || "Not scheduled"}
+                      </p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm text-gray-700">
+                            Form Status:
+                          </span>
+                        </div>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            isFormValid()
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {isFormValid() ? "Ready to Save" : "Incomplete"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </form>
+          </div>
+
+          {/* Footer Actions */}
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="px-5 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+              >
+                Cancel
+              </button>
+
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">
+                    Required fields:
+                  </span>
+                  <div className="flex gap-1">
+                    {["child_resident_id", "vaccine_name"].map((field) => (
+                      <div
+                        key={field}
+                        className={`w-2 h-2 rounded-full ${
+                          field === "child_resident_id" && formData[field]
+                            ? "bg-green-500"
+                            : field === "vaccine_name" &&
+                              formData[field]?.trim()
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        }`}
+                        title={
+                          field === "child_resident_id"
+                            ? "Child selected"
+                            : "Vaccine name entered"
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={!isFormValid() || isSubmitting}
+                  className={`px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all duration-200 ${
+                    isFormValid() && !isSubmitting
+                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg"
+                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5" />
+                      Save Immunization Record
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const EditImmunizationRecordModal = ({
+  setShowEditModal,
+  handleEditImmunization,
+  residents,
+  addNotification,
+  record,
+  calculateAgeFromDOB, // ADD THIS
+  vaccineOptions, // ADD THIS
+}) => {
+  const [formData, setFormData] = useState({
+    child_resident_id: record.child_resident_id || "",
+    mother_resident_id: record.mother_resident_id || "",
+    parent_name: record.parent_name || "",
+    father_name: record.father_name || "",
+    mother_name: record.mother_name || "",
+    vaccine_name: record.vaccine_name || "",
+    date_given: formatDateForInput(record.date_given) || "",
+    batch_no: record.batch_no || "",
+    next_dose_date: formatDateForInput(record.next_dose_date) || "",
+    given_by: record.given_by || "",
+    adverse_reactions: record.adverse_reactions || "",
+    notes: record.notes || "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  // Filter for children 5 years old and below (standard for immunization tracking)
+  const childResidents = residents.filter((r) => {
+    if (!r.date_of_birth) return true; // Include if DOB is missing
+    const age = calculateAgeFromDOB(r.date_of_birth);
+    return typeof age === "number" ? age <= 5 : true; // Changed to 5 years and below
+  });
+
+  // Filter for potential mothers (18+ years old, Female)
+  const motherResidents = residents.filter((r) => {
+    if (!r.date_of_birth) return r.gender === "Female";
+    const age = calculateAgeFromDOB(r.date_of_birth);
+    return typeof age === "number" ? age >= 18 && r.gender === "Female" : false;
+  });
+
+  const selectedChild = residents.find(
+    (r) => r.resident_id == formData.child_resident_id
+  );
+  const selectedMother = residents.find(
+    (r) => r.resident_id == formData.mother_resident_id
+  );
+
+  const handleChildChange = (childId) => {
+    const child = residents.find((r) => r.resident_id == childId);
+
+    if (child) {
+      // Find household members
+      const householdMembers = residents.filter(
+        (r) => r.household_id === child.household_id
+      );
+
+      // Find parents
+      const father = householdMembers.find((r) => r.gender === "Male");
+      const mother = householdMembers.find((r) => r.gender === "Female");
+
+      setFormData((prev) => ({
+        ...prev,
+        child_resident_id: childId,
+        parent_name: mother
+          ? `${mother.first_name} ${mother.last_name}`
+          : prev.parent_name,
+        father_name: father
+          ? `${father.first_name} ${father.last_name}`
+          : prev.father_name,
+        mother_name: mother
+          ? `${mother.first_name} ${mother.last_name}`
+          : prev.mother_name,
+        mother_resident_id: mother
+          ? mother.resident_id
+          : prev.mother_resident_id,
+      }));
+    }
+  };
+
+  // Add this function after handleChildChange:
+  const handleMotherChange = (motherId) => {
+    const mother = residents.find((r) => r.resident_id == motherId);
+
+    if (mother) {
+      setFormData((prev) => ({
+        ...prev,
+        mother_resident_id: motherId,
+        mother_name: `${mother.first_name} ${mother.last_name}`,
+        // Update parent/guardian name if not already set
+        parent_name:
+          prev.parent_name || `${mother.first_name} ${mother.last_name}`,
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.child_resident_id) {
+      newErrors.child_resident_id = "Please select a child";
+    }
+
+    if (!formData.vaccine_name?.trim()) {
+      newErrors.vaccine_name = "Vaccine name is required";
+    }
+
+    if (formData.date_given && new Date(formData.date_given) > new Date()) {
+      newErrors.date_given = "Date given cannot be in the future";
+    }
+
+    if (formData.next_dose_date && formData.date_given) {
+      const givenDate = new Date(formData.date_given);
+      const nextDoseDate = new Date(formData.next_dose_date);
+      if (nextDoseDate <= givenDate) {
+        newErrors.next_dose_date =
+          "Next dose date must be after the given date";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      addNotification(
+        "error",
+        "Validation Error",
+        "Please check the form for errors"
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await handleEditImmunization(record.id, formData);
+      setShowEditModal(false);
+    } catch (error) {
+      // Error handled in parent
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isFormValid = () => {
+    return formData.child_resident_id && formData.vaccine_name?.trim();
+  };
+
+  // Helper to get resident name from ID
+  const getResidentName = (residentId) => {
+    const resident = residents.find((r) => r.resident_id == residentId);
+    return resident
+      ? `${resident.first_name} ${resident.last_name}`
+      : "Unknown";
+  };
+
+  // Add this helper function inside EditImmunizationRecordModal, after state declarations:
+  const findParentsForChild = (child) => {
+    if (!child || !child.household_id) {
+      return { father: null, mother: null, guardian: null };
+    }
+
+    // Get all residents in the same household
+    const householdMembers = residents.filter(
+      (r) => r.household_id === child.household_id
+    );
+
+    let father = null;
+    let mother = null;
+    let guardian = null;
+
+    // Try to find parents using relationship field if it exists
+    householdMembers.forEach((member) => {
+      if (member.relationship) {
+        const relationship = member.relationship.toLowerCase();
+        if (relationship.includes("father") || relationship.includes("dad")) {
+          father = member;
+        }
+        if (relationship.includes("mother") || relationship.includes("mom")) {
+          mother = member;
+        }
+        if (
+          relationship.includes("guardian") ||
+          relationship.includes("parent")
+        ) {
+          guardian = member;
+        }
+      }
+    });
+
+    // Fallback: If no relationship field, use age and gender
+    if (!father) {
+      const adultMales = householdMembers.filter((m) => {
+        if (m.resident_id === child.resident_id) return false; // Exclude child
+        if (m.gender !== "Male") return false;
+        if (!m.date_of_birth) return true;
+        const age = calculateAgeFromDOB(m.date_of_birth);
+        return typeof age === "number" && age >= 18;
+      });
+      father = adultMales[0] || null;
+    }
+
+    if (!mother) {
+      const adultFemales = householdMembers.filter((m) => {
+        if (m.resident_id === child.resident_id) return false; // Exclude child
+        if (m.gender !== "Female") return false;
+        if (!m.date_of_birth) return true;
+        const age = calculateAgeFromDOB(m.date_of_birth);
+        return typeof age === "number" && age >= 18;
+      });
+      mother = adultFemales[0] || null;
+    }
+
+    // Set guardian as mother by default, or father if no mother
+    guardian = mother || father || null;
+
+    return { father, mother, guardian };
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-5xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
+        {/* Enhanced Header */}
+        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+                <Edit2 className="text-white" size={28} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  Edit Child Immunization Record
+                </h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
+                  <p className="text-white/80 text-sm">
+                    Editing immunization record for {record.child_name}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group backdrop-blur-sm"
+              aria-label="Close modal"
+            >
+              <X
+                size={24}
+                className="group-hover:rotate-90 transition-transform duration-300"
+              />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col h-[calc(90vh-120px)]">
+          <div className="flex-1 overflow-y-auto p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Record Info Banner */}
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-4 border border-blue-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-800 mb-1">
+                      Editing Record
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      Original record created on{" "}
+                      {formatDateForInput(record.created_at)} • Last updated on{" "}
+                      {formatDateForInput(record.updated_at)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="text-xs text-blue-700">
+                      Record ID: {record.id}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Child Selection Section */}
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <User className="w-5 h-5 text-blue-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Child Information
+                  </h3>
+                  <span className="text-sm text-red-500">* Required</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Child <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <select
+                        value={formData.child_resident_id}
+                        onChange={(e) => handleChildChange(e.target.value)}
+                        className={`w-full pl-12 pr-4 py-3.5 border-2 ${
+                          errors.child_resident_id
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                            : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
+                        } rounded-xl transition-all duration-200 bg-white appearance-none`}
+                        required
+                      >
+                        <option value="">Select a child...</option>
+                        {childResidents.map((r) => (
+                          <option key={r.resident_id} value={r.resident_id}>
+                            {r.first_name} {r.last_name} • Age:{" "}
+                            {calculateAgeFromDOB(r.date_of_birth)} • ID:{" "}
+                            {r.resident_id}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
+                    </div>
+                    {errors.child_resident_id && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.child_resident_id}
+                      </p>
+                    )}
+                  </div>
+
+                  {selectedChild && (
+                    <div className="md:col-span-2">
+                      <div className="p-4 bg-white rounded-xl border border-gray-200">
+                        <h4 className="text-sm font-medium text-gray-900 mb-2">
+                          Selected Child Details
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-500">Name</p>
+                            <p className="font-medium text-gray-900">
+                              {selectedChild.first_name}{" "}
+                              {selectedChild.last_name}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">Age</p>
+                            <p className="font-medium text-gray-900">
+                              {calculateAgeFromDOB(selectedChild.date_of_birth)}{" "}
+                              years
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">Date of Birth</p>
+                            <p className="font-medium text-gray-900">
+                              {formatDateForInput(selectedChild.date_of_birth)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">Gender</p>
+                            <p className="font-medium text-gray-900">
+                              {selectedChild.gender || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Parent Information Section */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <Users className="w-5 h-5 text-purple-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Parent/Guardian Information
+                  </h3>
+                  <span className="text-xs text-gray-500">(Auto-filled)</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mother
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.mother_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            mother_name: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-gray-50"
+                        placeholder="Mother's name"
+                        readOnly
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Auto-filled based on household
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Father Name
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.father_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            father_name: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-gray-50"
+                        placeholder="Father's name"
+                        readOnly
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Auto-filled based on household
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Parent/Guardian
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.parent_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            parent_name: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="Primary parent/guardian name"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Primary contact person (editable)
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Different Mother (Optional)
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <select
+                        value={formData.mother_resident_id}
+                        onChange={(e) => handleMotherChange(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-white appearance-none"
+                      >
+                        <option value="">
+                          Select different mother (optional)...
+                        </option>
+                        {motherResidents.map((r) => (
+                          <option key={r.resident_id} value={r.resident_id}>
+                            {r.first_name} {r.last_name} • Age:{" "}
+                            {calculateAgeFromDOB(r.date_of_birth)}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Use this if the auto-filled mother is incorrect
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Vaccine Details Section */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <Syringe className="w-5 h-5 text-green-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Vaccine Details
+                  </h3>
+                  <span className="text-sm text-red-500">* Required</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Vaccine Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Syringe className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <select
+                        value={formData.vaccine_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            vaccine_name: e.target.value,
+                          }))
+                        }
+                        className={`w-full pl-12 pr-4 py-3.5 border-2 ${
+                          errors.vaccine_name
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                            : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
+                        } rounded-xl transition-all duration-200 bg-white appearance-none`}
+                        required
+                      >
+                        <option value="">Select vaccine...</option>
+                        {vaccineOptions.map((vaccine, index) => (
+                          <option key={index} value={vaccine}>
+                            {vaccine}
+                          </option>
+                        ))}
+                        <option value="other">Other (specify below)</option>
+                      </select>
+                      <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
+                    </div>
+                    {errors.vaccine_name && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.vaccine_name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Batch Number
+                    </label>
+                    <div className="relative">
+                      <FileText className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.batch_no}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            batch_no: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="e.g., BATCH-12345"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Date Given
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="date"
+                        value={formData.date_given}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            date_given: e.target.value,
+                          }))
+                        }
+                        max={new Date().toISOString().split("T")[0]}
+                        className={`w-full pl-12 pr-4 py-3.5 border-2 ${
+                          errors.date_given
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                            : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
+                        } rounded-xl transition-all duration-200`}
+                      />
+                      {errors.date_given && (
+                        <p className="mt-2 text-sm text-red-600">
+                          {errors.date_given}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Next Dose Date
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="date"
+                        value={formData.next_dose_date}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            next_dose_date: e.target.value,
+                          }))
+                        }
+                        min={
+                          formData.date_given ||
+                          new Date().toISOString().split("T")[0]
+                        }
+                        className={`w-full pl-12 pr-4 py-3.5 border-2 ${
+                          errors.next_dose_date
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                            : "border-gray-300 focus:border-[#58A1D3] focus:ring-[#58A1D3]/20"
+                        } rounded-xl transition-all duration-200`}
+                      />
+                      {errors.next_dose_date && (
+                        <p className="mt-2 text-sm text-red-600">
+                          {errors.next_dose_date}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -3269,412 +4298,166 @@ const CreateImmunizationRecordModal = ({
                             given_by: e.target.value,
                           }))
                         }
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl"
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
                         placeholder="Healthcare provider name"
                       />
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Additional Notes */}
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Adverse Reactions
                     </label>
-                    <textarea
-                      value={formData.adverse_reactions}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          adverse_reactions: e.target.value,
-                        }))
-                      }
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl resize-none"
-                      rows="2"
-                      placeholder="None"
-                    />
+                    <div className="relative">
+                      <AlertCircle className="absolute left-4 top-4 text-gray-400 w-5 h-5" />
+                      <textarea
+                        value={formData.adverse_reactions}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            adverse_reactions: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 resize-none"
+                        rows="3"
+                        placeholder="Any adverse reactions or side effects observed. Leave empty if none."
+                      />
+                    </div>
                   </div>
-                  <div>
+
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Notes
                     </label>
-                    <textarea
-                      value={formData.notes}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          notes: e.target.value,
-                        }))
-                      }
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl resize-none"
-                      rows="2"
-                      placeholder="Additional details..."
-                    />
+                    <div className="relative">
+                      <FileText className="absolute left-4 top-4 text-gray-400 w-5 h-5" />
+                      <textarea
+                        value={formData.notes}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            notes: e.target.value,
+                          }))
+                        }
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 resize-none"
+                        rows="3"
+                        placeholder="Additional notes, observations, or special instructions..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary Preview */}
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <Info className="w-5 h-5 text-amber-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Update Summary
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Child</p>
+                    <p className="font-medium text-gray-900">
+                      {getResidentName(formData.child_resident_id)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Vaccine</p>
+                    <p className="font-medium text-gray-900">
+                      {formData.vaccine_name || "Not selected"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Status</p>
+                    <p className="font-medium text-gray-900">
+                      {formData.date_given ? "Vaccinated" : "Scheduled"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Next Dose</p>
+                    <p className="font-medium text-gray-900">
+                      {formData.next_dose_date || "No next dose scheduled"}
+                    </p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span className="text-sm text-gray-700">
+                          Form Status:
+                        </span>
+                      </div>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          isFormValid()
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {isFormValid() ? "Ready to Update" : "Incomplete"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
             </form>
           </div>
 
+          {/* Footer Actions */}
           <div className="sticky bottom-0 bg-white border-t border-gray-200 p-6">
-            <div className="flex justify-end gap-4">
+            <div className="flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setShowCreateModal(false)}
-                className="px-5 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium"
+                onClick={() => setShowEditModal(false)}
+                className="px-5 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                disabled={!isFormValid() || isSubmitting}
-                className={`px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 ${
-                  isFormValid()
-                    ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                    : "bg-gray-200 text-gray-500"
-                }`}
-              >
-                {isSubmitting ? (
-                  "Saving..."
-                ) : (
-                  <>
-                    <Save className="w-5 h-5" /> Save Record
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
-const EditImmunizationRecordModal = ({
-  setShowEditModal,
-  handleEditImmunization,
-  residents,
-  addNotification,
-  record,
-  calculateAgeFromDOB,
-  vaccineOptions,
-}) => {
-  const [formData, setFormData] = useState({
-    child_resident_id: record.child_resident_id || "",
-    mother_resident_id: record.mother_resident_id || "",
-    father_resident_id: "", // Add field for father ID in case you want to track it
-    parent_name: record.parent_name || "",
-    father_name: record.father_name || "",
-    mother_name: record.mother_name || "",
-    vaccine_name: record.vaccine_name || "",
-    date_given: formatDateForInput(record.date_given) || "",
-    batch_no: record.batch_no || "",
-    next_dose_date: formatDateForInput(record.next_dose_date) || "",
-    given_by: record.given_by || "",
-    adverse_reactions: record.adverse_reactions || "",
-    notes: record.notes || "",
-  });
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Validation:</span>
+                  <div className="flex gap-1">
+                    {Object.keys(errors).length === 0 ? (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-red-500" />
+                    )}
+                    <span className="text-xs text-gray-600">
+                      {Object.keys(errors).length === 0
+                        ? "All valid"
+                        : `${Object.keys(errors).length} error(s)`}
+                    </span>
+                  </div>
+                </div>
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // --- FILTERS (Same as Create) ---
-  const childResidents = residents.filter(
-    (r) => !r.date_of_birth || calculateAgeFromDOB(r.date_of_birth) <= 5
-  );
-  const motherResidents = residents.filter(
-    (r) =>
-      r.gender === "Female" &&
-      (!r.date_of_birth || calculateAgeFromDOB(r.date_of_birth) >= 15)
-  );
-  const fatherResidents = residents.filter(
-    (r) =>
-      r.gender === "Male" &&
-      (!r.date_of_birth || calculateAgeFromDOB(r.date_of_birth) >= 15)
-  );
-
-  // --- HANDLERS (Manual only) ---
-
-  const handleChildChange = (childId) => {
-    setFormData((prev) => ({ ...prev, child_resident_id: childId }));
-  };
-
-  const handleMotherChange = (motherId) => {
-    const mother = residents.find((r) => r.resident_id == motherId);
-    setFormData((prev) => ({
-      ...prev,
-      mother_resident_id: motherId,
-      mother_name: mother ? `${mother.first_name} ${mother.last_name}` : "",
-      // Auto-update parent name if user selects a mother
-      parent_name: mother
-        ? `${mother.first_name} ${mother.last_name}`
-        : prev.parent_name,
-    }));
-  };
-
-  const handleFatherChange = (fatherId) => {
-    const father = residents.find((r) => r.resident_id == fatherId);
-    setFormData((prev) => ({
-      ...prev,
-      father_resident_id: fatherId,
-      father_name: father ? `${father.first_name} ${father.last_name}` : "",
-      // Auto-update parent name if user selects a father
-      parent_name: father
-        ? `${father.first_name} ${father.last_name}`
-        : prev.parent_name,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.child_resident_id || !formData.vaccine_name) {
-      addNotification("error", "Error", "Child and Vaccine are required");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      await handleEditImmunization(record.id, formData);
-      setShowEditModal(false);
-    } catch (error) {
-      // handled by parent
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-5xl shadow-2xl shadow-cyan-500/20 border border-white/20 max-h-[90vh] overflow-hidden">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-                <Edit2 className="text-white" size={28} />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  Edit Immunization Record
-                </h2>
-                <p className="text-white/80 text-sm">
-                  Update vaccination details manually
-                </p>
+                <button
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={!isFormValid() || isSubmitting}
+                  className={`px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all duration-200 ${
+                    isFormValid() && !isSubmitting
+                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg"
+                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5" />
+                      Update Immunization Record
+                    </>
+                  )}
+                </button>
               </div>
             </div>
-            <button
-              onClick={() => setShowEditModal(false)}
-              className="text-white hover:bg-white/20 rounded-full p-2"
-            >
-              <X size={24} />
-            </button>
-          </div>
-        </div>
-
-        <div className="flex flex-col h-[calc(90vh-120px)]">
-          <div className="flex-1 overflow-y-auto p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Child Info */}
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Child Information
-                </h3>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <select
-                    value={formData.child_resident_id}
-                    onChange={(e) => handleChildChange(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white appearance-none"
-                  >
-                    {childResidents.map((r) => (
-                      <option key={r.resident_id} value={r.resident_id}>
-                        {r.first_name} {r.last_name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Parents (Manual Dropdowns) */}
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Parents / Guardian
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Mother
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <select
-                        value={formData.mother_resident_id}
-                        onChange={(e) => handleMotherChange(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white appearance-none"
-                      >
-                        <option value="">Select Mother...</option>
-                        {motherResidents.map((r) => (
-                          <option key={r.resident_id} value={r.resident_id}>
-                            {r.first_name} {r.last_name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Father
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <select
-                        value={formData.father_resident_id}
-                        onChange={(e) => handleFatherChange(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white appearance-none"
-                      >
-                        <option value="">Select Father...</option>
-                        {fatherResidents.map((r) => (
-                          <option key={r.resident_id} value={r.resident_id}>
-                            {r.first_name} {r.last_name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Parent/Guardian Name
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <input
-                        type="text"
-                        value={formData.parent_name}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            parent_name: e.target.value,
-                          }))
-                        }
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Vaccine Details */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Vaccine Details
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Vaccine
-                    </label>
-                    <div className="relative">
-                      <Syringe className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <select
-                        value={formData.vaccine_name}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            vaccine_name: e.target.value,
-                          }))
-                        }
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white appearance-none"
-                      >
-                        {vaccineOptions.map((v, i) => (
-                          <option key={i} value={v}>
-                            {v}
-                          </option>
-                        ))}
-                        <option value="other">Other</option>
-                      </select>
-                      <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Date Given
-                    </label>
-                    <div className="relative">
-                      <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <input
-                        type="date"
-                        value={formData.date_given}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            date_given: e.target.value,
-                          }))
-                        }
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Next Dose
-                    </label>
-                    <div className="relative">
-                      <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <input
-                        type="date"
-                        value={formData.next_dose_date}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            next_dose_date: e.target.value,
-                          }))
-                        }
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Given By
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <input
-                        type="text"
-                        value={formData.given_by}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            given_by: e.target.value,
-                          }))
-                        }
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </form>
-          </div>
-          <div className="sticky bottom-0 bg-white border-t border-gray-200 p-6 flex justify-end gap-3">
-            <button
-              onClick={() => setShowEditModal(false)}
-              className="px-5 py-2.5 border-2 border-gray-300 rounded-xl font-medium text-gray-700"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-medium flex items-center gap-2"
-            >
-              <Save size={20} /> Update Record
-            </button>
           </div>
         </div>
       </div>
