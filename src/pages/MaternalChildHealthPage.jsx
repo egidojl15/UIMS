@@ -692,17 +692,6 @@ const ViewImmunizationRecordModal = ({
                       Age: <strong>{childAge}</strong>
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-700">
-                      Last Updated:{" "}
-                      <strong>
-                        {new Date(
-                          selectedRecord.updated_at
-                        ).toLocaleDateString()}
-                      </strong>
-                    </span>
-                  </div>
                 </div>
               </div>
               <div className="mt-4 md:mt-0">
@@ -992,17 +981,6 @@ const CreateMaternalRecordModal = ({
     notes: "",
   });
 
-  // Helper to get resident name from ID
-  const getResidentName = (residentId) => {
-    const resident = residents.find(
-      (r) => String(r.resident_id) === String(residentId)
-    );
-    return resident
-      ? `${resident.first_name} ${resident.last_name}`
-      : "Unknown Resident";
-  };
-
-  // Helper to check if resident has an active record
   // Helper to check if resident has an active record
   const getResidentStatus = useCallback(
     (residentId) => {
@@ -1024,6 +1002,16 @@ const CreateMaternalRecordModal = ({
     },
     [existingRecords]
   );
+
+  // Helper to get resident name from ID
+  const getResidentName = (residentId) => {
+    const resident = residents.find(
+      (r) => String(r.resident_id) === String(residentId)
+    );
+    return resident
+      ? `${resident.first_name} ${resident.last_name}`
+      : "Unknown Resident";
+  };
 
   const [activeTab, setActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
