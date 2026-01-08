@@ -1019,14 +1019,6 @@ const ManageHouseholdsPage = () => {
                         member.first_name?.trim(),
                         member.middle_name?.trim(),
                         member.last_name?.trim(),
-                        // ✅ FIXED: Only include suffix if it's valid (not "0", not empty, not null)
-                        member.suffix &&
-                        member.suffix !== 0 &&
-                        member.suffix !== "0" &&
-                        String(member.suffix).trim() !== "" &&
-                        String(member.suffix).toLowerCase() !== "null"
-                          ? String(member.suffix).trim()
-                          : null,
                       ]
                         .filter(Boolean) // Remove null/undefined/empty values
                         .join(" ");
