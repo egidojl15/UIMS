@@ -4074,7 +4074,6 @@ const EditImmunizationRecordModal = ({
                         }
                         className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-gray-50"
                         placeholder="Mother's name"
-                        readOnly
                       />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
@@ -4099,7 +4098,6 @@ const EditImmunizationRecordModal = ({
                         }
                         className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-gray-50"
                         placeholder="Father's name"
-                        readOnly
                       />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
