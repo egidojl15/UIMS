@@ -1003,16 +1003,6 @@ const CreateMaternalRecordModal = ({
     [existingRecords]
   );
 
-  // Helper to get resident name from ID
-  const getResidentName = (residentId) => {
-    const resident = residents.find(
-      (r) => String(r.resident_id) === String(residentId)
-    );
-    return resident
-      ? `${resident.first_name} ${resident.last_name}`
-      : "Unknown Resident";
-  };
-
   const [activeTab, setActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -1078,6 +1068,17 @@ const CreateMaternalRecordModal = ({
     { id: "delivery", label: "Delivery", icon: Baby },
     { id: "notes", label: "Notes", icon: FileText },
   ];
+
+  // ADD THIS FUNCTION HERE:
+  const getResidentName = (residentId) => {
+    const resident = residents.find(
+      (r) =>
+        r.resident_id === parseInt(residentId) || r.resident_id === residentId
+    );
+    return resident
+      ? `${resident.first_name} ${resident.last_name}`
+      : "Unknown Resident";
+  };
 
   const getCurrentResident = () => {
     return residents.find(
