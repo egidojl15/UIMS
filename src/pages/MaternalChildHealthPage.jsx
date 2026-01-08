@@ -2017,6 +2017,14 @@ const EditMaternalRecordModal = ({
     notes: record.notes || "",
   });
 
+  // ADD THIS HELPER FUNCTION HERE
+  const getResidentName = (residentId) => {
+    const resident = residents.find((r) => r.resident_id == residentId);
+    return resident
+      ? `${resident.first_name} ${resident.last_name}`
+      : "Unknown";
+  };
+
   const [activeTab, setActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
