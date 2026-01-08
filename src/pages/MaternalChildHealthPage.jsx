@@ -4053,13 +4053,16 @@ const EditImmunizationRecordModal = ({
                   <h3 className="text-lg font-semibold text-gray-900">
                     Parent/Guardian Information
                   </h3>
-                  <span className="text-xs text-gray-500">(Auto-filled)</span>
+                  <span className="text-xs text-gray-500">
+                    (Editable - correct if needed)
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Mother Name - EDITABLE */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Mother
+                      Mother Name
                     </label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -4070,18 +4073,19 @@ const EditImmunizationRecordModal = ({
                           setFormData((prev) => ({
                             ...prev,
                             mother_name: e.target.value,
+                            // Clear mother_resident_id if manually editing
+                            mother_resident_id: prev.mother_resident_id
+                              ? ""
+                              : prev.mother_resident_id,
                           }))
                         }
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-gray-50"
-                        placeholder="Mother's name"
-                        readOnly
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="Mother's full name"
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Auto-filled based on household
-                    </p>
                   </div>
 
+                  {/* Father Name - EDITABLE */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Father Name
@@ -4097,16 +4101,13 @@ const EditImmunizationRecordModal = ({
                             father_name: e.target.value,
                           }))
                         }
-                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-gray-50"
-                        placeholder="Father's name"
-                        readOnly
+                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200"
+                        placeholder="Father's full name"
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Auto-filled based on household
-                    </p>
                   </div>
 
+                  {/* Parent/Guardian - EDITABLE */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Parent/Guardian
@@ -4127,23 +4128,47 @@ const EditImmunizationRecordModal = ({
                       />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      Primary contact person (editable)
+                      Primary contact person
                     </p>
                   </div>
 
+                  {/* Select Different Mother - OPTIONAL */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Different Mother (Optional)
+                      Select from Residents (Optional)
                     </label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <select
                         value={formData.mother_resident_id}
-                        onChange={(e) => handleMotherChange(e.target.value)}
+                        onChange={(e) => {
+                          const motherId = e.target.value;
+                          if (motherId) {
+                            const mother = residents.find(
+                              (r) => r.resident_id == motherId
+                            );
+                            if (mother) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                mother_resident_id: motherId,
+                                mother_name: `${mother.first_name} ${mother.last_name}`,
+                                parent_name:
+                                  prev.parent_name ||
+                                  `${mother.first_name} ${mother.last_name}`,
+                              }));
+                            }
+                          } else {
+                            // Clear selection
+                            setFormData((prev) => ({
+                              ...prev,
+                              mother_resident_id: "",
+                            }));
+                          }
+                        }}
                         className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:border-[#58A1D3] focus:ring-[#58A1D3]/20 transition-all duration-200 bg-white appearance-none"
                       >
                         <option value="">
-                          Select different mother (optional)...
+                          Select mother from residents...
                         </option>
                         {motherResidents.map((r) => (
                           <option key={r.resident_id} value={r.resident_id}>
@@ -4155,7 +4180,7 @@ const EditImmunizationRecordModal = ({
                       <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 rotate-90 pointer-events-none" />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      Use this if the auto-filled mother is incorrect
+                      Use this to link to an existing resident record
                     </p>
                   </div>
                 </div>
