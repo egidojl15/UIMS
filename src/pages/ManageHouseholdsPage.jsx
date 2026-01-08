@@ -2020,7 +2020,7 @@ const HouseholdForm = ({ household, onClose, onSubmit, addNotification }) => {
                             <div className="flex-1">
                               <p className="text-sm font-medium text-gray-900">
                                 {member.first_name} {member.middle_name}{" "}
-                                {member.last_name} {member.suffix}
+                                {member.last_name}
                               </p>
                               <p className="text-xs text-gray-500">
                                 {member.gender} • {member.civil_status} •{" "}
