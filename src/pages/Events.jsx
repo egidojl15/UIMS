@@ -134,6 +134,17 @@ const Events = ({ editable = false }) => {
     setSelectedItem(null);
   };
 
+  const formatTime = (timeStr) => {
+    if (!timeStr) return timeStr; // Return original if empty
+    // timeStr is in format "HH:mm" (24-hour)
+    const [hours, minutes] = timeStr.split(":");
+    const hour = parseInt(hours, 10);
+    const isPM = hour >= 12;
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    const period = isPM ? "PM" : "AM";
+    return `${hour12}:${minutes} ${period}`;
+  };
+
   const formatDateTime = (dateStr, timeStr) => {
     if (!dateStr) return null;
     const date = new Date(dateStr);
@@ -144,7 +155,7 @@ const Events = ({ editable = false }) => {
     });
 
     if (timeStr) {
-      return `${dateFormatted} at ${timeStr}`;
+      return `${dateFormatted} at ${formatTime(timeStr)}`;
     }
     return dateFormatted;
   };
@@ -402,9 +413,9 @@ const Events = ({ editable = false }) => {
                           day: "numeric",
                         });
                         if (selectedItem.start_time && selectedItem.end_time) {
-                          return `${dateOnly}, ${selectedItem.start_time} – ${selectedItem.end_time}`;
+                          return `${dateOnly}, ${formatTime(selectedItem.start_time)} – ${formatTime(selectedItem.end_time)}`;
                         } else if (selectedItem.start_time) {
-                          return `${dateOnly} at ${selectedItem.start_time}`;
+                          return `${dateOnly} at ${formatTime(selectedItem.start_time)}`;
                         }
                         return dateOnly;
                       } else {
