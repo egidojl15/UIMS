@@ -381,12 +381,37 @@ const Events = ({ editable = false }) => {
                 <div className="flex items-center gap-2">
                   <Clock size={16} />
                   <span>
-                    {formatDateTime(
-                      selectedItem.start_date,
-                      selectedItem.start_time,
-                    )}
-                    {selectedItem.end_date &&
-                      ` – ${formatDateTime(selectedItem.end_date, selectedItem.end_time)}`}
+                    {(() => {
+                      const isSameDay =
+                        selectedItem.start_date === selectedItem.end_date;
+                      const startFormatted = formatDateTime(
+                        selectedItem.start_date,
+                        selectedItem.start_time,
+                      );
+
+                      if (!selectedItem.end_date) {
+                        // Only start date/time
+                        return startFormatted;
+                      } else if (isSameDay) {
+                        // Same day: show date once, then time range
+                        const dateOnly = new Date(
+                          selectedItem.start_date,
+                        ).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        });
+                        if (selectedItem.start_time && selectedItem.end_time) {
+                          return `${dateOnly}, ${selectedItem.start_time} – ${selectedItem.end_time}`;
+                        } else if (selectedItem.start_time) {
+                          return `${dateOnly} at ${selectedItem.start_time}`;
+                        }
+                        return dateOnly;
+                      } else {
+                        // Different days: show full dates
+                        return `${startFormatted} – ${formatDateTime(selectedItem.end_date, selectedItem.end_time)}`;
+                      }
+                    })()}
                   </span>
                 </div>
               )}
