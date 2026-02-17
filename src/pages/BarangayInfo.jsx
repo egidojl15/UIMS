@@ -174,7 +174,7 @@ const NotificationSystem = ({ notifications, onRemove }) => {
         >
           <div
             className={`${getNotificationStyle(
-              n.type
+              n.type,
             )} mx-auto max-w-lg w-full p-8 shadow-2xl ring-4 ring-gray-200`}
           >
             <div className="flex items-start space-x-4">
@@ -539,7 +539,7 @@ const BarangayInfo = () => {
     const filtered = announcements.filter(
       (a) =>
         a.title?.toLowerCase().includes(term) ||
-        a.content?.toLowerCase().includes(term)
+        a.content?.toLowerCase().includes(term),
     );
     setFilteredAnnouncements(filtered);
   };
@@ -554,7 +554,7 @@ const BarangayInfo = () => {
       (e) =>
         e.title?.toLowerCase().includes(term) ||
         e.location?.toLowerCase().includes(term) ||
-        e.description?.toLowerCase().includes(term)
+        e.description?.toLowerCase().includes(term),
     );
     setFilteredEvents(filtered);
   };
@@ -584,7 +584,7 @@ const BarangayInfo = () => {
     try {
       await announcementsAPI.update(
         editingAnnouncement.announcement_id || editingAnnouncement.id,
-        { title: formData.title, content: formData.content }
+        { title: formData.title, content: formData.content },
       );
       await loadAnnouncements();
       setShowEditModal(false);
@@ -642,7 +642,7 @@ const BarangayInfo = () => {
     try {
       await eventsAPI.update(
         editingEvent.event_id || editingEvent.id,
-        eventFormData
+        eventFormData,
       );
       await loadEvents();
       setShowEditEventModal(false);
@@ -727,7 +727,7 @@ const BarangayInfo = () => {
       (h) =>
         h.title?.toLowerCase().includes(term) ||
         h.category?.toLowerCase().includes(term) ||
-        h.year?.toString().includes(term)
+        h.year?.toString().includes(term),
     );
     setFilteredHistory(filtered);
   };
@@ -838,7 +838,7 @@ const BarangayInfo = () => {
 
       await barangayHistoryAPI.update(
         editingHistory.history_id || editingHistory.id,
-        payload
+        payload,
       );
       await loadHistory();
       setShowEditHistoryModal(false);
@@ -914,7 +914,7 @@ const BarangayInfo = () => {
         p.title?.toLowerCase().includes(term) ||
         p.description?.toLowerCase().includes(term) ||
         p.location?.toLowerCase().includes(term) ||
-        p.contractor?.toLowerCase().includes(term)
+        p.contractor?.toLowerCase().includes(term),
     );
     setFilteredProjects(filtered);
   };
@@ -1002,7 +1002,7 @@ const BarangayInfo = () => {
 
       await projectsAPI.update(
         editingProject.project_id || editingProject.id,
-        updateData
+        updateData,
       );
 
       await loadProjects();
@@ -1176,7 +1176,7 @@ const BarangayInfo = () => {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
             body: formDataImage,
-          }
+          },
         );
 
         if (!uploadResponse.ok) {
@@ -1204,7 +1204,7 @@ const BarangayInfo = () => {
       if (editingOfficial) {
         await officialsAPI.update(
           editingOfficial.official_id || editingOfficial.id,
-          payload
+          payload,
         );
         addNotification({ type: "success", title: "Official Updated" });
       } else {
@@ -1828,7 +1828,7 @@ const BarangayInfo = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CalendarInput
               label="Start Date *"
-              value={eventFormData.start_date}
+              value={formatDateForInput(eventFormData.start_date)}
               onChange={(e) =>
                 setEventFormData({
                   ...eventFormData,
@@ -1839,7 +1839,7 @@ const BarangayInfo = () => {
             />
             <CalendarInput
               label="End Date *"
-              value={eventFormData.end_date}
+              value={formatDateForInput(eventFormData.end_date)}
               onChange={(e) =>
                 setEventFormData({ ...eventFormData, end_date: e.target.value })
               }
@@ -1920,7 +1920,7 @@ const BarangayInfo = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CalendarInput
               label="Start Date *"
-              value={eventFormData.start_date}
+              value={formatDateForInput(eventFormData.start_date)}
               onChange={(e) =>
                 setEventFormData({
                   ...eventFormData,
@@ -1931,7 +1931,7 @@ const BarangayInfo = () => {
             />
             <CalendarInput
               label="End Date *"
-              value={eventFormData.end_date}
+              value={formatDateForInput(eventFormData.end_date)}
               onChange={(e) =>
                 setEventFormData({ ...eventFormData, end_date: e.target.value })
               }
@@ -2447,8 +2447,8 @@ const BarangayInfo = () => {
                               p.status === "completed"
                                 ? "bg-green-100 text-green-800 border border-green-300"
                                 : p.status === "ongoing"
-                                ? "bg-blue-100 text-blue-800 border border-blue-300"
-                                : "bg-yellow-100 text-yellow-800 border border-yellow-300"
+                                  ? "bg-blue-100 text-blue-800 border border-blue-300"
+                                  : "bg-yellow-100 text-yellow-800 border border-yellow-300"
                             }`}
                           >
                             {p.status?.toUpperCase()}
