@@ -18,6 +18,8 @@ const Events = ({ editable = false }) => {
     location: "",
     start_date: "",
     end_date: "",
+    start_time: "",
+    end_time: "",
   });
 
   const location = useLocation();
@@ -50,6 +52,8 @@ const Events = ({ editable = false }) => {
         location: formData.location,
         start_date: formData.start_date,
         end_date: formData.end_date,
+        start_time: formData.start_time,
+        end_time: formData.end_time,
       });
       await load();
       setShowCreateModal(false);
@@ -59,6 +63,8 @@ const Events = ({ editable = false }) => {
         location: "",
         start_date: "",
         end_date: "",
+        start_time: "",
+        end_time: "",
       });
     } catch (e) {
       console.error("create event", e);
@@ -74,6 +80,8 @@ const Events = ({ editable = false }) => {
         location: formData.location,
         start_date: formData.start_date,
         end_date: formData.end_date,
+        start_time: formData.start_time,
+        end_time: formData.end_time,
       });
       await load();
       setShowEditModal(false);
@@ -84,6 +92,8 @@ const Events = ({ editable = false }) => {
         location: "",
         start_date: "",
         end_date: "",
+        start_time: "",
+        end_time: "",
       });
     } catch (e) {
       console.error("update event", e);
@@ -108,6 +118,8 @@ const Events = ({ editable = false }) => {
       location: item.location || "",
       start_date: item.start_date || "",
       end_date: item.end_date || "",
+      start_time: item.start_time || "",
+      end_time: item.end_time || "",
     });
     setShowEditModal(true);
   };
@@ -122,15 +134,19 @@ const Events = ({ editable = false }) => {
     setSelectedItem(null);
   };
 
-  const formatDateTime = (dateStr) => {
+  const formatDateTime = (dateStr, timeStr) => {
     if (!dateStr) return null;
-    return new Date(dateStr).toLocaleDateString("en-US", {
+    const date = new Date(dateStr);
+    const dateFormatted = date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
+
+    if (timeStr) {
+      return `${dateFormatted} at ${timeStr}`;
+    }
+    return dateFormatted;
   };
 
   const Modal = ({ title, children, onClose }) => (
@@ -200,6 +216,8 @@ const Events = ({ editable = false }) => {
                     location: "",
                     start_date: "",
                     end_date: "",
+                    start_time: "",
+                    end_time: "",
                   });
                   setShowCreateModal(true);
                 }}
@@ -294,10 +312,9 @@ const Events = ({ editable = false }) => {
                                     {
                                       month: "short",
                                       day: "numeric",
-                                      hour: "numeric",
-                                      minute: "2-digit",
-                                    }
+                                    },
                                   )}
+                                  {e.start_time && ` at ${e.start_time}`}
                                 </span>
                               </div>
                             )}
@@ -364,9 +381,12 @@ const Events = ({ editable = false }) => {
                 <div className="flex items-center gap-2">
                   <Clock size={16} />
                   <span>
-                    {formatDateTime(selectedItem.start_date)}
+                    {formatDateTime(
+                      selectedItem.start_date,
+                      selectedItem.start_time,
+                    )}
                     {selectedItem.end_date &&
-                      ` – ${formatDateTime(selectedItem.end_date)}`}
+                      ` – ${formatDateTime(selectedItem.end_date, selectedItem.end_time)}`}
                   </span>
                 </div>
               )}
@@ -463,10 +483,10 @@ const Events = ({ editable = false }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Start Date & Time
+                  Start Date
                 </label>
                 <input
-                  type="datetime-local"
+                  type="date"
                   value={formData.start_date}
                   onChange={(e) =>
                     setFormData({ ...formData, start_date: e.target.value })
@@ -477,13 +497,43 @@ const Events = ({ editable = false }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  End Date & Time
+                  End Date
                 </label>
                 <input
-                  type="datetime-local"
+                  type="date"
                   value={formData.end_date}
                   onChange={(e) =>
                     setFormData({ ...formData, end_date: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#58A1D3] focus:outline-none transition-colors duration-300"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Start Time
+                </label>
+                <input
+                  type="time"
+                  value={formData.start_time}
+                  onChange={(e) =>
+                    setFormData({ ...formData, start_time: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#58A1D3] focus:outline-none transition-colors duration-300"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Time
+                </label>
+                <input
+                  type="time"
+                  value={formData.end_time}
+                  onChange={(e) =>
+                    setFormData({ ...formData, end_time: e.target.value })
                   }
                   className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#58A1D3] focus:outline-none transition-colors duration-300"
                 />
@@ -500,6 +550,8 @@ const Events = ({ editable = false }) => {
                     location: "",
                     start_date: "",
                     end_date: "",
+                    start_time: "",
+                    end_time: "",
                   });
                 }}
                 className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 font-medium"
@@ -582,10 +634,10 @@ const Events = ({ editable = false }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Start Date & Time
+                  Start Date
                 </label>
                 <input
-                  type="datetime-local"
+                  type="date"
                   value={formData.start_date}
                   onChange={(e) =>
                     setFormData({ ...formData, start_date: e.target.value })
@@ -596,13 +648,43 @@ const Events = ({ editable = false }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  End Date & Time
+                  End Date
                 </label>
                 <input
-                  type="datetime-local"
+                  type="date"
                   value={formData.end_date}
                   onChange={(e) =>
                     setFormData({ ...formData, end_date: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#58A1D3] focus:outline-none transition-colors duration-300"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Start Time
+                </label>
+                <input
+                  type="time"
+                  value={formData.start_time}
+                  onChange={(e) =>
+                    setFormData({ ...formData, start_time: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#58A1D3] focus:outline-none transition-colors duration-300"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Time
+                </label>
+                <input
+                  type="time"
+                  value={formData.end_time}
+                  onChange={(e) =>
+                    setFormData({ ...formData, end_time: e.target.value })
                   }
                   className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#58A1D3] focus:outline-none transition-colors duration-300"
                 />
@@ -620,6 +702,8 @@ const Events = ({ editable = false }) => {
                     location: "",
                     start_date: "",
                     end_date: "",
+                    start_time: "",
+                    end_time: "",
                   });
                 }}
                 className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 font-medium"
