@@ -358,6 +358,8 @@ const BarangayInfo = () => {
     location: "",
     start_date: "",
     end_date: "",
+    start_time: "",
+    end_time: "",
     description: "",
   });
   const [editing, setEditing] = useState(null);
@@ -630,6 +632,8 @@ const BarangayInfo = () => {
         location: "",
         start_date: "",
         end_date: "",
+        start_time: "",
+        end_time: "",
         description: "",
       });
     } catch (e) {
@@ -652,6 +656,8 @@ const BarangayInfo = () => {
         location: "",
         start_date: "",
         end_date: "",
+        start_time: "",
+        end_time: "",
         description: "",
       });
     } catch (e) {
@@ -670,16 +676,18 @@ const BarangayInfo = () => {
   };
 
   const openEditEvent = (e) => {
-  setEditingEvent(e);
-  setEventFormData({
-    title: e.title,
-    location: e.location || "",
-    start_date: formatDateForInput(e.start_date) || "",   // ← FIXED
-    end_date: formatDateForInput(e.end_date) || "",       // ← FIXED
-    description: e.description || "",
-  });
-  setShowEditEventModal(true);
-};
+    setEditingEvent(e);
+    setEventFormData({
+      title: e.title,
+      location: e.location || "",
+      start_date: formatDateForInput(e.start_date) || "", // ← FIXED
+      end_date: formatDateForInput(e.end_date) || "", // ← FIXED
+      start_time: e.start_time || "",
+      end_time: e.end_time || "",
+      description: e.description || "",
+    });
+    setShowEditEventModal(true);
+  };
 
   // useEffect for filtered projects
   useEffect(() => {
@@ -1755,7 +1763,8 @@ const BarangayInfo = () => {
                         <MapPin size={14} /> <span>{e.location}</span>
                       </div>
                       <div className="text-xs text-gray-500 mt-1">
-                        {e.start_date} - {e.end_date}
+                        {e.start_date} {e.start_time && `at ${e.start_time}`} -{" "}
+                        {e.end_date} {e.end_time && `at ${e.end_time}`}
                       </div>
                       {e.description && (
                         <p className="text-sm text-gray-600 mt-2 line-clamp-2">
@@ -1845,6 +1854,40 @@ const BarangayInfo = () => {
               }
               required
             />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Start Time
+              </label>
+              <input
+                type="time"
+                value={eventFormData.start_time}
+                onChange={(e) =>
+                  setEventFormData({
+                    ...eventFormData,
+                    start_time: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                End Time
+              </label>
+              <input
+                type="time"
+                value={eventFormData.end_time}
+                onChange={(e) =>
+                  setEventFormData({
+                    ...eventFormData,
+                    end_time: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -1937,6 +1980,40 @@ const BarangayInfo = () => {
               }
               required
             />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Start Time
+              </label>
+              <input
+                type="time"
+                value={eventFormData.start_time}
+                onChange={(e) =>
+                  setEventFormData({
+                    ...eventFormData,
+                    start_time: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                End Time
+              </label>
+              <input
+                type="time"
+                value={eventFormData.end_time}
+                onChange={(e) =>
+                  setEventFormData({
+                    ...eventFormData,
+                    end_time: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
