@@ -333,6 +333,21 @@ const BarangayInfo = () => {
   const navigate = useNavigate();
   const { mapImages, updateMapImages } = useMap();
 
+  // Format date for display (e.g., "December 6, 2025")
+  const formatDisplayDate = (dateStr) => {
+    if (!dateStr) return "Recent";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch (e) {
+      return "Recent";
+    }
+  };
+
   const [announcements, setAnnouncements] = useState([]);
   const [events, setEvents] = useState([]);
   const [officials, setOfficials] = useState([]);
@@ -1579,7 +1594,9 @@ const BarangayInfo = () => {
                     </h3>
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Calendar size={14} />{" "}
-                      <span>{a.posted_date || a.created_at || "Recent"}</span>
+                      <span>
+                        {formatDisplayDate(a.posted_date || a.created_at)}
+                      </span>
                     </div>
                   </div>
                   <div className="flex gap-2">
