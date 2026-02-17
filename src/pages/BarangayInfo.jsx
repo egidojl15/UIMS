@@ -670,16 +670,16 @@ const BarangayInfo = () => {
   };
 
   const openEditEvent = (e) => {
-    setEditingEvent(e);
-    setEventFormData({
-      title: e.title,
-      location: e.location || "",
-      start_date: e.start_date || "",
-      end_date: e.end_date || "",
-      description: e.description || "",
-    });
-    setShowEditEventModal(true);
-  };
+  setEditingEvent(e);
+  setEventFormData({
+    title: e.title,
+    location: e.location || "",
+    start_date: formatDateForInput(e.start_date) || "",   // ← FIXED
+    end_date: formatDateForInput(e.end_date) || "",       // ← FIXED
+    description: e.description || "",
+  });
+  setShowEditEventModal(true);
+};
 
   // useEffect for filtered projects
   useEffect(() => {
