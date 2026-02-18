@@ -209,13 +209,13 @@ const CertificateRequests = () => {
     if (typeLower.includes("indigen") || typeLower.includes("indigent")) {
       title = "CERTIFICATE of INDIGENCY";
       mainBody = `
-        <p style="margin: 0.7em 0; text-indent: 2em;">
+        <p style="margin: 0.6em 0; text-indent: 2em;">
           <strong>THIS IS TO CERTIFY</strong> that per record kept in the Barangay,
           <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,
           of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
         </p>
 
-        <p style="margin: 0.7em 0; text-indent: 2em;">
+        <p style="margin: 0.6em 0; text-indent: 2em;">
           <strong>THIS TO CERTIFY FURTHER</strong> that the family of the name mentioned above is living below the poverty threshold level
           and is identified as indigent in our barangay.
         </p>
@@ -228,13 +228,13 @@ const CertificateRequests = () => {
     } else {
       title = "CERTIFICATION";
       mainBody = `
-        <p style="margin: 0.7em 0; text-indent: 2em;">
+        <p style="margin: 0.6em 0; text-indent: 2em;">
           <strong>THIS IS TO CERTIFY</strong> that
           <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,
           of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
         </p>
 
-        <p style="margin: 0.7em 0; text-indent: 2em;">
+        <p style="margin: 0.6em 0; text-indent: 2em;">
           <strong>THIS TO CERTIFY FURTHER</strong> that as of this date no criminal and/or civil charges has been filed
           against him/her in this office.
         </p>
@@ -274,7 +274,7 @@ const CertificateRequests = () => {
               margin-bottom: 0.8cm;
             }
             .logo {
-              height: 100px;
+              height: 95px;
               width: auto;
             }
             .header {
@@ -1091,7 +1091,9 @@ const CertificateRequests = () => {
                           <h4 className="font-bold text-lg text-gray-900 mb-1">
                             {selectedRequest.certificate_type || "N/A"}
                           </h4>
-                          <p className="text-sm text-purple-600">Certificate Request</p>
+                          <p className="text-sm text-purple-600">
+                            Certificate Request
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1102,7 +1104,9 @@ const CertificateRequests = () => {
                           Purpose
                         </label>
                         <div className="bg-white p-4 rounded-xl border shadow-sm">
-                          <p className="text-gray-700 leading-relaxed">{selectedRequest.purpose}</p>
+                          <p className="text-gray-700 leading-relaxed">
+                            {selectedRequest.purpose}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -1140,7 +1144,9 @@ const CertificateRequests = () => {
                         <Clock className="w-5 h-5 text-green-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">Request Submitted</p>
+                        <p className="font-semibold text-gray-900">
+                          Request Submitted
+                        </p>
                         <p className="text-sm text-gray-600">
                           {new Date(selectedRequest.created_at).toLocaleString("en-US", {
                             month: "long",
@@ -1161,7 +1167,9 @@ const CertificateRequests = () => {
                             <RefreshCw className="w-5 h-5 text-blue-600" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-semibold text-gray-900">Last Updated</p>
+                            <p className="font-semibold text-gray-900">
+                              Last Updated
+                            </p>
                             <p className="text-sm text-gray-600">
                               {new Date(selectedRequest.updated_at).toLocaleString("en-US", {
                                 month: "long",
@@ -1188,7 +1196,9 @@ const CertificateRequests = () => {
                   Rejection Reason
                 </h3>
                 <div className="bg-white p-5 rounded-xl border-l-4 border-red-400">
-                  <p className="text-red-800 leading-relaxed">{selectedRequest.rejection_reason}</p>
+                  <p className="text-red-800 leading-relaxed">
+                    {selectedRequest.rejection_reason}
+                  </p>
                 </div>
               </div>
             )}
