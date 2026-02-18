@@ -183,37 +183,56 @@ const CertificateRequests = () => {
       return;
     }
 
-    const currentDate = new Date();
-    const dd = currentDate.getDate();
-    const mm = currentDate.toLocaleString('default', { month: 'long' });
-    const yy = currentDate.getFullYear();
+    // Auto date
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.toLocaleString("default", { month: "long" });
+    const year = today.getFullYear();
 
-    const getOrdinal = (n) => {
-      const s = ["th", "st", "nd", "rd"];
-      const v = n % 10;
-      return n + (s[v] || s[0]);
+    const ordinalSuffix = (n) => {
+      if (n > 3 && n < 21) return "th";
+      switch (n % 10) {
+        case 1: return "st";
+        case 2: return "nd";
+        case 3: return "rd";
+        default: return "th";
+      }
     };
 
-    const ordinalDay = getOrdinal(dd);
-    const issuedDate = `ISSUED this ${ordinalDay} day of ${mm}, ${yy} at Barangay Upper Ichon, Macrohon, Southern Leyte, Philippines.`;
+    const dayWithOrdinal = `${day}${ordinalSuffix(day)}`;
+    const defaultIssued = `this ${dayWithOrdinal} day of ${month}, ${year}`;
 
-    let title = 'CERTIFICATION';
-    let body = `
-      THIS IS TO CERTIFY that ${request.requester_name || '[Name]'}, of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
+    // Determine title & content
+    const typeLower = (request.certificate_type || "").toLowerCase().trim();
+    let title = "CERTIFICATION";
+    let mainBody = "";
 
-      THIS TO CERTIFY FURTHER that as of this date no criminal and/or civil charges has been filed against him/her in this office.
+    if (typeLower.includes("indigen") || typeLower.includes("indigent")) {
+      title = "CERTIFICATE of INDIGENCY";
+      mainBody = `
+        THIS IS TO CERTIFY that per record kept in the Barangay,<br>
+        <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,<br>
+        of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.<br><br>
 
-      THIS CERTIFICATION is issued upon the request of the name mentioned above for ${request.purpose || 'whatever purpose it may serve'}.
-    `;
+        THIS TO CERTIFY FURTHER that the family of the name mentioned above is living below the poverty threshold level<br>
+        and is identified as indigent in our barangay.<br><br>
 
-    if (request.certificate_type.toLowerCase().includes('indigency')) {
-      title = 'CERTIFICATE of INDIGENCY';
-      body = `
-        THIS IS TO CERTIFY that per record kept in the Barangay, ${request.requester_name || '[Name]'}, of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
+        THIS CERTIFICATION is issued upon the request of the name mentioned above for<br>
+        <span contenteditable="true">${request.purpose || "financial assistance purposes"}</span>.
+      `;
+    } else {
+      // General Certification / Good Moral
+      title = "CERTIFICATION";
+      mainBody = `
+        THIS IS TO CERTIFY that<br>
+        <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,<br>
+        of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.<br><br>
 
-        THIS TO CERTIFY FURTHER that the family of the name mentioned above is living below the poverty threshold level and is identified as indigent in our barangay.
+        THIS TO CERTIFY FURTHER that as of this date no criminal and/or civil charges has been filed<br>
+        against him/her in this office.<br><br>
 
-        THIS CERTIFICATION is issued upon the request of the name mentioned above for ${request.purpose || 'financial assistance purposes'}.
+        THIS CERTIFICATION is issued upon the request of the name mentioned above for<br>
+        <span contenteditable="true">${request.purpose || "job applications"}</span>.
       `;
     }
 
@@ -222,58 +241,168 @@ const CertificateRequests = () => {
         <head>
           <title>${title}</title>
           <style>
-            body { font-family: 'Times New Roman', serif; margin: 40px; text-align: center; line-height: 1.5; }
-            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-            .seal-left, .seal-right { width: 100px; height: auto; }
-            .title { font-size: 24px; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; }
-            .body { text-align: left; margin: 0 auto; max-width: 600px; font-size: 16px; }
-            .issued { margin-top: 40px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto; }
-            .signature { margin-top: 60px; text-align: center; }
-            .signer-name { font-weight: bold; text-transform: uppercase; }
-            .signer-title { text-transform: uppercase; }
+            @page {
+              size: A4 portrait;
+              margin: 1.8cm 2.2cm 2cm 2.2cm;
+            }
+            body {
+              font-family: 'Times New Roman', Times, serif;
+              font-size: 13pt;
+              line-height: 1.5;
+              margin: 0;
+              padding: 0;
+              color: #000;
+            }
+            .container {
+              max-width: 21cm;
+              margin: 0 auto;
+            }
+            .logos {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 0.6cm;
+            }
+            .logo {
+              height: 100px;
+              width: auto;
+            }
+            .header {
+              text-align: center;
+              font-size: 11pt;
+              line-height: 1.4;
+              margin-bottom: 0.4cm;
+            }
+            .barangay {
+              font-size: 16pt;
+              font-weight: bold;
+              text-transform: uppercase;
+              margin: 0.8cm 0 0.4cm;
+            }
+            .office {
+              text-align: center;
+              font-weight: bold;
+              text-transform: uppercase;
+              margin: 1.2cm 0 0.8cm;
+              font-size: 12.5pt;
+            }
+            .title {
+              text-align: center;
+              font-size: 18pt;
+              font-weight: bold;
+              text-transform: uppercase;
+              margin: 1.4cm 0 1.6cm;
+              letter-spacing: 0.5px;
+            }
+            .to-whom {
+              font-weight: bold;
+              margin: 1cm 0 0.8cm;
+            }
+            .body-text {
+              text-align: justify;
+              margin-bottom: 1.2cm;
+            }
+            .body-text p {
+              margin: 0.7em 0;
+              text-indent: 2em;
+            }
+            .issued {
+              margin-top: 2cm;
+              text-align: left;
+            }
+            .signature {
+              margin-top: 4cm;
+              text-align: right;
+              margin-right: 3cm;
+            }
+            .signature-line {
+              border-top: 1px solid #000;
+              width: 260px;
+              margin-bottom: 0.4cm;
+              margin-left: auto;
+            }
+            .signature-name {
+              font-weight: bold;
+              text-transform: uppercase;
+              font-size: 14pt;
+            }
+            .signature-title {
+              font-size: 12.5pt;
+              text-transform: uppercase;
+            }
+            .no-print {
+              margin-top: 3cm;
+              text-align: center;
+              color: #555;
+              font-size: 14px;
+            }
+            [contenteditable="true"] {
+              background: #fffef0;
+              outline: 1px dashed #aaa;
+              padding: 2px 4px;
+              min-width: 60px;
+              display: inline-block;
+            }
             @media print {
-              .no-print { display: none; }
+              .no-print { display: none !important; }
+              [contenteditable="true"] {
+                background: transparent;
+                outline: none;
+                border-bottom: 1px solid #000 !important;
+                padding: 0;
+              }
             }
           </style>
         </head>
         <body>
-          <div class="header">
-            <img src="https://www.clipartmax.com/png/middle/219-2192387_logo-of-the-philippines-republic.png" alt="Republic of the Philippines Seal" class="seal-left">
-            <div>
-              <p>Republic of the Philippines</p>
-              <p>Province of Southern Leyte</p>
-              <p>Municipality of Macrohon</p>
-              <p>BARANGAY UPPER ICHON</p>
+          <div class="container">
+            <div class="logos">
+              <img src="/images/UIMS.png" alt="Barangay Upper Ichon" class="logo">
+              <img src="/images/Bagong_Pilipinas_logo.png" alt="Bagong Pilipinas" class="logo">
             </div>
-            <img src="https://thumbs.dreamstime.com/z/d-waving-philippines-province-flag-southern-leyte-closeup-view-d-illustration-waving-philippines-province-flag-southern-242964947.jpg" alt="Province of Southern Leyte Seal" class="seal-right">
+
+            <div class="header">
+              Republic of the Philippines<br>
+              Province of Southern Leyte<br>
+              Municipality of Macrohon
+            </div>
+
+            <div class="barangay">BARANGAY UPPER ICHON</div>
+
+            <div class="office">OFFICE OF THE PUNONG BARANGAY</div>
+
+            <div class="title" contenteditable="true">${title}</div>
+
+            <div class="to-whom">TO WHOM IT MAY CONCERN:</div>
+
+            <div class="body-text" contenteditable="true">
+              ${mainBody}
+            </div>
+
+            <div class="issued" contenteditable="true">
+              ISSUED ${defaultIssued} at Barangay Upper Ichon, Macrohon, Southern Leyte, Philippines.
+            </div>
+
+            <div class="signature">
+              <div class="signature-line"></div>
+              <div class="signature-name" contenteditable="true">JUNNARD O. NAPALAN</div>
+              <div class="signature-title">Punong Barangay</div>
+            </div>
           </div>
 
-          <p>OFFICE OF THE PUNONG BARANGAY</p>
-
-          <h1 class="title">${title}</h1>
-
-          <p>TO WHOM IT MAY CONCERN:</p>
-
-          <div class="body">
-            ${body}
-          </div>
-
-          <div class="issued">
-            ${issuedDate}
-          </div>
-
-          <div class="signature">
-            <div class="signer-name">JUNNARD O. NAPALAN</div>
-            <div class="signer-title">Punong Barangay</div>
-          </div>
-
-          <div class="no-print" style="margin-top:40px; text-align:center;">
-            <button onclick="window.print()" style="padding:10px 24px; font-size:16px; margin-right:16px;">Print</button>
-            <button onclick="window.close()" style="padding:10px 24px; font-size:16px;">Close</button>
+          <div class="no-print">
+            <p><strong>Tip:</strong> Edit any underlined part (name, purpose, date, title, signature) before printing.</p>
+            <button onclick="window.print()" style="padding:12px 32px; font-size:17px; margin-right:24px; background:#1e40af; color:white; border:none; border-radius:6px; cursor:pointer;">
+              Print Certificate
+            </button>
+            <button onclick="window.close()" style="padding:12px 32px; font-size:17px; cursor:pointer;">
+              Close
+            </button>
           </div>
         </body>
       </html>
     `);
+
     printWindow.document.close();
   }, []);
 
@@ -809,9 +938,9 @@ const CertificateRequests = () => {
               </div>
             </div>
 
-            {/* Main Content - 2 Column Layout */}
+            {/* Main Content */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Left Column - Requester Info */}
+              {/* Left - Requester Info */}
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
                   <h3 className="font-bold text-blue-800 mb-6 flex items-center gap-2">
@@ -851,7 +980,7 @@ const CertificateRequests = () => {
                       </div>
                     </div>
 
-                    {/* REQUEST CONTACT INFO */}
+                    {/* Contact */}
                     <div className="pt-6 border-t border-blue-200">
                       <h4 className="font-semibold text-blue-800 mb-4 flex items-center gap-2">
                         📞 Request Contact Information
@@ -863,9 +992,7 @@ const CertificateRequests = () => {
                           </label>
                           <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                             <Phone className="w-5 h-5 text-blue-500" />
-                            <span className="font-semibold">
-                              {selectedRequest.contact_number}
-                            </span>
+                            <span className="font-semibold">{selectedRequest.contact_number}</span>
                           </div>
                         </div>
                       )}
@@ -876,21 +1003,18 @@ const CertificateRequests = () => {
                           </label>
                           <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                             <Mail className="w-5 h-5 text-blue-500" />
-                            <span className="font-semibold break-all">
-                              {selectedRequest.email}
-                            </span>
+                            <span className="font-semibold break-all">{selectedRequest.email}</span>
                           </div>
                         </div>
                       )}
                     </div>
 
-                    {/* REGISTRATION INFO */}
-                    {(selectedRequest.registered_phone ||
-                      selectedRequest.registered_email) && (
+                    {/* Registration Info */}
+                    {(selectedRequest.registered_phone || selectedRequest.registered_email) && (
                       <div className="pt-6 border-t border-blue-200">
                         <h4 className="font-semibold text-green-800 mb-4 flex items-center gap-2">
                           <Database className="w-5 h-5" />
-                          <span>Registration Account Information</span>
+                          Registration Account Information
                         </h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {selectedRequest.registered_phone && (
@@ -939,7 +1063,7 @@ const CertificateRequests = () => {
                 </div>
               </div>
 
-              {/* Right Column - Certificate & Timeline */}
+              {/* Right Column */}
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl p-6 border border-purple-200">
                   <h3 className="font-bold text-purple-800 mb-6 flex items-center gap-2">
@@ -957,9 +1081,7 @@ const CertificateRequests = () => {
                           <h4 className="font-bold text-lg text-gray-900 mb-1">
                             {selectedRequest.certificate_type || "N/A"}
                           </h4>
-                          <p className="text-sm text-purple-600">
-                            Certificate Request
-                          </p>
+                          <p className="text-sm text-purple-600">Certificate Request</p>
                         </div>
                       </div>
                     </div>
@@ -970,9 +1092,7 @@ const CertificateRequests = () => {
                           Purpose
                         </label>
                         <div className="bg-white p-4 rounded-xl border shadow-sm">
-                          <p className="text-gray-700 leading-relaxed">
-                            {selectedRequest.purpose}
-                          </p>
+                          <p className="text-gray-700 leading-relaxed">{selectedRequest.purpose}</p>
                         </div>
                       </div>
                     )}
@@ -985,9 +1105,7 @@ const CertificateRequests = () => {
                         <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                           <Calendar className="w-5 h-5 text-green-500" />
                           <span className="font-semibold text-green-700">
-                            {new Date(
-                              selectedRequest.reschedule_date
-                            ).toLocaleDateString("en-US", {
+                            {new Date(selectedRequest.reschedule_date).toLocaleDateString("en-US", {
                               weekday: "long",
                               year: "numeric",
                               month: "long",
@@ -1012,71 +1130,57 @@ const CertificateRequests = () => {
                         <Clock className="w-5 h-5 text-green-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">
-                          Request Submitted
-                        </p>
+                        <p className="font-semibold text-gray-900">Request Submitted</p>
                         <p className="text-sm text-gray-600">
-                          {new Date(selectedRequest.created_at).toLocaleString(
-                            "en-US",
-                            {
+                          {new Date(selectedRequest.created_at).toLocaleString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </p>
+                      </div>
+                    </div>
+
+                    {selectedRequest.updated_at && selectedRequest.updated_at !== selectedRequest.created_at && (
+                      <div className="flex items-center gap-4 p-4 bg-white rounded-xl border-l-4 border-blue-400">
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <RefreshCw className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">Last Updated</p>
+                          <p className="text-sm text-gray-600">
+                            {new Date(selectedRequest.updated_at).toLocaleString("en-US", {
                               month: "long",
                               day: "numeric",
                               year: "numeric",
                               hour: "2-digit",
                               minute: "2-digit",
                               hour12: true,
-                            }
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    {selectedRequest.updated_at &&
-                      selectedRequest.updated_at !==
-                        selectedRequest.created_at && (
-                        <div className="flex items-center gap-4 p-4 bg-white rounded-xl border-l-4 border-blue-400">
-                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <RefreshCw className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-semibold text-gray-900">
-                              Last Updated
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {new Date(
-                                selectedRequest.updated_at
-                              ).toLocaleString("en-US", {
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                              })}
-                            </p>
-                          </div>
+                            })}
+                          </p>
                         </div>
-                      )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Rejection Reason */}
-            {selectedRequest.status === "rejected" &&
-              selectedRequest.rejection_reason && (
-                <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200 mb-8">
-                  <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5" />
-                    Rejection Reason
-                  </h3>
-                  <div className="bg-white p-5 rounded-xl border-l-4 border-red-400">
-                    <p className="text-red-800 leading-relaxed">
-                      {selectedRequest.rejection_reason}
-                    </p>
-                  </div>
+            {selectedRequest.status === "rejected" && selectedRequest.rejection_reason && (
+              <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200 mb-8">
+                <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5" />
+                  Rejection Reason
+                </h3>
+                <div className="bg-white p-5 rounded-xl border-l-4 border-red-400">
+                  <p className="text-red-800 leading-relaxed">{selectedRequest.rejection_reason}</p>
                 </div>
-              )}
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t bg-gradient-to-r from-gray-50 to-blue-50 rounded-b-3xl p-6">
@@ -1134,16 +1238,9 @@ const CertificateRequests = () => {
 
       <style jsx>{`
         @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0) rotate(0deg);
-          }
-          33% {
-            transform: translateY(-10px) rotate(120deg);
-          }
-          66% {
-            transform: translateY(5px) rotate(240deg);
-          }
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          33% { transform: translateY(-10px) rotate(120deg); }
+          66% { transform: translateY(5px) rotate(240deg); }
         }
         .animate-float {
           animation: float 6s ease-in-out infinite;
