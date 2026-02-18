@@ -183,7 +183,7 @@ const CertificateRequests = () => {
       return;
     }
 
-    // Auto date
+    // Auto date (editable)
     const today = new Date();
     const day = today.getDate();
     const month = today.toLocaleString("default", { month: "long" });
@@ -210,29 +210,40 @@ const CertificateRequests = () => {
     if (typeLower.includes("indigen") || typeLower.includes("indigent")) {
       title = "CERTIFICATE of INDIGENCY";
       mainBody = `
-        THIS IS TO CERTIFY that per record kept in the Barangay,<br>
-        <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,<br>
-        of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.<br><br>
+        <p style="text-indent: 2em; margin: 0.6em 0;">
+          <strong>THIS IS TO CERTIFY</strong> that per record kept in the Barangay,
+          <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,
+          of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
+        </p>
 
-        THIS TO CERTIFY FURTHER that the family of the name mentioned above is living below the poverty threshold level<br>
-        and is identified as indigent in our barangay.<br><br>
+        <p style="text-indent: 2em; margin: 0.6em 0;">
+          <strong>THIS TO CERTIFY FURTHER</strong> that the family of the name mentioned above is living below the poverty threshold level
+          and is identified as indigent in our barangay.
+        </p>
 
-        THIS CERTIFICATION is issued upon the request of the name mentioned above for<br>
-        <span contenteditable="true">${request.purpose || "financial assistance purposes"}</span>.
+        <p style="text-indent: 2em; margin: 1em 0;">
+          <strong>THIS CERTIFICATION</strong> is issued upon the request of the name mentioned above for
+          <span contenteditable="true">${request.purpose || "financial assistance purposes"}</span>.
+        </p>
       `;
     } else {
-      // General Certification / Good Moral
       title = "CERTIFICATION";
       mainBody = `
-        THIS IS TO CERTIFY that<br>
-        <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,<br>
-        of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.<br><br>
+        <p style="text-indent: 2em; margin: 0.6em 0;">
+          <strong>THIS IS TO CERTIFY</strong> that
+          <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,
+          of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
+        </p>
 
-        THIS TO CERTIFY FURTHER that as of this date no criminal and/or civil charges has been filed<br>
-        against him/her in this office.<br><br>
+        <p style="text-indent: 2em; margin: 0.6em 0;">
+          <strong>THIS TO CERTIFY FURTHER</strong> that as of this date no criminal and/or civil charges has been filed
+          against him/her in this office.
+        </p>
 
-        THIS CERTIFICATION is issued upon the request of the name mentioned above for<br>
-        <span contenteditable="true">${request.purpose || "job applications"}</span>.
+        <p style="text-indent: 2em; margin: 1em 0;">
+          <strong>THIS CERTIFICATION</strong> is issued upon the request of the name mentioned above for
+          <span contenteditable="true">${request.purpose || "job applications"}</span>.
+        </p>
       `;
     }
 
@@ -243,15 +254,15 @@ const CertificateRequests = () => {
           <style>
             @page {
               size: A4 portrait;
-              margin: 1.8cm 2.2cm 2cm 2.2cm;
+              margin: 1.5cm 2.2cm 1.8cm 2.2cm;
             }
             body {
               font-family: 'Times New Roman', Times, serif;
               font-size: 13pt;
               line-height: 1.5;
+              color: #000;
               margin: 0;
               padding: 0;
-              color: #000;
             }
             .container {
               max-width: 21cm;
@@ -261,7 +272,7 @@ const CertificateRequests = () => {
               display: flex;
               justify-content: space-between;
               align-items: center;
-              margin-bottom: 0.6cm;
+              margin-bottom: 0.8cm;
             }
             .logo {
               height: 100px;
@@ -270,14 +281,16 @@ const CertificateRequests = () => {
             .header {
               text-align: center;
               font-size: 11pt;
-              line-height: 1.4;
+              line-height: 1.35;
               margin-bottom: 0.4cm;
             }
             .barangay {
+              text-align: center;
               font-size: 16pt;
               font-weight: bold;
               text-transform: uppercase;
-              margin: 0.8cm 0 0.4cm;
+              margin: 0.9cm 0 0.4cm;
+              letter-spacing: 1px;
             }
             .office {
               text-align: center;
@@ -292,15 +305,15 @@ const CertificateRequests = () => {
               font-weight: bold;
               text-transform: uppercase;
               margin: 1.4cm 0 1.6cm;
-              letter-spacing: 0.5px;
+              letter-spacing: 0.6px;
             }
             .to-whom {
               font-weight: bold;
-              margin: 1cm 0 0.8cm;
+              text-align: left;
+              margin: 1.1cm 0 0.7cm;
             }
             .body-text {
               text-align: justify;
-              margin-bottom: 1.2cm;
             }
             .body-text p {
               margin: 0.7em 0;
@@ -317,8 +330,8 @@ const CertificateRequests = () => {
             }
             .signature-line {
               border-top: 1px solid #000;
-              width: 260px;
-              margin-bottom: 0.4cm;
+              width: 280px;
+              margin-bottom: 0.5cm;
               margin-left: auto;
             }
             .signature-name {
@@ -380,18 +393,18 @@ const CertificateRequests = () => {
             </div>
 
             <div class="issued" contenteditable="true">
-              ISSUED ${defaultIssued} at Barangay Upper Ichon, Macrohon, Southern Leyte, Philippines.
+              <strong>ISSUED</strong> ${defaultIssued} at Barangay Upper Ichon, Macrohon, Southern Leyte, Philippines.
             </div>
 
             <div class="signature">
               <div class="signature-line"></div>
               <div class="signature-name" contenteditable="true">JUNNARD O. NAPALAN</div>
-              <div class="signature-title">Punong Barangay</div>
+              <div class="signature-title" contenteditable="true">Punong Barangay</div>
             </div>
           </div>
 
           <div class="no-print">
-            <p><strong>Tip:</strong> Edit any underlined part (name, purpose, date, title, signature) before printing.</p>
+            <p><strong>Edit any underlined/editable part</strong> (name, purpose, date, title, signature) before printing.</p>
             <button onclick="window.print()" style="padding:12px 32px; font-size:17px; margin-right:24px; background:#1e40af; color:white; border:none; border-radius:6px; cursor:pointer;">
               Print Certificate
             </button>
@@ -938,9 +951,9 @@ const CertificateRequests = () => {
               </div>
             </div>
 
-            {/* Main Content */}
+            {/* Main Content - 2 Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Left - Requester Info */}
+              {/* Left Column - Requester Info */}
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
                   <h3 className="font-bold text-blue-800 mb-6 flex items-center gap-2">
@@ -980,7 +993,7 @@ const CertificateRequests = () => {
                       </div>
                     </div>
 
-                    {/* Contact */}
+                    {/* REQUEST CONTACT INFO */}
                     <div className="pt-6 border-t border-blue-200">
                       <h4 className="font-semibold text-blue-800 mb-4 flex items-center gap-2">
                         📞 Request Contact Information
@@ -992,7 +1005,9 @@ const CertificateRequests = () => {
                           </label>
                           <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                             <Phone className="w-5 h-5 text-blue-500" />
-                            <span className="font-semibold">{selectedRequest.contact_number}</span>
+                            <span className="font-semibold">
+                              {selectedRequest.contact_number}
+                            </span>
                           </div>
                         </div>
                       )}
@@ -1003,14 +1018,17 @@ const CertificateRequests = () => {
                           </label>
                           <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                             <Mail className="w-5 h-5 text-blue-500" />
-                            <span className="font-semibold break-all">{selectedRequest.email}</span>
+                            <span className="font-semibold break-all">
+                              {selectedRequest.email}
+                            </span>
                           </div>
                         </div>
                       )}
                     </div>
 
-                    {/* Registration Info */}
-                    {(selectedRequest.registered_phone || selectedRequest.registered_email) && (
+                    {/* REGISTRATION INFO */}
+                    {(selectedRequest.registered_phone ||
+                      selectedRequest.registered_email) && (
                       <div className="pt-6 border-t border-blue-200">
                         <h4 className="font-semibold text-green-800 mb-4 flex items-center gap-2">
                           <Database className="w-5 h-5" />
@@ -1063,7 +1081,7 @@ const CertificateRequests = () => {
                 </div>
               </div>
 
-              {/* Right Column */}
+              {/* Right Column - Certificate & Timeline */}
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl p-6 border border-purple-200">
                   <h3 className="font-bold text-purple-800 mb-6 flex items-center gap-2">
@@ -1081,7 +1099,9 @@ const CertificateRequests = () => {
                           <h4 className="font-bold text-lg text-gray-900 mb-1">
                             {selectedRequest.certificate_type || "N/A"}
                           </h4>
-                          <p className="text-sm text-purple-600">Certificate Request</p>
+                          <p className="text-sm text-purple-600">
+                            Certificate Request
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1092,7 +1112,9 @@ const CertificateRequests = () => {
                           Purpose
                         </label>
                         <div className="bg-white p-4 rounded-xl border shadow-sm">
-                          <p className="text-gray-700 leading-relaxed">{selectedRequest.purpose}</p>
+                          <p className="text-gray-700 leading-relaxed">
+                            {selectedRequest.purpose}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -1105,7 +1127,9 @@ const CertificateRequests = () => {
                         <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                           <Calendar className="w-5 h-5 text-green-500" />
                           <span className="font-semibold text-green-700">
-                            {new Date(selectedRequest.reschedule_date).toLocaleDateString("en-US", {
+                            {new Date(
+                              selectedRequest.reschedule_date
+                            ).toLocaleDateString("en-US", {
                               weekday: "long",
                               year: "numeric",
                               month: "long",
@@ -1130,57 +1154,71 @@ const CertificateRequests = () => {
                         <Clock className="w-5 h-5 text-green-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">Request Submitted</p>
-                        <p className="text-sm text-gray-600">
-                          {new Date(selectedRequest.created_at).toLocaleString("en-US", {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                          })}
+                        <p className="font-semibold text-gray-900">
+                          Request Submitted
                         </p>
-                      </div>
-                    </div>
-
-                    {selectedRequest.updated_at && selectedRequest.updated_at !== selectedRequest.created_at && (
-                      <div className="flex items-center gap-4 p-4 bg-white rounded-xl border-l-4 border-blue-400">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <RefreshCw className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-semibold text-gray-900">Last Updated</p>
-                          <p className="text-sm text-gray-600">
-                            {new Date(selectedRequest.updated_at).toLocaleString("en-US", {
+                        <p className="text-sm text-gray-600">
+                          {new Date(selectedRequest.created_at).toLocaleString(
+                            "en-US",
+                            {
                               month: "long",
                               day: "numeric",
                               year: "numeric",
                               hour: "2-digit",
                               minute: "2-digit",
                               hour12: true,
-                            })}
-                          </p>
-                        </div>
+                            }
+                          )}
+                        </p>
                       </div>
-                    )}
+                    </div>
+
+                    {selectedRequest.updated_at &&
+                      selectedRequest.updated_at !==
+                        selectedRequest.created_at && (
+                        <div className="flex items-center gap-4 p-4 bg-white rounded-xl border-l-4 border-blue-400">
+                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <RefreshCw className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold text-gray-900">
+                              Last Updated
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {new Date(
+                                selectedRequest.updated_at
+                              ).toLocaleString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Rejection Reason */}
-            {selectedRequest.status === "rejected" && selectedRequest.rejection_reason && (
-              <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200 mb-8">
-                <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5" />
-                  Rejection Reason
-                </h3>
-                <div className="bg-white p-5 rounded-xl border-l-4 border-red-400">
-                  <p className="text-red-800 leading-relaxed">{selectedRequest.rejection_reason}</p>
+            {selectedRequest.status === "rejected" &&
+              selectedRequest.rejection_reason && (
+                <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200 mb-8">
+                  <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Rejection Reason
+                  </h3>
+                  <div className="bg-white p-5 rounded-xl border-l-4 border-red-400">
+                    <p className="text-red-800 leading-relaxed">
+                      {selectedRequest.rejection_reason}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t bg-gradient-to-r from-gray-50 to-blue-50 rounded-b-3xl p-6">
@@ -1238,9 +1276,16 @@ const CertificateRequests = () => {
 
       <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          33% { transform: translateY(-10px) rotate(120deg); }
-          66% { transform: translateY(5px) rotate(240deg); }
+          0%,
+          100% {
+            transform: translateY(0) rotate(0deg);
+          }
+          33% {
+            transform: translateY(-10px) rotate(120deg);
+          }
+          66% {
+            transform: translateY(5px) rotate(240deg);
+          }
         }
         .animate-float {
           animation: float 6s ease-in-out infinite;
