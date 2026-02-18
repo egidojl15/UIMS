@@ -183,7 +183,7 @@ const CertificateRequests = () => {
       return;
     }
 
-    // Auto date (editable)
+    // Auto date with bold parts
     const today = new Date();
     const day = today.getDate();
     const month = today.toLocaleString("default", { month: "long" });
@@ -200,7 +200,6 @@ const CertificateRequests = () => {
     };
 
     const dayWithOrdinal = `${day}${ordinalSuffix(day)}`;
-    const defaultIssued = `this ${dayWithOrdinal} day of ${month}, ${year}`;
 
     // Determine title & content
     const typeLower = (request.certificate_type || "").toLowerCase().trim();
@@ -210,18 +209,18 @@ const CertificateRequests = () => {
     if (typeLower.includes("indigen") || typeLower.includes("indigent")) {
       title = "CERTIFICATE of INDIGENCY";
       mainBody = `
-        <p style="text-indent: 2em; margin: 0.6em 0;">
+        <p style="margin: 0.7em 0; text-indent: 2em;">
           <strong>THIS IS TO CERTIFY</strong> that per record kept in the Barangay,
           <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,
           of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
         </p>
 
-        <p style="text-indent: 2em; margin: 0.6em 0;">
+        <p style="margin: 0.7em 0; text-indent: 2em;">
           <strong>THIS TO CERTIFY FURTHER</strong> that the family of the name mentioned above is living below the poverty threshold level
           and is identified as indigent in our barangay.
         </p>
 
-        <p style="text-indent: 2em; margin: 1em 0;">
+        <p style="margin: 1em 0; text-indent: 2em;">
           <strong>THIS CERTIFICATION</strong> is issued upon the request of the name mentioned above for
           <span contenteditable="true">${request.purpose || "financial assistance purposes"}</span>.
         </p>
@@ -229,18 +228,18 @@ const CertificateRequests = () => {
     } else {
       title = "CERTIFICATION";
       mainBody = `
-        <p style="text-indent: 2em; margin: 0.6em 0;">
+        <p style="margin: 0.7em 0; text-indent: 2em;">
           <strong>THIS IS TO CERTIFY</strong> that
           <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,
           of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
         </p>
 
-        <p style="text-indent: 2em; margin: 0.6em 0;">
+        <p style="margin: 0.7em 0; text-indent: 2em;">
           <strong>THIS TO CERTIFY FURTHER</strong> that as of this date no criminal and/or civil charges has been filed
           against him/her in this office.
         </p>
 
-        <p style="text-indent: 2em; margin: 1em 0;">
+        <p style="margin: 1em 0; text-indent: 2em;">
           <strong>THIS CERTIFICATION</strong> is issued upon the request of the name mentioned above for
           <span contenteditable="true">${request.purpose || "job applications"}</span>.
         </p>
@@ -254,7 +253,7 @@ const CertificateRequests = () => {
           <style>
             @page {
               size: A4 portrait;
-              margin: 1.5cm 2.2cm 1.8cm 2.2cm;
+              margin: 1.4cm 2.0cm 1.6cm 2.0cm;
             }
             body {
               font-family: 'Times New Roman', Times, serif;
@@ -282,7 +281,7 @@ const CertificateRequests = () => {
               text-align: center;
               font-size: 11pt;
               line-height: 1.35;
-              margin-bottom: 0.4cm;
+              margin-bottom: 0.3cm;
             }
             .barangay {
               text-align: center;
@@ -296,7 +295,7 @@ const CertificateRequests = () => {
               text-align: center;
               font-weight: bold;
               text-transform: uppercase;
-              margin: 1.2cm 0 0.8cm;
+              margin: 1.1cm 0 0.7cm;
               font-size: 12.5pt;
             }
             .title {
@@ -304,13 +303,13 @@ const CertificateRequests = () => {
               font-size: 18pt;
               font-weight: bold;
               text-transform: uppercase;
-              margin: 1.4cm 0 1.6cm;
+              margin: 1.3cm 0 1.5cm;
               letter-spacing: 0.6px;
             }
             .to-whom {
               font-weight: bold;
               text-align: left;
-              margin: 1.1cm 0 0.7cm;
+              margin: 1cm 0 0.6cm;
             }
             .body-text {
               text-align: justify;
@@ -320,24 +319,26 @@ const CertificateRequests = () => {
               text-indent: 2em;
             }
             .issued {
-              margin-top: 2cm;
+              margin-top: 1.8cm;
               text-align: left;
             }
             .signature {
-              margin-top: 4cm;
-              text-align: right;
-              margin-right: 3cm;
+              margin-top: 3.8cm;
+              text-align: center;
+              margin-left: auto;
+              margin-right: auto;
+              width: 300px;
             }
             .signature-line {
               border-top: 1px solid #000;
-              width: 280px;
-              margin-bottom: 0.5cm;
-              margin-left: auto;
+              width: 100%;
+              margin: 0.4cm 0;
             }
             .signature-name {
               font-weight: bold;
               text-transform: uppercase;
               font-size: 14pt;
+              margin-bottom: 0.2cm;
             }
             .signature-title {
               font-size: 12.5pt;
@@ -393,12 +394,12 @@ const CertificateRequests = () => {
             </div>
 
             <div class="issued" contenteditable="true">
-              <strong>ISSUED</strong> ${defaultIssued} at Barangay Upper Ichon, Macrohon, Southern Leyte, Philippines.
+              <strong>ISSUED</strong> <strong>this ${dayWithOrdinal}</strong> day of <strong>${month}</strong>, <strong>${year}</strong> at Barangay Upper Ichon, Macrohon, Southern Leyte, Philippines.
             </div>
 
             <div class="signature">
-              <div class="signature-line"></div>
               <div class="signature-name" contenteditable="true">JUNNARD O. NAPALAN</div>
+              <div class="signature-line"></div>
               <div class="signature-title" contenteditable="true">Punong Barangay</div>
             </div>
           </div>
@@ -929,14 +930,10 @@ const CertificateRequests = () => {
                   </span>
                   <div className="flex items-center gap-3 mt-2">
                     <span
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
-                        getStatusInfo(selectedRequest.status).color
-                      }`}
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${getStatusInfo(selectedRequest.status).color}`}
                     >
                       <div
-                        className={`w-3 h-3 rounded-full ${
-                          getStatusInfo(selectedRequest.status).dot
-                        }`}
+                        className={`w-3 h-3 rounded-full ${getStatusInfo(selectedRequest.status).dot}`}
                       ></div>
                       {getStatusInfo(selectedRequest.status).label}
                     </span>
@@ -951,7 +948,7 @@ const CertificateRequests = () => {
               </div>
             </div>
 
-            {/* Main Content - 2 Column Layout */}
+            {/* Main Content */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {/* Left Column - Requester Info */}
               <div className="space-y-6">
@@ -993,7 +990,7 @@ const CertificateRequests = () => {
                       </div>
                     </div>
 
-                    {/* REQUEST CONTACT INFO */}
+                    {/* Contact Info */}
                     <div className="pt-6 border-t border-blue-200">
                       <h4 className="font-semibold text-blue-800 mb-4 flex items-center gap-2">
                         📞 Request Contact Information
@@ -1005,9 +1002,7 @@ const CertificateRequests = () => {
                           </label>
                           <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                             <Phone className="w-5 h-5 text-blue-500" />
-                            <span className="font-semibold">
-                              {selectedRequest.contact_number}
-                            </span>
+                            <span className="font-semibold">{selectedRequest.contact_number}</span>
                           </div>
                         </div>
                       )}
@@ -1018,17 +1013,14 @@ const CertificateRequests = () => {
                           </label>
                           <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                             <Mail className="w-5 h-5 text-blue-500" />
-                            <span className="font-semibold break-all">
-                              {selectedRequest.email}
-                            </span>
+                            <span className="font-semibold break-all">{selectedRequest.email}</span>
                           </div>
                         </div>
                       )}
                     </div>
 
-                    {/* REGISTRATION INFO */}
-                    {(selectedRequest.registered_phone ||
-                      selectedRequest.registered_email) && (
+                    {/* Registration Info */}
+                    {(selectedRequest.registered_phone || selectedRequest.registered_email) && (
                       <div className="pt-6 border-t border-blue-200">
                         <h4 className="font-semibold text-green-800 mb-4 flex items-center gap-2">
                           <Database className="w-5 h-5" />
@@ -1081,7 +1073,7 @@ const CertificateRequests = () => {
                 </div>
               </div>
 
-              {/* Right Column - Certificate & Timeline */}
+              {/* Right Column */}
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl p-6 border border-purple-200">
                   <h3 className="font-bold text-purple-800 mb-6 flex items-center gap-2">
@@ -1099,9 +1091,7 @@ const CertificateRequests = () => {
                           <h4 className="font-bold text-lg text-gray-900 mb-1">
                             {selectedRequest.certificate_type || "N/A"}
                           </h4>
-                          <p className="text-sm text-purple-600">
-                            Certificate Request
-                          </p>
+                          <p className="text-sm text-purple-600">Certificate Request</p>
                         </div>
                       </div>
                     </div>
@@ -1112,9 +1102,7 @@ const CertificateRequests = () => {
                           Purpose
                         </label>
                         <div className="bg-white p-4 rounded-xl border shadow-sm">
-                          <p className="text-gray-700 leading-relaxed">
-                            {selectedRequest.purpose}
-                          </p>
+                          <p className="text-gray-700 leading-relaxed">{selectedRequest.purpose}</p>
                         </div>
                       </div>
                     )}
@@ -1127,9 +1115,7 @@ const CertificateRequests = () => {
                         <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                           <Calendar className="w-5 h-5 text-green-500" />
                           <span className="font-semibold text-green-700">
-                            {new Date(
-                              selectedRequest.reschedule_date
-                            ).toLocaleDateString("en-US", {
+                            {new Date(selectedRequest.reschedule_date).toLocaleDateString("en-US", {
                               weekday: "long",
                               year: "numeric",
                               month: "long",
@@ -1154,40 +1140,30 @@ const CertificateRequests = () => {
                         <Clock className="w-5 h-5 text-green-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">
-                          Request Submitted
-                        </p>
+                        <p className="font-semibold text-gray-900">Request Submitted</p>
                         <p className="text-sm text-gray-600">
-                          {new Date(selectedRequest.created_at).toLocaleString(
-                            "en-US",
-                            {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true,
-                            }
-                          )}
+                          {new Date(selectedRequest.created_at).toLocaleString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
                         </p>
                       </div>
                     </div>
 
                     {selectedRequest.updated_at &&
-                      selectedRequest.updated_at !==
-                        selectedRequest.created_at && (
+                      selectedRequest.updated_at !== selectedRequest.created_at && (
                         <div className="flex items-center gap-4 p-4 bg-white rounded-xl border-l-4 border-blue-400">
                           <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <RefreshCw className="w-5 h-5 text-blue-600" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-semibold text-gray-900">
-                              Last Updated
-                            </p>
+                            <p className="font-semibold text-gray-900">Last Updated</p>
                             <p className="text-sm text-gray-600">
-                              {new Date(
-                                selectedRequest.updated_at
-                              ).toLocaleString("en-US", {
+                              {new Date(selectedRequest.updated_at).toLocaleString("en-US", {
                                 month: "long",
                                 day: "numeric",
                                 year: "numeric",
@@ -1205,20 +1181,17 @@ const CertificateRequests = () => {
             </div>
 
             {/* Rejection Reason */}
-            {selectedRequest.status === "rejected" &&
-              selectedRequest.rejection_reason && (
-                <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200 mb-8">
-                  <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5" />
-                    Rejection Reason
-                  </h3>
-                  <div className="bg-white p-5 rounded-xl border-l-4 border-red-400">
-                    <p className="text-red-800 leading-relaxed">
-                      {selectedRequest.rejection_reason}
-                    </p>
-                  </div>
+            {selectedRequest.status === "rejected" && selectedRequest.rejection_reason && (
+              <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200 mb-8">
+                <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5" />
+                  Rejection Reason
+                </h3>
+                <div className="bg-white p-5 rounded-xl border-l-4 border-red-400">
+                  <p className="text-red-800 leading-relaxed">{selectedRequest.rejection_reason}</p>
                 </div>
-              )}
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t bg-gradient-to-r from-gray-50 to-blue-50 rounded-b-3xl p-6">
@@ -1276,16 +1249,9 @@ const CertificateRequests = () => {
 
       <style jsx>{`
         @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0) rotate(0deg);
-          }
-          33% {
-            transform: translateY(-10px) rotate(120deg);
-          }
-          66% {
-            transform: translateY(5px) rotate(240deg);
-          }
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          33% { transform: translateY(-10px) rotate(120deg); }
+          66% { transform: translateY(5px) rotate(240deg); }
         }
         .animate-float {
           animation: float 6s ease-in-out infinite;
