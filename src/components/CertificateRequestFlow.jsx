@@ -16,7 +16,7 @@ const Modal = ({
 
   const modalContent = (
     <div
-      className="modal-backdrop bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+      className="modal-backdrop fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -255,7 +255,7 @@ const RequestFormModal = ({
       if (onSuccess) {
         onSuccess(
           "Request Submitted Successfully!",
-          "Your certificate request has been processed."
+          "Your certificate request has been processed.",
         );
       } else {
         alert("Request submitted successfully!"); // fallback
@@ -270,12 +270,12 @@ const RequestFormModal = ({
       if (onError) {
         onError(
           "Submission Failed",
-          err.response?.data?.message || err.message || "Please try again."
+          err.response?.data?.message || err.message || "Please try again.",
         );
       } else {
         alert(
           "Failed to submit request: " +
-            (err.response?.data?.message || err.message)
+            (err.response?.data?.message || err.message),
         );
       }
     } finally {
