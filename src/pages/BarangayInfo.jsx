@@ -213,7 +213,7 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
 
   const modalContent = (
     <div
-      className="modal-backdrop bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+      className="modal-backdrop fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyan-500/20 border border-white/20 relative">
