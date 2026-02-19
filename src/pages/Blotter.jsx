@@ -25,9 +25,7 @@ import NotificationSystem from "../components/NotificationSystem";
 // ────────────────────────────────────────────────
 const formatReporterType = (type) => {
   if (!type) return "N/A";
-  return type
-    .replace("_", " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase());
+  return type.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
 const formatDate = (dateString) => {
@@ -52,7 +50,7 @@ const formatStatus = (status) => {
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 };
 
-// Reusable StatCard (unchanged)
+// Reusable StatCard component
 const StatCard = ({
   title,
   value,
@@ -64,9 +62,7 @@ const StatCard = ({
 }) => (
   <div
     className={`group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-8 transition-all duration-500 border border-white/20 ${
-      hovered
-        ? "transform scale-105 shadow-2xl shadow-blue-500/20 bg-white/95"
-        : "hover:shadow-xl hover:shadow-blue-500/10"
+      hovered ? "transform scale-105 shadow-2xl shadow-blue-500/20 bg-white/95" : "hover:shadow-xl hover:shadow-blue-500/10"
     }`}
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
@@ -76,9 +72,7 @@ const StatCard = ({
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-500 mb-2">{title}</p>
-          <p className="text-3xl font-bold text-[#0F4C81] group-hover:text-[#58A1D3] transition-colors duration-300">
-            {value}
-          </p>
+          <p className="text-3xl font-bold text-[#0F4C81] group-hover:text-[#58A1D3] transition-colors duration-300">{value}</p>
         </div>
         <div className={`p-4 rounded-2xl ${color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
           <Icon className="text-white" size={28} />
@@ -88,16 +82,14 @@ const StatCard = ({
   </div>
 );
 
-// Modal (unchanged)
+// Modal component
 const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
   if (!isOpen) return null;
 
   const modalContent = (
     <div
       className="modal-backdrop bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn fixed inset-0 z-[99999]"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyan-500/20 border border-white/20 relative">
         <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-8 py-6 rounded-t-3xl z-10">
@@ -165,35 +157,33 @@ const TableRow = ({ data, onView, onEdit, onDelete }) => {
         </div>
         <div className="text-xs text-gray-500">Date</div>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-6 py-4 text-center">
         <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-            data.status
-          )} shadow-sm border`}
+          className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold ${getStatusColor(data.status)} shadow-sm border min-w-[100px] justify-center`}
         >
-          <div className="w-2 h-2 rounded-full bg-current mr-2 opacity-70"></div>
+          <div className="w-2.5 h-2.5 rounded-full bg-current mr-2 opacity-80"></div>
           {formatStatus(data.status)}
         </span>
       </td>
-      <td className="px-6 py-4">
-        <div className="flex space-x-1">
+      <td className="px-6 py-4 text-center">
+        <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => onView(data)}
-            className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 group/btn transform hover:scale-105"
+            className="p-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 group/btn transform hover:scale-105"
             title="View Details"
           >
             <Eye size={18} className="group-hover/btn:scale-110 transition-transform duration-300" />
           </button>
           <button
             onClick={() => onEdit(data)}
-            className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-300 group/btn transform hover:scale-105"
+            className="p-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-300 group/btn transform hover:scale-105"
             title="Edit Blotter"
           >
             <Edit size={18} className="group-hover/btn:scale-110 transition-transform duration-300" />
           </button>
           <button
             onClick={() => onDelete(data.blotter_id)}
-            className="p-3 rounded-2xl bg-gradient-to-r from-red-500 to-pink-500 text-white hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300 group/btn transform hover:scale-105"
+            className="p-2.5 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300 group/btn transform hover:scale-105"
             title="Delete Blotter"
           >
             <Trash2 size={18} className="group-hover/btn:scale-110 transition-transform duration-300" />
@@ -505,7 +495,7 @@ const Blotter = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] relative overflow-hidden">
-      {/* Floating dots background */}
+      {/* Floating background elements */}
       <div className="fixed inset-0 pointer-events-none">
         {[...Array(15)].map((_, i) => (
           <div
@@ -523,7 +513,7 @@ const Blotter = () => {
 
       <div className="relative z-10 px-6 sm:px-8 lg:px-12 py-8">
         <div className="max-w-7xl mx-auto">
-          {/* Hero / Header section - unchanged */}
+          {/* Hero Section */}
           <section className="relative mb-12">
             <div className="bg-gradient-to-br from-[#0F4C81] via-[#58A1D3] to-[#B3DEF8] rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden shadow-2xl">
               <div className="absolute inset-0 opacity-20">
@@ -562,7 +552,7 @@ const Blotter = () => {
             </div>
           </section>
 
-          {/* Overview title */}
+          {/* Section Header */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="w-2 h-2 bg-[#0F4C81] rounded-full animate-pulse"></div>
@@ -572,7 +562,7 @@ const Blotter = () => {
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">Monitor and manage all blotter records with real-time statistics</p>
           </div>
 
-          {/* Stats cards */}
+          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             <StatCard title="Total Blotters" value={stats.total} icon={FileText} color="bg-gradient-to-br from-blue-500 to-cyan-500" hovered={hoveredCard === "total"} onMouseEnter={() => setHoveredCard("total")} onMouseLeave={() => setHoveredCard(null)} />
             <StatCard title="Active Cases" value={stats.active} icon={AlertTriangle} color="bg-gradient-to-br from-red-500 to-pink-500" hovered={hoveredCard === "active"} onMouseEnter={() => setHoveredCard("active")} onMouseLeave={() => setHoveredCard(null)} />
@@ -580,7 +570,7 @@ const Blotter = () => {
             <StatCard title="Closed Cases" value={stats.closed} icon={Clock} color="bg-gradient-to-br from-gray-500 to-slate-500" hovered={hoveredCard === "closed"} onMouseEnter={() => setHoveredCard("closed")} onMouseLeave={() => setHoveredCard(null)} />
           </div>
 
-          {/* Search + Filter + New button */}
+          {/* Search and Filter Bar */}
           <div className="group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-6 mb-8 border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative z-10">
@@ -634,22 +624,20 @@ const Blotter = () => {
             </div>
           </div>
 
-          {/* ────────────────────────────────────────────────
-              DESKTOP TABLE (fixed alignment)
-          ──────────────────────────────────────────────── */}
+          {/* DESKTOP TABLE - improved alignment */}
           <div className="hidden lg:block">
             <div className="group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
               <div className="overflow-x-auto custom-scroll">
-                <table className="w-full min-w-[1000px] table-fixed">
+                <table className="w-full min-w-[1100px] table-fixed border-collapse">
                   <thead className="bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] sticky top-0 z-20">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-[14%]">Blotter ID</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-[22%]">Reported By</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-[16%]">Reporter Type</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-[18%]">Incident Type</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-[14%]">Date</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-[10%]">Status</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-[6%] min-w-[120px]">Actions</th>
+                      <th className="px-6 py-5 text-left text-xs font-bold text-white uppercase tracking-wider w-[12%]">Blotter ID</th>
+                      <th className="px-6 py-5 text-left text-xs font-bold text-white uppercase tracking-wider w-[22%]">Reported By</th>
+                      <th className="px-6 py-5 text-left text-xs font-bold text-white uppercase tracking-wider w-[14%]">Reporter Type</th>
+                      <th className="px-6 py-5 text-left text-xs font-bold text-white uppercase tracking-wider w-[18%]">Incident Type</th>
+                      <th className="px-6 py-5 text-left text-xs font-bold text-white uppercase tracking-wider w-[12%]">Date</th>
+                      <th className="px-6 py-5 text-center text-xs font-bold text-white uppercase tracking-wider w-[12%]">Status</th>
+                      <th className="px-6 py-5 text-center text-xs font-bold text-white uppercase tracking-wider w-[12%] min-w-[140px]">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 bg-white/70">
@@ -694,9 +682,7 @@ const Blotter = () => {
             </div>
           </div>
 
-          {/* ────────────────────────────────────────────────
-              MOBILE CARD VIEW
-          ──────────────────────────────────────────────── */}
+          {/* Mobile Card Layout */}
           <div className="lg:hidden space-y-6 px-2">
             {loading ? (
               <div className="p-12 text-center">
@@ -744,7 +730,6 @@ const Blotter = () => {
                       </span>
                     </div>
                   </div>
-
                   <div className="p-6 space-y-5 bg-white">
                     <div className="grid grid-cols-2 gap-6 text-sm">
                       <div>
@@ -768,7 +753,6 @@ const Blotter = () => {
                         <p className="font-bold text-gray-900 mt-1">{formatDate(b.incident_date)}</p>
                       </div>
                     </div>
-
                     <div className="flex gap-3 pt-4 border-t border-gray-200">
                       <button
                         onClick={() => handleView(b)}
@@ -795,7 +779,7 @@ const Blotter = () => {
             )}
           </div>
 
-          {/* Modal Form */}
+          {/* Modal */}
           <Modal isOpen={modalType !== null} onClose={handleClose} title={modalTitle} subtitle={modalSubtitle}>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
@@ -804,7 +788,6 @@ const Blotter = () => {
                 </div>
               )}
 
-              {/* Reporter Type */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">Reporter Type *</label>
                 <div className="flex gap-4">
@@ -821,7 +804,6 @@ const Blotter = () => {
                 </div>
               </div>
 
-              {/* Reported By */}
               {form.reporter_type === "resident" ? (
                 <div ref={dropdownRef} className="relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Search Resident *</label>
@@ -870,108 +852,42 @@ const Blotter = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Non-Resident Name *</label>
-                    <input
-                      type="text"
-                      name="reported_by"
-                      placeholder="Enter full name"
-                      value={form.reported_by}
-                      onChange={handleChange}
-                      disabled={isReadOnly}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
-                      required={!isReadOnly}
-                    />
+                    <input type="text" name="reported_by" placeholder="Enter full name" value={form.reported_by} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" required={!isReadOnly} />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
-                    <input
-                      type="text"
-                      name="non_resident_contact"
-                      placeholder="Enter contact"
-                      value={form.non_resident_contact || ""}
-                      onChange={handleChange}
-                      disabled={isReadOnly}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
-                    />
+                    <input type="text" name="non_resident_contact" placeholder="Enter contact" value={form.non_resident_contact || ""} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
-                    <input
-                      type="text"
-                      name="non_resident_address"
-                      placeholder="Enter address"
-                      value={form.non_resident_address || ""}
-                      onChange={handleChange}
-                      disabled={isReadOnly}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
-                    />
+                    <input type="text" name="non_resident_address" placeholder="Enter address" value={form.non_resident_address || ""} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" />
                   </div>
                 </div>
               )}
 
-              {/* Incident details */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Incident Type *</label>
-                  <input
-                    type="text"
-                    name="incident_type"
-                    placeholder="e.g., Theft, Dispute"
-                    value={form.incident_type}
-                    onChange={handleChange}
-                    disabled={isReadOnly}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
-                    required={!isReadOnly}
-                  />
+                  <input type="text" name="incident_type" placeholder="e.g., Theft, Dispute" value={form.incident_type} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" required={!isReadOnly} />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Incident Date *</label>
-                  <input
-                    type="date"
-                    name="incident_date"
-                    value={form.incident_date}
-                    onChange={handleChange}
-                    disabled={isReadOnly}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
-                    required={!isReadOnly}
-                  />
+                  <input type="date" name="incident_date" value={form.incident_date} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" required={!isReadOnly} />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Incident Time</label>
-                  <input
-                    type="time"
-                    name="incident_time"
-                    value={form.incident_time}
-                    onChange={handleChange}
-                    disabled={isReadOnly}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
-                  />
+                  <input type="time" name="incident_time" value={form.incident_time} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Location *</label>
-                  <input
-                    type="text"
-                    name="location"
-                    placeholder="e.g., Main Street"
-                    value={form.location}
-                    onChange={handleChange}
-                    disabled={isReadOnly}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
-                    required={!isReadOnly}
-                  />
+                  <input type="text" name="location" placeholder="e.g., Main Street" value={form.location} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" required={!isReadOnly} />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Status *</label>
-                  <select
-                    name="status"
-                    value={form.status}
-                    onChange={handleChange}
-                    disabled={isReadOnly || modalType === "add"}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
-                    required={!isReadOnly}
-                  >
+                  <select name="status" value={form.status} onChange={handleChange} disabled={isReadOnly || modalType === "add"} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" required={!isReadOnly}>
                     <option value="active">Active</option>
                     <option value="resolved">Resolved</option>
                     <option value="closed">Closed</option>
@@ -981,57 +897,25 @@ const Blotter = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Persons Involved</label>
-                <textarea
-                  name="persons_involved"
-                  placeholder="Describe individuals involved"
-                  value={form.persons_involved}
-                  onChange={handleChange}
-                  disabled={isReadOnly}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100"
-                  rows="2"
-                />
+                <textarea name="persons_involved" placeholder="Describe individuals involved" value={form.persons_involved} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100" rows="2" />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Incident Details *</label>
-                <textarea
-                  name="incident_details"
-                  placeholder="Provide detailed description of the incident..."
-                  value={form.incident_details}
-                  onChange={handleChange}
-                  disabled={isReadOnly}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100"
-                  rows="3"
-                  required={!isReadOnly}
-                />
+                <textarea name="incident_details" placeholder="Provide detailed description of the incident..." value={form.incident_details} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100" rows="3" required={!isReadOnly} />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Action Taken</label>
-                <textarea
-                  name="action_taken"
-                  placeholder="Actions already taken or planned"
-                  value={form.action_taken}
-                  onChange={handleChange}
-                  disabled={isReadOnly}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100"
-                  rows="2"
-                />
+                <textarea name="action_taken" placeholder="Actions already taken or planned" value={form.action_taken} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100" rows="2" />
               </div>
 
               <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="px-6 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-300 font-semibold text-gray-700 hover:border-gray-400"
-                >
+                <button type="button" onClick={handleClose} className="px-6 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-300 font-semibold text-gray-700 hover:border-gray-400">
                   {isReadOnly ? "Close" : "Cancel"}
                 </button>
                 {!isReadOnly && (
-                  <button
-                    type="submit"
-                    className="px-6 py-3 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 font-semibold transform hover:scale-105"
-                  >
+                  <button type="submit" className="px-6 py-3 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 font-semibold transform hover:scale-105">
                     {modalType === "edit" ? "Update Blotter" : "Save Blotter"}
                   </button>
                 )}
