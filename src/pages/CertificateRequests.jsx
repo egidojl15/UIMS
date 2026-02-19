@@ -183,7 +183,7 @@ const CertificateRequests = () => {
       return;
     }
 
-    // Auto date with bold parts
+    // Auto date with ordinal
     const today = new Date();
     const day = today.getDate();
     const month = today.toLocaleString("default", { month: "long" });
@@ -207,40 +207,38 @@ const CertificateRequests = () => {
     let mainBody = "";
 
     if (typeLower.includes("indigen") || typeLower.includes("indigent")) {
-      title = "CERTIFICATE of INDIGENCY";
+      title = "CERTIFICATE OF INDIGENCY";
       mainBody = `
-        <p style="margin: 0.6em 0; text-indent: 2em;">
-          <strong>THIS IS TO CERTIFY</strong> that per record kept in the Barangay,
+        <p style="margin: 0.5em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS IS TO CERTIFY</strong> that per record kept in the Barangay, 
           <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,
           of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
         </p>
 
-        <p style="margin: 0.6em 0; text-indent: 2em;">
-          <strong>THIS TO CERTIFY FURTHER</strong> that the family of the name mentioned above is living below the poverty threshold level
-          and is identified as indigent in our barangay.
+        <p style="margin: 0.5em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS TO CERTIFY FURTHER</strong> that the family of the name mentioned above is living below the poverty threshold level and is identified as indigent in our barangay.
         </p>
 
-        <p style="margin: 1em 0; text-indent: 2em;">
-          <strong>THIS CERTIFICATION</strong> is issued upon the request of the name mentioned above for
+        <p style="margin: 0.8em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS CERTIFICATION</strong> is issued upon the request of the name mentioned above for 
           <span contenteditable="true">${request.purpose || "financial assistance purposes"}</span>.
         </p>
       `;
     } else {
       title = "CERTIFICATION";
       mainBody = `
-        <p style="margin: 0.6em 0; text-indent: 2em;">
-          <strong>THIS IS TO CERTIFY</strong> that
+        <p style="margin: 0.5em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS IS TO CERTIFY</strong> that 
           <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,
           of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
         </p>
 
-        <p style="margin: 0.6em 0; text-indent: 2em;">
-          <strong>THIS TO CERTIFY FURTHER</strong> that as of this date no criminal and/or civil charges has been filed
-          against him/her in this office.
+        <p style="margin: 0.5em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS TO CERTIFY FURTHER</strong> that as of this date no criminal and/or civil charges has been filed against him/her in this office.
         </p>
 
-        <p style="margin: 1em 0; text-indent: 2em;">
-          <strong>THIS CERTIFICATION</strong> is issued upon the request of the name mentioned above for
+        <p style="margin: 0.8em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS CERTIFICATION</strong> is issued upon the request of the name mentioned above for 
           <span contenteditable="true">${request.purpose || "job applications"}</span>.
         </p>
       `;
@@ -253,12 +251,12 @@ const CertificateRequests = () => {
           <style>
             @page {
               size: A4 portrait;
-              margin: 1.4cm 2.0cm 1.6cm 2.0cm;
+              margin: 1.2cm 1.8cm 1.4cm 1.8cm;
             }
             body {
               font-family: 'Times New Roman', Times, serif;
-              font-size: 13pt;
-              line-height: 1.5;
+              font-size: 13.2pt;
+              line-height: 1.42;
               color: #000;
               margin: 0;
               padding: 0;
@@ -271,89 +269,91 @@ const CertificateRequests = () => {
               display: flex;
               justify-content: space-between;
               align-items: center;
-              margin-bottom: 0.8cm;
+              margin-bottom: 0.6cm;
             }
             .logo {
-              height: 95px;
+              height: 85px;
               width: auto;
             }
             .header {
               text-align: center;
               font-size: 11pt;
-              line-height: 1.35;
-              margin-bottom: 0.3cm;
+              line-height: 1.3;
+              margin-bottom: 0.2cm;
             }
             .barangay {
               text-align: center;
-              font-size: 16pt;
+              font-size: 15.5pt;
               font-weight: bold;
               text-transform: uppercase;
-              margin: 0.9cm 0 0.4cm;
-              letter-spacing: 1px;
+              margin: 0.7cm 0 0.3cm;
+              letter-spacing: 0.8px;
             }
             .office {
               text-align: center;
               font-weight: bold;
               text-transform: uppercase;
-              margin: 1.1cm 0 0.7cm;
-              font-size: 12.5pt;
+              margin: 0.8cm 0 0.6cm;
+              font-size: 12pt;
             }
             .title {
               text-align: center;
-              font-size: 18pt;
+              font-size: 17.5pt;
               font-weight: bold;
               text-transform: uppercase;
-              margin: 1.3cm 0 1.5cm;
-              letter-spacing: 0.6px;
+              margin: 1.1cm 0 1.3cm;
+              letter-spacing: 0.5px;
             }
             .to-whom {
               font-weight: bold;
               text-align: left;
-              margin: 1cm 0 0.6cm;
-            }
-            .body-text {
-              text-align: justify;
+              margin: 0.9cm 0 0.5cm;
+              font-size: 13.5pt;
             }
             .body-text p {
-              margin: 0.7em 0;
+              margin: 0.55em 0;
               text-indent: 2em;
             }
             .issued {
-              margin-top: 1.8cm;
+              margin-top: 1.4cm;
               text-align: left;
+              line-height: 1.4;
+            }
+            .signature-area {
+              margin-top: 2.8cm;
+              width: 100%;
+              text-align: right;
             }
             .signature {
-              margin-top: 3.8cm;
+              display: inline-block;
               text-align: center;
-              margin-left: auto;
-              margin-right: auto;
-              width: 300px;
+              min-width: 260px;
             }
             .signature-line {
               border-top: 1px solid #000;
               width: 100%;
-              margin: 0.4cm 0;
+              margin: 0.3cm 0 0.15cm;
             }
             .signature-name {
               font-weight: bold;
               text-transform: uppercase;
-              font-size: 14pt;
-              margin-bottom: 0.2cm;
+              font-size: 13.5pt;
+              margin-bottom: 0.1cm;
             }
             .signature-title {
-              font-size: 12.5pt;
+              font-size: 12pt;
               text-transform: uppercase;
             }
             .no-print {
-              margin-top: 3cm;
+              margin-top: 2.5cm;
               text-align: center;
               color: #555;
-              font-size: 14px;
+              font-size: 13px;
             }
             [contenteditable="true"] {
               background: #fffef0;
               outline: 1px dashed #aaa;
-              padding: 2px 4px;
+              padding: 1px 3px;
               min-width: 60px;
               display: inline-block;
             }
@@ -385,7 +385,7 @@ const CertificateRequests = () => {
 
             <div class="office">OFFICE OF THE PUNONG BARANGAY</div>
 
-            <div class="title" contenteditable="true">${title}</div>
+            <div class="title">${title}</div>
 
             <div class="to-whom">TO WHOM IT MAY CONCERN:</div>
 
@@ -397,19 +397,21 @@ const CertificateRequests = () => {
               <strong>ISSUED</strong> <strong>this ${dayWithOrdinal}</strong> day of <strong>${month}</strong>, <strong>${year}</strong> at Barangay Upper Ichon, Macrohon, Southern Leyte, Philippines.
             </div>
 
-            <div class="signature">
-              <div class="signature-name" contenteditable="true">JUNNARD O. NAPALAN</div>
-              <div class="signature-line"></div>
-              <div class="signature-title" contenteditable="true">Punong Barangay</div>
+            <div class="signature-area">
+              <div class="signature">
+                <div class="signature-name" contenteditable="true">JUNNARD O. NAPALAN</div>
+                <div class="signature-line"></div>
+                <div class="signature-title" contenteditable="true">Punong Barangay</div>
+              </div>
             </div>
           </div>
 
           <div class="no-print">
-            <p><strong>Edit any underlined/editable part</strong> (name, purpose, date, title, signature) before printing.</p>
-            <button onclick="window.print()" style="padding:12px 32px; font-size:17px; margin-right:24px; background:#1e40af; color:white; border:none; border-radius:6px; cursor:pointer;">
+            <p><strong>Edit underlined/editable parts</strong> before printing (name, purpose, etc.)</p>
+            <button onclick="window.print()" style="padding:10px 28px; font-size:16px; margin-right:20px; background:#1e40af; color:white; border:none; border-radius:6px; cursor:pointer;">
               Print Certificate
             </button>
-            <button onclick="window.close()" style="padding:12px 32px; font-size:17px; cursor:pointer;">
+            <button onclick="window.close()" style="padding:10px 28px; font-size:16px; cursor:pointer;">
               Close
             </button>
           </div>
