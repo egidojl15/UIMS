@@ -72,7 +72,7 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
 
   const modalContent = (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-fadeIn"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyan-500/20 border border-white/20 relative">
@@ -155,7 +155,7 @@ const TableRow = ({ data, onView, onEdit, onDelete }) => {
       <td className="px-6 py-4">
         <span
           className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-            data.is_active
+            data.is_active,
           )} shadow-sm`}
         >
           {getStatusIcon(data.is_active)}
@@ -317,7 +317,7 @@ const UserManagement = () => {
   const handleSave = async () => {
     // Email uniqueness
     const emailTaken = users.some(
-      (u) => u.email === formData.email && u.user_id !== editingUser?.user_id
+      (u) => u.email === formData.email && u.user_id !== editingUser?.user_id,
     );
     if (emailTaken) {
       alert("Email already in use.");
@@ -338,7 +338,7 @@ const UserManagement = () => {
       } else {
         // Get the dashboard_url from the selected role
         const selectedRole = roles.find(
-          (r) => r.role_id === Number(formData.role_id)
+          (r) => r.role_id === Number(formData.role_id),
         );
         const dashboard_url = selectedRole?.dashboard_url || "/dashboard";
 
@@ -429,13 +429,13 @@ const UserManagement = () => {
       i.full_name?.toLowerCase().includes(search.toLowerCase()) ||
       i.email?.toLowerCase().includes(search.toLowerCase()) ||
       i.position?.toLowerCase().includes(search.toLowerCase()) ||
-      i.username?.toLowerCase().includes(search.toLowerCase())
+      i.username?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const totalPages = Math.ceil(filtered.length / perPage);
   const paginated = filtered.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
 
   // Stats
@@ -612,10 +612,10 @@ const UserManagement = () => {
             </div>
 
             {/* ──────── Table / Cards ──────── */}
-            <div className="group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
+            <div className="group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
               <div className="relative z-10 flex flex-col h-full">
                 {/* Desktop Table */}
-                <div className="hidden lg:block bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden border border-white/20">
+                <div className="hidden lg:block bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20">
                   <div className="bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] sticky top-0 z-20">
                     <table className="w-full">
                       <thead>
@@ -831,15 +831,15 @@ const UserManagement = () => {
                 viewMode
                   ? "View User Details"
                   : editingUser
-                  ? "Edit User"
-                  : "Add New User"
+                    ? "Edit User"
+                    : "Add New User"
               }
               subtitle={
                 viewMode
                   ? "Review user information and permissions"
                   : editingUser
-                  ? "Update user information and role"
-                  : "Create a new user account with role assignment"
+                    ? "Update user information and role"
+                    : "Create a new user account with role assignment"
               }
             >
               <div className="space-y-6">
