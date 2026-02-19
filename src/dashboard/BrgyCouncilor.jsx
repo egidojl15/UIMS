@@ -61,18 +61,18 @@ const NotificationBadge = ({ count }) => {
 const navItems = [
   { name: "Dashboard", path: "/dashboard/councilor", icon: HomeIcon },
   {
-    name: "Complaint Records",
+    name: "Complaints",
     path: "/dashboard/councilor/complaints",
     icon: FileText,
   },
-  { name: "Blotter Records", path: "/dashboard/councilor/blotter", icon: ShieldAlert },
+  { name: "Blotter", path: "/dashboard/councilor/blotter", icon: ShieldAlert },
   {
     name: "Log Book",
     path: "/dashboard/councilor/logbook",
     icon: BookCopyIcon,
   },
   {
-    name: "Activity Logs",
+    name: "Activity Log",
     path: "/dashboard/councilor/activitylog",
     icon: ClockIcon,
   },
