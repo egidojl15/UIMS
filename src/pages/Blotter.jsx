@@ -15,11 +15,44 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { blottersAPI, residentsAPI } from "../services/api";
 import NotificationSystem from "../components/NotificationSystem";
 
-// Reusable StatCard component (unchanged)
+// ────────────────────────────────────────────────
+//   SHARED FORMAT HELPERS
+// ────────────────────────────────────────────────
+const formatReporterType = (type) => {
+  if (!type) return "N/A";
+  return type
+    .replace("_", " ")
+    .replace(/\b\w/g, (l) => l.toUpperCase());
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const getStatusColor = (status) => {
+  const s = (status || "").toLowerCase();
+  if (s === "active") return "bg-red-100 text-red-800 border-red-200";
+  if (s === "resolved") return "bg-green-100 text-green-800 border-green-200";
+  if (s === "closed") return "bg-gray-100 text-gray-800 border-gray-200";
+  return "bg-gray-100 text-gray-800 border-gray-200";
+};
+
+const formatStatus = (status) => {
+  if (!status) return "Unknown";
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+};
+
+// Reusable StatCard (unchanged)
 const StatCard = ({
   title,
   value,
@@ -39,7 +72,6 @@ const StatCard = ({
     onMouseLeave={onMouseLeave}
   >
     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
     <div className="relative z-10">
       <div className="flex items-center justify-between">
         <div>
@@ -48,9 +80,7 @@ const StatCard = ({
             {value}
           </p>
         </div>
-        <div
-          className={`p-4 rounded-2xl ${color} shadow-lg group-hover:scale-110 transition-transform duration-300`}
-        >
+        <div className={`p-4 rounded-2xl ${color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
           <Icon className="text-white" size={28} />
         </div>
       </div>
@@ -58,7 +88,7 @@ const StatCard = ({
   </div>
 );
 
-// Modal component (unchanged)
+// Modal (unchanged)
 const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
   if (!isOpen) return null;
 
@@ -66,9 +96,7 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
     <div
       className="modal-backdrop bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn fixed inset-0 z-[99999]"
       onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
+        if (e.target === e.currentTarget) onClose();
       }}
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyan-500/20 border border-white/20 relative">
@@ -79,18 +107,13 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
                 <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
                 {title}
               </h3>
-              {subtitle && (
-                <p className="text-cyan-100 mt-1 text-sm">{subtitle}</p>
-              )}
+              {subtitle && <p className="text-cyan-100 mt-1 text-sm">{subtitle}</p>}
             </div>
             <button
               onClick={onClose}
               className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
             >
-              <X
-                size={24}
-                className="group-hover:rotate-90 transition-transform duration-300"
-              />
+              <X size={24} className="group-hover:rotate-90 transition-transform duration-300" />
             </button>
           </div>
         </div>
@@ -104,40 +127,6 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
 };
 
 const TableRow = ({ data, onView, onEdit, onDelete }) => {
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "resolved":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "closed":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const formatStatus = (status) => {
-    return status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "Unknown";
-  };
-
-  const formatDate = (dateString) => {
-    return dateString
-      ? new Date(dateString).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "N/A";
-  };
-
-  const formatReporterType = (type) => {
-    if (!type) return "N/A";
-    return type
-      .replace("_", " ")
-      .replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
   return (
     <tr className="hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-cyan-50/50 transition-all duration-300 border-b border-gray-100 group">
       <td className="px-6 py-4">
@@ -516,7 +505,7 @@ const Blotter = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] relative overflow-hidden">
-      {/* Floating background elements */}
+      {/* Floating dots background */}
       <div className="fixed inset-0 pointer-events-none">
         {[...Array(15)].map((_, i) => (
           <div
@@ -534,7 +523,7 @@ const Blotter = () => {
 
       <div className="relative z-10 px-6 sm:px-8 lg:px-12 py-8">
         <div className="max-w-7xl mx-auto">
-          {/* Hero Section - unchanged */}
+          {/* Hero / Header section - unchanged */}
           <section className="relative mb-12">
             <div className="bg-gradient-to-br from-[#0F4C81] via-[#58A1D3] to-[#B3DEF8] rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden shadow-2xl">
               <div className="absolute inset-0 opacity-20">
@@ -573,7 +562,7 @@ const Blotter = () => {
             </div>
           </section>
 
-          {/* Section Header - unchanged */}
+          {/* Overview title */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="w-2 h-2 bg-[#0F4C81] rounded-full animate-pulse"></div>
@@ -583,7 +572,7 @@ const Blotter = () => {
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">Monitor and manage all blotter records with real-time statistics</p>
           </div>
 
-          {/* Stats Cards - unchanged */}
+          {/* Stats cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             <StatCard title="Total Blotters" value={stats.total} icon={FileText} color="bg-gradient-to-br from-blue-500 to-cyan-500" hovered={hoveredCard === "total"} onMouseEnter={() => setHoveredCard("total")} onMouseLeave={() => setHoveredCard(null)} />
             <StatCard title="Active Cases" value={stats.active} icon={AlertTriangle} color="bg-gradient-to-br from-red-500 to-pink-500" hovered={hoveredCard === "active"} onMouseEnter={() => setHoveredCard("active")} onMouseLeave={() => setHoveredCard(null)} />
@@ -591,7 +580,7 @@ const Blotter = () => {
             <StatCard title="Closed Cases" value={stats.closed} icon={Clock} color="bg-gradient-to-br from-gray-500 to-slate-500" hovered={hoveredCard === "closed"} onMouseEnter={() => setHoveredCard("closed")} onMouseLeave={() => setHoveredCard(null)} />
           </div>
 
-          {/* Search and Filter Bar - unchanged */}
+          {/* Search + Filter + New button */}
           <div className="group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-6 mb-8 border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative z-10">
@@ -645,7 +634,9 @@ const Blotter = () => {
             </div>
           </div>
 
-          {/* FIXED DESKTOP TABLE */}
+          {/* ────────────────────────────────────────────────
+              DESKTOP TABLE (fixed alignment)
+          ──────────────────────────────────────────────── */}
           <div className="hidden lg:block">
             <div className="group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
               <div className="overflow-x-auto custom-scroll">
@@ -703,7 +694,9 @@ const Blotter = () => {
             </div>
           </div>
 
-          {/* Mobile Card Layout - unchanged */}
+          {/* ────────────────────────────────────────────────
+              MOBILE CARD VIEW
+          ──────────────────────────────────────────────── */}
           <div className="lg:hidden space-y-6 px-2">
             {loading ? (
               <div className="p-12 text-center">
@@ -747,10 +740,11 @@ const Blotter = () => {
                         }`}
                       >
                         <div className="w-2.5 h-2.5 rounded-full bg-current opacity-80"></div>
-                        {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
+                        {formatStatus(b.status)}
                       </span>
                     </div>
                   </div>
+
                   <div className="p-6 space-y-5 bg-white">
                     <div className="grid grid-cols-2 gap-6 text-sm">
                       <div>
@@ -771,13 +765,10 @@ const Blotter = () => {
                       </div>
                       <div>
                         <span className="text-gray-600 font-medium">Date:</span>
-                        <p className="font-bold text-gray-900 mt-1">
-                          {b.incident_date
-                            ? new Date(b.incident_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                            : "N/A"}
-                        </p>
+                        <p className="font-bold text-gray-900 mt-1">{formatDate(b.incident_date)}</p>
                       </div>
                     </div>
+
                     <div className="flex gap-3 pt-4 border-t border-gray-200">
                       <button
                         onClick={() => handleView(b)}
@@ -804,7 +795,7 @@ const Blotter = () => {
             )}
           </div>
 
-          {/* Modal - unchanged */}
+          {/* Modal Form */}
           <Modal isOpen={modalType !== null} onClose={handleClose} title={modalTitle} subtitle={modalSubtitle}>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
@@ -813,6 +804,7 @@ const Blotter = () => {
                 </div>
               )}
 
+              {/* Reporter Type */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">Reporter Type *</label>
                 <div className="flex gap-4">
@@ -829,6 +821,7 @@ const Blotter = () => {
                 </div>
               </div>
 
+              {/* Reported By */}
               {form.reporter_type === "resident" ? (
                 <div ref={dropdownRef} className="relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Search Resident *</label>
@@ -859,7 +852,7 @@ const Blotter = () => {
                             <div className="font-semibold text-gray-900">
                               {resident.first_name} {resident.middle_name || ""} {resident.last_name}
                             </div>
-                            <div className="text-sm text-gray-500">{resident.purok} • {resident.contact_number}</div>
+                            <div className="text-sm text-gray-500">{resident.purok || "—"} • {resident.contact_number || "—"}</div>
                           </div>
                         ))}
                       </div>
@@ -868,7 +861,7 @@ const Blotter = () => {
                   {form.reported_by && (
                     <div className="mt-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
                       <div className="text-sm text-green-800 flex items-center gap-2">
-                        <CheckCircle size={16} /> Selected: {residentSearch}
+                        <CheckCircle2 size={16} /> Selected: {residentSearch}
                       </div>
                     </div>
                   )}
@@ -877,42 +870,108 @@ const Blotter = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Non-Resident Name *</label>
-                    <input type="text" name="reported_by" placeholder="Enter full name" value={form.reported_by} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" required={!isReadOnly} />
+                    <input
+                      type="text"
+                      name="reported_by"
+                      placeholder="Enter full name"
+                      value={form.reported_by}
+                      onChange={handleChange}
+                      disabled={isReadOnly}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
+                      required={!isReadOnly}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
-                    <input type="text" name="non_resident_contact" placeholder="Enter contact" value={form.non_resident_contact || ""} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" />
+                    <input
+                      type="text"
+                      name="non_resident_contact"
+                      placeholder="Enter contact"
+                      value={form.non_resident_contact || ""}
+                      onChange={handleChange}
+                      disabled={isReadOnly}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
-                    <input type="text" name="non_resident_address" placeholder="Enter address" value={form.non_resident_address || ""} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" />
+                    <input
+                      type="text"
+                      name="non_resident_address"
+                      placeholder="Enter address"
+                      value={form.non_resident_address || ""}
+                      onChange={handleChange}
+                      disabled={isReadOnly}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
+                    />
                   </div>
                 </div>
               )}
 
+              {/* Incident details */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Incident Type *</label>
-                  <input type="text" name="incident_type" placeholder="e.g., Theft, Dispute" value={form.incident_type} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" required={!isReadOnly} />
+                  <input
+                    type="text"
+                    name="incident_type"
+                    placeholder="e.g., Theft, Dispute"
+                    value={form.incident_type}
+                    onChange={handleChange}
+                    disabled={isReadOnly}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
+                    required={!isReadOnly}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Incident Date *</label>
-                  <input type="date" name="incident_date" value={form.incident_date} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" required={!isReadOnly} />
+                  <input
+                    type="date"
+                    name="incident_date"
+                    value={form.incident_date}
+                    onChange={handleChange}
+                    disabled={isReadOnly}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
+                    required={!isReadOnly}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Incident Time</label>
-                  <input type="time" name="incident_time" value={form.incident_time} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" />
+                  <input
+                    type="time"
+                    name="incident_time"
+                    value={form.incident_time}
+                    onChange={handleChange}
+                    disabled={isReadOnly}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Location *</label>
-                  <input type="text" name="location" placeholder="e.g., Main Street" value={form.location} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" required={!isReadOnly} />
+                  <input
+                    type="text"
+                    name="location"
+                    placeholder="e.g., Main Street"
+                    value={form.location}
+                    onChange={handleChange}
+                    disabled={isReadOnly}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
+                    required={!isReadOnly}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Status *</label>
-                  <select name="status" value={form.status} onChange={handleChange} disabled={isReadOnly || modalType === "add"} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100" required={!isReadOnly}>
+                  <select
+                    name="status"
+                    value={form.status}
+                    onChange={handleChange}
+                    disabled={isReadOnly || modalType === "add"}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100"
+                    required={!isReadOnly}
+                  >
                     <option value="active">Active</option>
                     <option value="resolved">Resolved</option>
                     <option value="closed">Closed</option>
@@ -922,25 +981,57 @@ const Blotter = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Persons Involved</label>
-                <textarea name="persons_involved" placeholder="Describe individuals involved" value={form.persons_involved} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100" rows="2" />
+                <textarea
+                  name="persons_involved"
+                  placeholder="Describe individuals involved"
+                  value={form.persons_involved}
+                  onChange={handleChange}
+                  disabled={isReadOnly}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100"
+                  rows="2"
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Incident Details *</label>
-                <textarea name="incident_details" placeholder="Provide detailed description of the incident..." value={form.incident_details} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100" rows="3" required={!isReadOnly} />
+                <textarea
+                  name="incident_details"
+                  placeholder="Provide detailed description of the incident..."
+                  value={form.incident_details}
+                  onChange={handleChange}
+                  disabled={isReadOnly}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100"
+                  rows="3"
+                  required={!isReadOnly}
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Action Taken</label>
-                <textarea name="action_taken" placeholder="Actions already taken or planned" value={form.action_taken} onChange={handleChange} disabled={isReadOnly} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100" rows="2" />
+                <textarea
+                  name="action_taken"
+                  placeholder="Actions already taken or planned"
+                  value={form.action_taken}
+                  onChange={handleChange}
+                  disabled={isReadOnly}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical disabled:bg-gray-100"
+                  rows="2"
+                />
               </div>
 
               <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
-                <button type="button" onClick={handleClose} className="px-6 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-300 font-semibold text-gray-700 hover:border-gray-400">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="px-6 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-300 font-semibold text-gray-700 hover:border-gray-400"
+                >
                   {isReadOnly ? "Close" : "Cancel"}
                 </button>
                 {!isReadOnly && (
-                  <button type="submit" className="px-6 py-3 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 font-semibold transform hover:scale-105">
+                  <button
+                    type="submit"
+                    className="px-6 py-3 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 font-semibold transform hover:scale-105"
+                  >
                     {modalType === "edit" ? "Update Blotter" : "Save Blotter"}
                   </button>
                 )}
