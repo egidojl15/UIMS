@@ -1,3 +1,6 @@
+// CertificateRequests.jsx
+// viewing ni sa secretary ug sa barangay captain
+
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Eye,
@@ -5,18 +8,16 @@ import {
   X,
   FileText,
   Search,
-  Filter,
   Clock,
   Plus,
   CheckCircle,
   AlertCircle,
-  Download,
+  Printer,
   RefreshCw,
   Phone,
   Mail,
   Calendar,
   Database,
-  User,
 } from "lucide-react";
 import { requestsAPI } from "../services/api";
 import CertificateRequestFlow from "../components/CertificateRequestFlow";
@@ -29,7 +30,6 @@ const CertificateRequests = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isVisible, setIsVisible] = useState(false);
-  const [hoveredCard, setHoveredCard] = useState(null);
 
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
@@ -40,7 +40,7 @@ const CertificateRequests = () => {
   const [showRequestFlow, setShowRequestFlow] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
-  // Notification management
+  // Notification helpers
   const handleRemoveNotification = (id) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
@@ -49,13 +49,7 @@ const CertificateRequests = () => {
     const notifId = Date.now();
     setNotifications((prev) => [
       ...prev,
-      {
-        id: notifId,
-        type: "success",
-        title,
-        message,
-        autoDismiss: true,
-      },
+      { id: notifId, type: "success", title, message, autoDismiss: true },
     ]);
   };
 
@@ -63,13 +57,7 @@ const CertificateRequests = () => {
     const notifId = Date.now();
     setNotifications((prev) => [
       ...prev,
-      {
-        id: notifId,
-        type: "error",
-        title,
-        message,
-        autoDismiss: false,
-      },
+      { id: notifId, type: "error", title, message, autoDismiss: false },
     ]);
   };
 
@@ -94,10 +82,7 @@ const CertificateRequests = () => {
     } catch (err) {
       console.error("Load error:", err);
       setError("Failed to load requests");
-      addErrorNotification(
-        "Failed to Load",
-        "Could not fetch certificate requests"
-      );
+      addErrorNotification("Failed to Load", "Could not fetch certificate requests");
       setRequests([]);
     } finally {
       setLoading(false);
@@ -131,37 +116,26 @@ const CertificateRequests = () => {
 
       setRequests((prev) =>
         prev.map((r) =>
-          r.id === selectedRequest.id
-            ? { ...r, ...updated, status: "processing" }
-            : r
+          r.id === selectedRequest.id ? { ...r, ...updated, status: "processing" } : r
         )
       );
 
       setShowApproveModal(false);
       setRescheduleDate("");
-
       addSuccessNotification(
         "Request Approved Successfully! ✅",
-        `Certificate request for ${
-          selectedRequest.requester_name
-        } is now in processing${
+        `Certificate request for ${selectedRequest.requester_name} is now in processing${
           rescheduleDate ? `, scheduled for ${rescheduleDate}` : ""
         }`
       );
     } catch (err) {
-      addErrorNotification(
-        "Approval Failed ❌",
-        err.message || "Failed to approve the certificate request"
-      );
+      addErrorNotification("Approval Failed ❌", err.message || "Failed to approve the request");
     }
   };
 
   const confirmReject = async () => {
     if (!selectedRequest || !rejectionReason.trim()) {
-      addErrorNotification(
-        "Validation Error ❌",
-        "Please enter a rejection reason"
-      );
+      addErrorNotification("Validation Error ❌", "Please enter a rejection reason");
       return;
     }
     try {
@@ -172,24 +146,18 @@ const CertificateRequests = () => {
 
       setRequests((prev) =>
         prev.map((r) =>
-          r.id === selectedRequest.id
-            ? { ...r, ...updated, status: "rejected" }
-            : r
+          r.id === selectedRequest.id ? { ...r, ...updated, status: "rejected" } : r
         )
       );
 
       setShowRejectModal(false);
       setRejectionReason("");
-
       addSuccessNotification(
         "Request Rejected Successfully! ❌",
         `Certificate request for ${selectedRequest.requester_name} has been rejected`
       );
     } catch (err) {
-      addErrorNotification(
-        "Rejection Failed ❌",
-        err.message || "Failed to reject the certificate request"
-      );
+      addErrorNotification("Rejection Failed ❌", err.message || "Failed to reject the request");
     }
   };
 
@@ -200,28 +168,267 @@ const CertificateRequests = () => {
 
   const handleRefresh = () => {
     loadRequests();
-    addSuccessNotification(
-      "Refreshed Successfully! 🔄",
-      "Certificate requests list updated"
-    );
+    addSuccessNotification("Refreshed Successfully! 🔄", "Certificate requests list updated");
   };
 
   const handleNewRequest = () => {
     setShowRequestFlow(true);
-    addSuccessNotification(
-      "New Request Started! ➕",
-      "Complete the form to submit a new certificate request"
-    );
+    addSuccessNotification("New Request Started! ➕", "Complete the form to submit a new request");
   };
+
+  const handlePrint = useCallback((request) => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Popup blocked. Please allow popups for this site.");
+      return;
+    }
+
+    // Auto date with ordinal
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.toLocaleString("default", { month: "long" });
+    const year = today.getFullYear();
+
+    const ordinalSuffix = (n) => {
+      if (n > 3 && n < 21) return "th";
+      switch (n % 10) {
+        case 1: return "st";
+        case 2: return "nd";
+        case 3: return "rd";
+        default: return "th";
+      }
+    };
+
+    const dayWithOrdinal = `${day}${ordinalSuffix(day)}`;
+
+    // Determine title & content
+    const typeLower = (request.certificate_type || "").toLowerCase().trim();
+    let title = "CERTIFICATION";
+    let mainBody = "";
+
+    if (typeLower.includes("indigen") || typeLower.includes("indigent")) {
+      title = "CERTIFICATE OF INDIGENCY";
+      mainBody = `
+        <p style="margin: 0.5em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS IS TO CERTIFY</strong> that per record kept in the Barangay, 
+          <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,
+          of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
+        </p>
+
+        <p style="margin: 0.5em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS TO CERTIFY FURTHER</strong> that the family of the name mentioned above is living below the poverty threshold level and is identified as indigent in our barangay.
+        </p>
+
+        <p style="margin: 0.8em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS CERTIFICATION</strong> is issued upon the request of the name mentioned above for 
+          <span contenteditable="true">${request.purpose || "financial assistance purposes"}</span>.
+        </p>
+      `;
+    } else {
+      title = "CERTIFICATION";
+      mainBody = `
+        <p style="margin: 0.5em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS IS TO CERTIFY</strong> that 
+          <span contenteditable="true" style="border-bottom:1px dashed #000; min-width:220px; display:inline-block;">${request.requester_name || "_______________________"}</span>,
+          of legal age, single and a bona fide resident of Barangay Upper Ichon, Macrohon, Southern Leyte.
+        </p>
+
+        <p style="margin: 0.5em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS TO CERTIFY FURTHER</strong> that as of this date no criminal and/or civil charges has been filed against him/her in this office.
+        </p>
+
+        <p style="margin: 0.8em 0; text-indent: 2em; line-height: 1.45;">
+          <strong>THIS CERTIFICATION</strong> is issued upon the request of the name mentioned above for 
+          <span contenteditable="true">${request.purpose || "job applications"}</span>.
+        </p>
+      `;
+    }
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${title}</title>
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 1.2cm 1.8cm 1.4cm 1.8cm;
+            }
+            body {
+              font-family: 'Times New Roman', Times, serif;
+              font-size: 13.2pt;
+              line-height: 1.42;
+              color: #000;
+              margin: 0;
+              padding: 0;
+            }
+            .container {
+              max-width: 21cm;
+              margin: 0 auto;
+            }
+            .logos {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 0.6cm;
+            }
+            .logo {
+              height: 85px;
+              width: auto;
+            }
+            .header {
+              text-align: center;
+              font-size: 11pt;
+              line-height: 1.3;
+              margin-bottom: 0.2cm;
+            }
+            .barangay {
+              text-align: center;
+              font-size: 15.5pt;
+              font-weight: bold;
+              text-transform: uppercase;
+              margin: 0.7cm 0 0.3cm;
+              letter-spacing: 0.8px;
+            }
+            .office {
+              text-align: center;
+              font-weight: bold;
+              text-transform: uppercase;
+              margin: 0.8cm 0 0.6cm;
+              font-size: 12pt;
+            }
+            .title {
+              text-align: center;
+              font-size: 17.5pt;
+              font-weight: bold;
+              text-transform: uppercase;
+              margin: 1.1cm 0 1.3cm;
+              letter-spacing: 0.5px;
+            }
+            .to-whom {
+              font-weight: bold;
+              text-align: left;
+              margin: 0.9cm 0 0.5cm;
+              font-size: 13.5pt;
+            }
+            .body-text p {
+              margin: 0.55em 0;
+              text-indent: 2em;
+            }
+            .issued {
+              margin-top: 1.4cm;
+              text-align: left;
+              line-height: 1.4;
+            }
+            .signature-area {
+              margin-top: 2.8cm;
+              width: 100%;
+              text-align: right;
+            }
+            .signature {
+              display: inline-block;
+              text-align: center;
+              min-width: 260px;
+            }
+            .signature-line {
+              border-top: 1px solid #000;
+              width: 100%;
+              margin: 0.3cm 0 0.15cm;
+            }
+            .signature-name {
+              font-weight: bold;
+              text-transform: uppercase;
+              font-size: 13.5pt;
+              margin-bottom: 0.1cm;
+            }
+            .signature-title {
+              font-size: 12pt;
+              text-transform: uppercase;
+            }
+            .no-print {
+              margin-top: 2.5cm;
+              text-align: center;
+              color: #555;
+              font-size: 13px;
+            }
+            [contenteditable="true"] {
+              background: #fffef0;
+              outline: 1px dashed #aaa;
+              padding: 1px 3px;
+              min-width: 60px;
+              display: inline-block;
+            }
+            @media print {
+              .no-print { display: none !important; }
+              [contenteditable="true"] {
+                background: transparent;
+                outline: none;
+                border-bottom: 1px solid #000 !important;
+                padding: 0;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="logos">
+              <img src="/images/UIMS.png" alt="Barangay Upper Ichon" class="logo">
+              <img src="/images/Bagong_Pilipinas_logo.png" alt="Bagong Pilipinas" class="logo">
+            </div>
+
+            <div class="header">
+              Republic of the Philippines<br>
+              Province of Southern Leyte<br>
+              Municipality of Macrohon
+            </div>
+
+            <div class="barangay">BARANGAY UPPER ICHON</div>
+
+            <div class="office">OFFICE OF THE PUNONG BARANGAY</div>
+
+            <div class="title">${title}</div>
+
+            <div class="to-whom">TO WHOM IT MAY CONCERN:</div>
+
+            <div class="body-text" contenteditable="true">
+              ${mainBody}
+            </div>
+
+            <div class="issued" contenteditable="true">
+              <strong>ISSUED</strong> <strong>this ${dayWithOrdinal}</strong> day of <strong>${month}</strong>, <strong>${year}</strong> at Barangay Upper Ichon, Macrohon, Southern Leyte, Philippines.
+            </div>
+
+            <div class="signature-area">
+              <div class="signature">
+                <div class="signature-name" contenteditable="true">JUNNARD O. NAPALAN</div>
+                <div class="signature-line"></div>
+                <div class="signature-title" contenteditable="true">Punong Barangay</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="no-print">
+            <p><strong>Edit underlined/editable parts</strong> before printing (name, purpose, etc.)</p>
+            <button onclick="window.print()" style="padding:10px 28px; font-size:16px; margin-right:20px; background:#1e40af; color:white; border:none; border-radius:6px; cursor:pointer;">
+              Print Certificate
+            </button>
+            <button onclick="window.close()" style="padding:10px 28px; font-size:16px; cursor:pointer;">
+              Close
+            </button>
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+  }, []);
 
   const filteredRequests = requests.filter((r) => {
     const term = searchTerm.toLowerCase();
-    const matchesSearch =
+    return (
       String(r.id).includes(term) ||
       (r.certificate_type || "").toLowerCase().includes(term) ||
-      (r.requester_name || "").toLowerCase().includes(term);
-    const matchesStatus = statusFilter === "all" || r.status === statusFilter;
-    return matchesSearch && matchesStatus;
+      (r.requester_name || "").toLowerCase().includes(term)
+    ) && (statusFilter === "all" || r.status === statusFilter);
   });
 
   const stats = {
@@ -232,45 +439,25 @@ const CertificateRequests = () => {
   };
 
   const getStatusInfo = (status) => {
-    const s = (status || "").toString().trim().toLowerCase();
-
-    if (s.includes("approve") || s === "processing") {
-      return {
-        label: "Approved",
-        color: "bg-green-50 text-green-700 border-green-200",
-        dot: "bg-green-500",
-      };
+    const s = (status || "").toLowerCase().trim();
+    if (s === "processing" || s.includes("approve")) {
+      return { label: "Approved", color: "bg-green-50 text-green-700 border-green-200", dot: "bg-green-500" };
     }
-    if (s.includes("pend") || s === "pending") {
-      return {
-        label: "Pending",
-        color: "bg-yellow-50 text-yellow-700 border-yellow-200",
-        dot: "bg-yellow-500",
-      };
+    if (s === "pending") {
+      return { label: "Pending", color: "bg-yellow-50 text-yellow-700 border-yellow-200", dot: "bg-yellow-500" };
     }
-    if (s.includes("reject") || s === "rejected") {
-      return {
-        label: "Rejected",
-        color: "bg-red-50 text-red-700 border-red-200",
-        dot: "bg-red-500",
-      };
+    if (s === "rejected") {
+      return { label: "Rejected", color: "bg-red-50 text-red-700 border-red-200", dot: "bg-red-500" };
     }
-    return {
-      label: "Unknown",
-      color: "bg-gray-50 text-gray-700 border-gray-200",
-      dot: "bg-gray-500",
-    };
+    return { label: "Unknown", color: "bg-gray-50 text-gray-700 border-gray-200", dot: "bg-gray-500" };
   };
 
   if (error && !loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] p-4 sm:p-6 flex items-center justify-center">
-        <div className="bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] p-6 flex items-center justify-center">
+        <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 text-center">
           <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={loadRequests}
-            className="px-6 py-3 bg-[#0F4C81] text-white rounded-2xl"
-          >
+          <button onClick={loadRequests} className="px-6 py-3 bg-[#0F4C81] text-white rounded-2xl">
             Retry
           </button>
         </div>
@@ -300,46 +487,18 @@ const CertificateRequests = () => {
           {/* Hero */}
           <section className="mb-8 sm:mb-12">
             <div className="bg-gradient-to-br from-[#0F4C81] via-[#58A1D3] to-[#B3DEF8] rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden">
-              <div className="absolute inset-0 opacity-20">
-                <svg
-                  className="absolute bottom-0 w-full h-full"
-                  viewBox="0 0 1200 400"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M0,200 C300,250 600,150 900,200 C1050,220 1150,180 1200,200 L1200,400 L0,400 Z"
-                    fill="currentColor"
-                    className="text-white animate-pulse"
-                  />
-                </svg>
-              </div>
               <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                     <FileText className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-300" />
                   </div>
                   <div>
-                    <div className="inline-flex items-center gap-2 mb-1">
-                      <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
-                      <span className="text-cyan-200 text-xs sm:text-sm font-medium tracking-widest">
-                        CERTIFICATE MANAGEMENT
-                      </span>
-                      <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
-                    </div>
                     <h2 className="text-2xl sm:text-4xl font-bold mb-1 drop-shadow-lg">
                       Certificate Requests
                     </h2>
                     <p className="text-sm sm:text-base text-cyan-100">
                       Review and manage all certificate requests
                     </p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                  <span className="text-black text-xs sm:text-sm font-semibold drop-shadow-lg">
-                    Scroll to explore
-                  </span>
-                  <div className="w-7 h-10 sm:w-8 sm:h-12 border-4 border-black rounded-full flex justify-center bg-white/90 shadow-lg animate-pulse">
-                    <div className="w-1.5 h-3 sm:w-2 sm:h-4 bg-black rounded-full mt-1.5 sm:mt-2 animate-bounce"></div>
                   </div>
                 </div>
               </div>
@@ -349,47 +508,18 @@ const CertificateRequests = () => {
           {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
             {[
-              {
-                label: "Total",
-                value: stats.total,
-                icon: FileText,
-                color: "from-[#0F4C81] to-[#58A1D3]",
-              },
-              {
-                label: "Pending",
-                value: stats.pending,
-                icon: Clock,
-                color: "from-yellow-500 to-amber-500",
-              },
-              {
-                label: "Approved",
-                value: stats.processing,
-                icon: CheckCircle,
-                color: "from-green-500 to-emerald-500",
-              },
-              {
-                label: "Rejected",
-                value: stats.rejected,
-                icon: AlertCircle,
-                color: "from-red-500 to-pink-500",
-              },
+              { label: "Total", value: stats.total, icon: FileText, color: "from-[#0F4C81] to-[#58A1D3]" },
+              { label: "Pending", value: stats.pending, icon: Clock, color: "from-yellow-500 to-amber-500" },
+              { label: "Approved", value: stats.processing, icon: CheckCircle, color: "from-green-500 to-emerald-500" },
+              { label: "Rejected", value: stats.rejected, icon: AlertCircle, color: "from-red-500 to-pink-500" },
             ].map((stat, i) => (
-              <div
-                key={i}
-                className="bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl"
-              >
+              <div key={i} className="bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-500">
-                      {stat.label}
-                    </p>
-                    <p className="text-2xl sm:text-3xl font-bold text-[#0F4C81]">
-                      {stat.value}
-                    </p>
+                    <p className="text-xs sm:text-sm text-gray-500">{stat.label}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-[#0F4C81]">{stat.value}</p>
                   </div>
-                  <div
-                    className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br ${stat.color}`}
-                  >
+                  <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br ${stat.color}`}>
                     <stat.icon className="text-white w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
@@ -402,10 +532,7 @@ const CertificateRequests = () => {
             <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
               <div className="flex-1">
                 <div className="flex items-center bg-white/70 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 border">
-                  <Search
-                    className="text-gray-500 mr-2 sm:mr-3 flex-shrink-0"
-                    size={16}
-                  />
+                  <Search className="text-gray-500 mr-2 sm:mr-3 flex-shrink-0" size={16} />
                   <input
                     type="text"
                     placeholder="Search requests..."
@@ -431,7 +558,7 @@ const CertificateRequests = () => {
                   className="px-3 sm:px-4 py-2 sm:py-3 bg-white/70 rounded-xl sm:rounded-2xl border hover:bg-white/80 transition-all duration-300"
                   title="Refresh requests"
                 >
-                  <RefreshCw size={18} className="animate-spin" />
+                  <RefreshCw size={18} />
                 </button>
                 <button
                   onClick={handleNewRequest}
@@ -448,52 +575,39 @@ const CertificateRequests = () => {
           {/* Desktop Table */}
           <div className="hidden lg:block bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] sticky top-0 z-20">
-              <table className="w-full">
+              <table className="w-full table-fixed">
                 <thead>
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    <th className="w-[18%] px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                       REQUEST
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    <th className="w-[24%] px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                       REQUESTER
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    <th className="w-[20%] px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                       TYPE
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    <th className="w-[14%] px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                       DATE
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    <th className="w-[14%] px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                       STATUS
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    <th className="w-[10%] min-w-[100px] px-4 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">
                       ACTIONS
                     </th>
                   </tr>
                 </thead>
               </table>
             </div>
-            <div
-              className="overflow-y-auto custom-scroll"
-              style={{ maxHeight: "600px" }}
-            >
-              <table className="w-full">
+
+            <div className="overflow-y-auto custom-scroll" style={{ maxHeight: "600px" }}>
+              <table className="w-full table-fixed">
                 <tbody className="divide-y divide-gray-100">
                   {loading ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-16">
-                        Loading...
-                      </td>
-                    </tr>
+                    <tr><td colSpan={6} className="text-center py-16">Loading...</td></tr>
                   ) : filteredRequests.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="text-center py-16 text-gray-500"
-                      >
-                        No requests
-                      </td>
-                    </tr>
+                    <tr><td colSpan={6} className="text-center py-16 text-gray-500">No requests</td></tr>
                   ) : (
                     filteredRequests.map((r) => {
                       const statusInfo = getStatusInfo(r.status);
@@ -505,53 +619,38 @@ const CertificateRequests = () => {
                                 <FileText size={16} className="text-white" />
                               </div>
                               <div>
-                                <div className="font-bold text-[#0F4C81]">
-                                  REQ-{r.id}
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  Request #
-                                </div>
+                                <div className="font-bold text-[#0F4C81]">REQ-{r.id}</div>
+                                <div className="text-xs text-gray-500">Request #</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="font-medium">
-                              {r.requester_name}
-                            </div>
+                            <div className="font-medium truncate max-w-[220px]">{r.requester_name}</div>
                             <span
                               className={`text-xs px-2 py-1 rounded-full ${
-                                r.requester_type === "resident"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-gray-100 text-gray-700"
+                                r.requester_type === "resident" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-700"
                               }`}
                             >
-                              {r.requester_type === "resident"
-                                ? "Resident"
-                                : "Non-Resident"}
+                              {r.requester_type === "resident" ? "Resident" : "Non-Resident"}
                             </span>
                           </td>
-                          <td className="px-6 py-4">
-                            <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium inline-block max-w-full truncate">
                               {r.certificate_type}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm">
-                            {new Date(r.created_at).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              }
-                            )}
+                            {new Date(r.created_at).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
                           </td>
                           <td className="px-6 py-4">
                             <span
                               className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${statusInfo.color}`}
                             >
-                              <div
-                                className={`w-2 h-2 rounded-full ${statusInfo.dot}`}
-                              ></div>
+                              <div className={`w-2 h-2 rounded-full ${statusInfo.dot}`}></div>
                               {statusInfo.label}
                             </span>
                             {r.status === "rejected" && r.rejection_reason && (
@@ -560,8 +659,8 @@ const CertificateRequests = () => {
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="flex gap-2">
+                          <td className="px-4 py-4 text-center">
+                            <div className="flex items-center justify-center gap-2">
                               <button
                                 onClick={() => viewDetails(r)}
                                 className="p-2 rounded-xl bg-blue-500 text-white hover:scale-110 transition"
@@ -569,6 +668,7 @@ const CertificateRequests = () => {
                               >
                                 <Eye size={16} />
                               </button>
+
                               {r.status === "pending" && (
                                 <>
                                   <button
@@ -587,6 +687,16 @@ const CertificateRequests = () => {
                                   </button>
                                 </>
                               )}
+
+                              {r.status === "processing" && (
+                                <button
+                                  onClick={() => handlePrint(r)}
+                                  className="p-2 rounded-xl bg-indigo-600 text-white hover:scale-110 transition"
+                                  title="Print certificate"
+                                >
+                                  <Printer size={16} />
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -601,9 +711,7 @@ const CertificateRequests = () => {
           {/* Mobile Card View */}
           <div className="lg:hidden space-y-4">
             {loading ? (
-              <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 text-center">
-                Loading...
-              </div>
+              <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 text-center">Loading...</div>
             ) : filteredRequests.length === 0 ? (
               <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 text-center text-gray-500">
                 No requests
@@ -622,69 +730,48 @@ const CertificateRequests = () => {
                           <FileText size={16} className="text-white" />
                         </div>
                         <div>
-                          <div className="font-bold text-[#0F4C81]">
-                            REQ-{r.id}
-                          </div>
+                          <div className="font-bold text-[#0F4C81]">REQ-{r.id}</div>
                           <div className="text-xs text-gray-500">
-                            {new Date(r.created_at).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              }
-                            )}
+                            {new Date(r.created_at).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
                           </div>
                         </div>
                       </div>
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusInfo.color}`}
                       >
-                        <div
-                          className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot}`}
-                        ></div>
+                        <div className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot}`}></div>
                         {statusInfo.label}
                       </span>
                     </div>
 
                     <div className="space-y-2 mb-3">
                       <div>
-                        <div className="text-xs text-gray-500 mb-1">
-                          Requester
-                        </div>
+                        <div className="text-xs text-gray-500 mb-1">Requester</div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium text-sm">
-                            {r.requester_name}
-                          </span>
+                          <span className="font-medium text-sm">{r.requester_name}</span>
                           <span
                             className={`text-xs px-2 py-0.5 rounded-full ${
-                              r.requester_type === "resident"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-gray-100 text-gray-700"
+                              r.requester_type === "resident" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-700"
                             }`}
                           >
-                            {r.requester_type === "resident"
-                              ? "Resident"
-                              : "Non-Resident"}
+                            {r.requester_type === "resident" ? "Resident" : "Non-Resident"}
                           </span>
                         </div>
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500 mb-1">
-                          Certificate Type
-                        </div>
+                        <div className="text-xs text-gray-500 mb-1">Certificate Type</div>
                         <span className="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
                           {r.certificate_type}
                         </span>
                       </div>
                       {r.status === "rejected" && r.rejection_reason && (
                         <div>
-                          <div className="text-xs text-gray-500 mb-1">
-                            Rejection Reason
-                          </div>
-                          <div className="text-sm text-gray-700">
-                            {r.rejection_reason}
-                          </div>
+                          <div className="text-xs text-gray-500 mb-1">Rejection Reason</div>
+                          <div className="text-sm text-gray-700">{r.rejection_reason}</div>
                         </div>
                       )}
                     </div>
@@ -697,6 +784,7 @@ const CertificateRequests = () => {
                         <Eye size={16} />
                         View
                       </button>
+
                       {r.status === "pending" && (
                         <>
                           <button
@@ -715,6 +803,16 @@ const CertificateRequests = () => {
                           </button>
                         </>
                       )}
+
+                      {r.status === "processing" && (
+                        <button
+                          onClick={() => handlePrint(r)}
+                          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium active:scale-95 transition"
+                        >
+                          <Printer size={16} />
+                          Print
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -724,7 +822,6 @@ const CertificateRequests = () => {
         </div>
       </div>
 
-      {/* ✅ NOTIFICATION SYSTEM */}
       <NotificationSystem
         notifications={notifications}
         onRemove={handleRemoveNotification}
@@ -799,7 +896,7 @@ const CertificateRequests = () => {
         </div>
       )}
 
-      {/* ✅ COMPLETE VIEW DETAILS MODAL WITH REGISTRATION INFO */}
+      {/* View Details Modal */}
       {showViewModal && selectedRequest && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-6xl w-full max-h-[95vh] overflow-y-auto shadow-2xl">
@@ -835,14 +932,10 @@ const CertificateRequests = () => {
                   </span>
                   <div className="flex items-center gap-3 mt-2">
                     <span
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
-                        getStatusInfo(selectedRequest.status).color
-                      }`}
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${getStatusInfo(selectedRequest.status).color}`}
                     >
                       <div
-                        className={`w-3 h-3 rounded-full ${
-                          getStatusInfo(selectedRequest.status).dot
-                        }`}
+                        className={`w-3 h-3 rounded-full ${getStatusInfo(selectedRequest.status).dot}`}
                       ></div>
                       {getStatusInfo(selectedRequest.status).label}
                     </span>
@@ -857,7 +950,7 @@ const CertificateRequests = () => {
               </div>
             </div>
 
-            {/* Main Content - 2 Column Layout */}
+            {/* Main Content */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {/* Left Column - Requester Info */}
               <div className="space-y-6">
@@ -899,7 +992,7 @@ const CertificateRequests = () => {
                       </div>
                     </div>
 
-                    {/* REQUEST CONTACT INFO */}
+                    {/* Contact Info */}
                     <div className="pt-6 border-t border-blue-200">
                       <h4 className="font-semibold text-blue-800 mb-4 flex items-center gap-2">
                         📞 Request Contact Information
@@ -911,9 +1004,7 @@ const CertificateRequests = () => {
                           </label>
                           <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                             <Phone className="w-5 h-5 text-blue-500" />
-                            <span className="font-semibold">
-                              {selectedRequest.contact_number}
-                            </span>
+                            <span className="font-semibold">{selectedRequest.contact_number}</span>
                           </div>
                         </div>
                       )}
@@ -924,21 +1015,18 @@ const CertificateRequests = () => {
                           </label>
                           <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                             <Mail className="w-5 h-5 text-blue-500" />
-                            <span className="font-semibold break-all">
-                              {selectedRequest.email}
-                            </span>
+                            <span className="font-semibold break-all">{selectedRequest.email}</span>
                           </div>
                         </div>
                       )}
                     </div>
 
-                    {/* REGISTRATION INFO - NEW SECTION */}
-                    {(selectedRequest.registered_phone ||
-                      selectedRequest.registered_email) && (
+                    {/* Registration Info */}
+                    {(selectedRequest.registered_phone || selectedRequest.registered_email) && (
                       <div className="pt-6 border-t border-blue-200">
                         <h4 className="font-semibold text-green-800 mb-4 flex items-center gap-2">
                           <Database className="w-5 h-5" />
-                          <span>Registration Account Information</span>
+                          Registration Account Information
                         </h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {selectedRequest.registered_phone && (
@@ -987,7 +1075,7 @@ const CertificateRequests = () => {
                 </div>
               </div>
 
-              {/* Right Column - Certificate & Timeline */}
+              {/* Right Column */}
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl p-6 border border-purple-200">
                   <h3 className="font-bold text-purple-800 mb-6 flex items-center gap-2">
@@ -1033,9 +1121,7 @@ const CertificateRequests = () => {
                         <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3">
                           <Calendar className="w-5 h-5 text-green-500" />
                           <span className="font-semibold text-green-700">
-                            {new Date(
-                              selectedRequest.reschedule_date
-                            ).toLocaleDateString("en-US", {
+                            {new Date(selectedRequest.reschedule_date).toLocaleDateString("en-US", {
                               weekday: "long",
                               year: "numeric",
                               month: "long",
@@ -1064,24 +1150,20 @@ const CertificateRequests = () => {
                           Request Submitted
                         </p>
                         <p className="text-sm text-gray-600">
-                          {new Date(selectedRequest.created_at).toLocaleString(
-                            "en-US",
-                            {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true,
-                            }
-                          )}
+                          {new Date(selectedRequest.created_at).toLocaleString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
                         </p>
                       </div>
                     </div>
 
                     {selectedRequest.updated_at &&
-                      selectedRequest.updated_at !==
-                        selectedRequest.created_at && (
+                      selectedRequest.updated_at !== selectedRequest.created_at && (
                         <div className="flex items-center gap-4 p-4 bg-white rounded-xl border-l-4 border-blue-400">
                           <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <RefreshCw className="w-5 h-5 text-blue-600" />
@@ -1091,9 +1173,7 @@ const CertificateRequests = () => {
                               Last Updated
                             </p>
                             <p className="text-sm text-gray-600">
-                              {new Date(
-                                selectedRequest.updated_at
-                              ).toLocaleString("en-US", {
+                              {new Date(selectedRequest.updated_at).toLocaleString("en-US", {
                                 month: "long",
                                 day: "numeric",
                                 year: "numeric",
@@ -1111,20 +1191,19 @@ const CertificateRequests = () => {
             </div>
 
             {/* Rejection Reason */}
-            {selectedRequest.status === "rejected" &&
-              selectedRequest.rejection_reason && (
-                <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200 mb-8">
-                  <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5" />
-                    Rejection Reason
-                  </h3>
-                  <div className="bg-white p-5 rounded-xl border-l-4 border-red-400">
-                    <p className="text-red-800 leading-relaxed">
-                      {selectedRequest.rejection_reason}
-                    </p>
-                  </div>
+            {selectedRequest.status === "rejected" && selectedRequest.rejection_reason && (
+              <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-200 mb-8">
+                <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5" />
+                  Rejection Reason
+                </h3>
+                <div className="bg-white p-5 rounded-xl border-l-4 border-red-400">
+                  <p className="text-red-800 leading-relaxed">
+                    {selectedRequest.rejection_reason}
+                  </p>
                 </div>
-              )}
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t bg-gradient-to-r from-gray-50 to-blue-50 rounded-b-3xl p-6">
@@ -1135,6 +1214,7 @@ const CertificateRequests = () => {
                 <X className="w-5 h-5" />
                 Close
               </button>
+
               {selectedRequest.status === "pending" && (
                 <>
                   <button
@@ -1159,30 +1239,31 @@ const CertificateRequests = () => {
                   </button>
                 </>
               )}
+
+              {selectedRequest.status === "processing" && (
+                <button
+                  onClick={() => handlePrint(selectedRequest)}
+                  className="flex-1 py-3 px-6 bg-gradient-to-r from-indigo-500 to-indigo-700 text-white rounded-2xl text-lg font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <Printer className="w-5 h-5" />
+                  Print Certificate
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Certificate Request Flow */}
       <CertificateRequestFlow
         isOpen={showRequestFlow}
         onClose={() => setShowRequestFlow(false)}
       />
 
-      {/* Animations */}
       <style jsx>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0) rotate(0deg);
-          }
-          33% {
-            transform: translateY(-10px) rotate(120deg);
-          }
-          66% {
-            transform: translateY(5px) rotate(240deg);
-          }
+        @keyframes float { 
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          33% { transform: translateY(-10px) rotate(120deg); }
+          66% { transform: translateY(5px) rotate(240deg); }
         }
         .animate-float {
           animation: float 6s ease-in-out infinite;
