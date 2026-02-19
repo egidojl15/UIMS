@@ -315,30 +315,25 @@ const CertificateRequests = () => {
               text-indent: 2em;
             }
             .issued {
-              margin-top: 1.4cm;
+              margin-top: 1.6cm;
               text-align: left;
               line-height: 1.4;
             }
             .signature-area {
-              margin-top: 2.8cm;
+              margin-top: 3.4cm;
               width: 100%;
               text-align: right;
             }
             .signature {
               display: inline-block;
-              text-align: center;
-              min-width: 260px;
-            }
-            .signature-line {
-              border-top: 1px solid #000;
-              width: 100%;
-              margin: 0.3cm 0 0.15cm;
+              text-align: right;
+              min-width: 280px;
             }
             .signature-name {
               font-weight: bold;
               text-transform: uppercase;
               font-size: 13.5pt;
-              margin-bottom: 0.1cm;
+              margin-bottom: 0.2cm;
             }
             .signature-title {
               font-size: 12pt;
@@ -394,13 +389,12 @@ const CertificateRequests = () => {
             </div>
 
             <div class="issued" contenteditable="true">
-              <strong>ISSUED</strong> <strong>this ${dayWithOrdinal}</strong> day of <strong>${month}</strong>, <strong>${year}</strong> at Barangay Upper Ichon, Macrohon, Southern Leyte, Philippines.
+              <strong>ISSUED</strong> this <strong>${dayWithOrdinal}</strong> day of <strong>${month}</strong>, <strong>${year}</strong> at Barangay Upper Ichon, Macrohon, Southern Leyte, Philippines.
             </div>
 
             <div class="signature-area">
               <div class="signature">
                 <div class="signature-name" contenteditable="true">JUNNARD O. NAPALAN</div>
-                <div class="signature-line"></div>
                 <div class="signature-title" contenteditable="true">Punong Barangay</div>
               </div>
             </div>
