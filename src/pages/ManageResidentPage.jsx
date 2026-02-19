@@ -76,8 +76,8 @@ const formatDateForInput = (dateString) => {
         date = new Date(
           `${parts[2]}-${parts[0].padStart(2, "0")}-${parts[1].padStart(
             2,
-            "0"
-          )}`
+            "0",
+          )}`,
         );
       }
       // Check if it's dd-MM-yyyy (day first)
@@ -89,8 +89,8 @@ const formatDateForInput = (dateString) => {
         date = new Date(
           `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(
             2,
-            "0"
-          )}`
+            "0",
+          )}`,
         );
       }
     }
@@ -135,7 +135,7 @@ const InactiveResidentsModal = ({
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
-        }
+        },
       );
       const data = await response.json();
       if (data.success) {
@@ -152,7 +152,7 @@ const InactiveResidentsModal = ({
     setSelectedResidents((prev) =>
       prev.includes(residentId)
         ? prev.filter((id) => id !== residentId)
-        : [...prev, residentId]
+        : [...prev, residentId],
     );
   };
 
@@ -335,7 +335,7 @@ const InactiveResidentsModal = ({
                         <input
                           type="checkbox"
                           checked={selectedResidents.includes(
-                            resident.resident_id
+                            resident.resident_id,
                           )}
                           onChange={() =>
                             handleSelectResident(resident.resident_id)
@@ -723,7 +723,7 @@ const EditResidentModal = ({
       ? isAbsoluteUrl(editResident.photo_url)
         ? editResident.photo_url
         : `https://uims-backend-production.up.railway.app${editResident.photo_url}` // FIXED: Correct base URL + photo_url
-      : null
+      : null,
   );
 
   const [isUpdating, setIsUpdating] = useState(false); // NEW: Loading state for update button
@@ -1319,6 +1319,8 @@ const AddResidentModal = ({
   purokOptions,
   households,
   filteredResidents,
+  duplicateError,
+  setDuplicateError,
 }) => {
   const [photoPreview, setPhotoPreview] = useState(null);
 
@@ -1608,7 +1610,7 @@ const AddResidentModal = ({
                       (r) =>
                         r.civil_status === "Married" &&
                         r.gender !== residentForm.gender &&
-                        residentForm.gender
+                        residentForm.gender,
                     )
                     .map((resident) => {
                       const fullName = `${resident.first_name} ${
@@ -1681,7 +1683,7 @@ const AddResidentModal = ({
                     .filter((r) =>
                       r
                         .toLowerCase()
-                        .includes((residentForm.religion || "").toLowerCase())
+                        .includes((residentForm.religion || "").toLowerCase()),
                     )
                     .map((religion) => (
                       <div
@@ -1910,6 +1912,27 @@ const AddResidentModal = ({
               </div>
             </div>
             <div className="flex justify-end col-span-1 md:col-span-2 space-x-2">
+              {duplicateError && (
+                <div className="w-full mb-2 flex items-start gap-2 bg-red-50 border border-red-300 text-red-700 rounded-lg px-4 py-3 text-sm">
+                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0 text-red-500" />
+                  <div>
+                    <p className="font-semibold">Resident Already Exists</p>
+                    <p>
+                      A resident with the same name and birthdate is already
+                      registered in the system.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDuplicateError && setDuplicateError(false)
+                    }
+                    className="ml-auto text-red-400 hover:text-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => setShowResidentForm(false)}
@@ -2099,11 +2122,13 @@ const ManageResidentsPage = () => {
   const [standaloneHouseholds, setStandaloneHouseholds] = useState([]);
   const [standaloneNotifications, setStandaloneNotifications] = useState([]);
   const [standaloneLoading, setStandaloneLoading] = useState(true);
+  const [standaloneDuplicateError, setStandaloneDuplicateError] =
+    useState(false);
 
   // Standalone notification functions
   const standaloneRemoveNotification = useCallback((id) => {
     setStandaloneNotifications((prev) =>
-      prev.filter((notif) => notif.id !== id)
+      prev.filter((notif) => notif.id !== id),
     );
   }, []);
 
@@ -2120,7 +2145,7 @@ const ManageResidentsPage = () => {
       };
       setStandaloneNotifications((prev) => [...prev, newNotification]);
     },
-    []
+    [],
   );
 
   // Standalone fetch residents
@@ -2135,7 +2160,7 @@ const ManageResidentsPage = () => {
         standaloneAddNotification(
           "error",
           "Load Failed",
-          data.message || "Failed to load residents data"
+          data.message || "Failed to load residents data",
         );
       }
     } catch (error) {
@@ -2143,7 +2168,7 @@ const ManageResidentsPage = () => {
       standaloneAddNotification(
         "error",
         "Error",
-        "An error occurred while loading residents"
+        "An error occurred while loading residents",
       );
     } finally {
       setStandaloneLoading(false);
@@ -2266,19 +2291,20 @@ const ManageResidentsPage = () => {
         standaloneAddNotification(
           "error",
           "Validation Error",
-          "Please fill in all required fields: First Name, Last Name, Date of Birth, Gender, Civil Status, and Purok"
+          "Please fill in all required fields: First Name, Last Name, Date of Birth, Gender, Civil Status, and Purok",
         );
         return;
       }
 
       // Call the API
+      setStandaloneDuplicateError(false); // reset before each attempt
       const result = await residentsAPI.create(submitData);
 
       if (result.success) {
         standaloneAddNotification(
           "success",
           "Success",
-          "Resident created successfully"
+          "Resident created successfully",
         );
 
         // Refresh the residents list
@@ -2286,6 +2312,7 @@ const ManageResidentsPage = () => {
 
         // Close the form and reset
         setStandaloneShowResidentForm(false);
+        setStandaloneDuplicateError(false);
         setStandaloneResidentForm({
           first_name: "",
           middle_name: "",
@@ -2306,20 +2333,33 @@ const ManageResidentsPage = () => {
           photo_file: null,
         });
       } else {
+        // Check if it's a duplicate resident error
+        const isDuplicate =
+          result.message &&
+          result.message.toLowerCase().includes("already exists");
+        if (isDuplicate) setStandaloneDuplicateError(true);
         standaloneAddNotification(
           "error",
-          "Error",
-          result.message || "Failed to create resident"
+          isDuplicate ? "Resident Already Exists" : "Error",
+          isDuplicate
+            ? "Resident already exists. A resident with the same first name, middle name, last name, and birthdate is already registered."
+            : result.message || "Failed to create resident",
         );
       }
     } catch (error) {
       console.error("Error saving resident:", error);
+      const errMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to save resident";
+      const isDuplicate = errMsg.toLowerCase().includes("already exists");
+      if (isDuplicate) setStandaloneDuplicateError(true);
       standaloneAddNotification(
         "error",
-        "Error",
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to save resident"
+        isDuplicate ? "Resident Already Exists" : "Error",
+        isDuplicate
+          ? "Resident already exists. A resident with the same first name, middle name, last name, and birthdate is already registered."
+          : errMsg,
       );
     }
   };
@@ -2332,7 +2372,7 @@ const ManageResidentsPage = () => {
         standaloneAddNotification(
           "success",
           "Success",
-          "Resident updated successfully"
+          "Resident updated successfully",
         );
         standaloneFetchResidents();
         setStandaloneEditResident(null);
@@ -2340,7 +2380,7 @@ const ManageResidentsPage = () => {
         standaloneAddNotification(
           "error",
           "Error",
-          "Failed to update resident"
+          "Failed to update resident",
         );
       }
     } catch (error) {
@@ -2352,7 +2392,7 @@ const ManageResidentsPage = () => {
   // Standalone handle resident delete
   const standaloneHandleResidentDelete = async (
     residentId,
-    newAddress = ""
+    newAddress = "",
   ) => {
     try {
       const result = await residentsAPI.delete(residentId, newAddress);
@@ -2361,14 +2401,14 @@ const ManageResidentsPage = () => {
         standaloneAddNotification(
           "success",
           "Success",
-          "Resident moved to inactive residents"
+          "Resident moved to inactive residents",
         );
         standaloneFetchResidents();
       } else {
         standaloneAddNotification(
           "error",
           "Error",
-          "Failed to move resident to inactive list"
+          "Failed to move resident to inactive list",
         );
       }
     } catch (error) {
@@ -2376,7 +2416,7 @@ const ManageResidentsPage = () => {
       standaloneAddNotification(
         "error",
         "Error",
-        "Failed to move resident to inactive list"
+        "Failed to move resident to inactive list",
       );
     }
   };
@@ -2448,6 +2488,10 @@ const ManageResidentsPage = () => {
     ? standaloneFetchResidents
     : context.fetchResidents;
   const households = isStandalone ? standaloneHouseholds : context.households;
+  const duplicateError = isStandalone ? standaloneDuplicateError : false;
+  const setDuplicateError = isStandalone
+    ? setStandaloneDuplicateError
+    : () => {};
 
   // Declare all additional state hooks BEFORE any conditional returns
   const [residentToDelete, setResidentToDelete] = useState(null);
@@ -2475,7 +2519,7 @@ const ManageResidentsPage = () => {
           option.value !== "All" &&
           option.value !== "All Purok" &&
           option.label !== "All" &&
-          option.label !== "All Purok"
+          option.label !== "All Purok",
       );
       setReportPurokOptions(filteredOptions);
     }
@@ -2631,7 +2675,7 @@ const ManageResidentsPage = () => {
             tableStartY,
             cellWidth * ageGroups.length,
             headerHeight,
-            "F"
+            "F",
           );
 
           // Age group headers
@@ -2644,7 +2688,7 @@ const ManageResidentsPage = () => {
               ageGroup,
               x + cellWidth / 2,
               tableStartY + headerHeight / 2 + 2,
-              { align: "center" }
+              { align: "center" },
             );
           });
 
@@ -2655,7 +2699,7 @@ const ManageResidentsPage = () => {
             tableStartY + headerHeight,
             cellWidth * ageGroups.length,
             subHeaderHeight,
-            "F"
+            "F",
           );
 
           doc.setTextColor(255);
@@ -2670,7 +2714,7 @@ const ManageResidentsPage = () => {
               "M",
               x + subCellWidth / 2,
               tableStartY + headerHeight + subHeaderHeight / 2 + 2,
-              { align: "center" }
+              { align: "center" },
             );
 
             // Female header
@@ -2678,7 +2722,7 @@ const ManageResidentsPage = () => {
               "F",
               x + subCellWidth + subCellWidth / 2,
               tableStartY + headerHeight + subHeaderHeight / 2 + 2,
-              { align: "center" }
+              { align: "center" },
             );
           });
 
@@ -2692,7 +2736,7 @@ const ManageResidentsPage = () => {
             dataRowY,
             cellWidth * ageGroups.length,
             cellHeight,
-            "F"
+            "F",
           );
 
           // Draw data for each age group
@@ -2714,7 +2758,7 @@ const ManageResidentsPage = () => {
             } else {
               // Find data for this age group
               const rowData = ageDistributionData.find(
-                (row) => row.ageGroup === ageGroup
+                (row) => row.ageGroup === ageGroup,
               );
               maleCount = rowData ? rowData.male : 0;
               femaleCount = rowData ? rowData.female : 0;
@@ -2725,7 +2769,7 @@ const ManageResidentsPage = () => {
               maleCount.toString(),
               x + subCellWidth / 2,
               dataRowY + cellHeight / 2 + 2,
-              { align: "center" }
+              { align: "center" },
             );
 
             // Female count
@@ -2733,7 +2777,7 @@ const ManageResidentsPage = () => {
               femaleCount.toString(),
               x + subCellWidth + subCellWidth / 2,
               dataRowY + cellHeight / 2 + 2,
-              { align: "center" }
+              { align: "center" },
             );
           });
 
@@ -2748,7 +2792,7 @@ const ManageResidentsPage = () => {
               x,
               tableStartY,
               x,
-              tableStartY + headerHeight + subHeaderHeight + cellHeight
+              tableStartY + headerHeight + subHeaderHeight + cellHeight,
             );
           }
 
@@ -2757,25 +2801,25 @@ const ManageResidentsPage = () => {
             startX,
             tableStartY,
             startX + ageGroups.length * cellWidth,
-            tableStartY
+            tableStartY,
           );
           doc.line(
             startX,
             tableStartY + headerHeight,
             startX + ageGroups.length * cellWidth,
-            tableStartY + headerHeight
+            tableStartY + headerHeight,
           );
           doc.line(
             startX,
             tableStartY + headerHeight + subHeaderHeight,
             startX + ageGroups.length * cellWidth,
-            tableStartY + headerHeight + subHeaderHeight
+            tableStartY + headerHeight + subHeaderHeight,
           );
           doc.line(
             startX,
             tableStartY + headerHeight + subHeaderHeight + cellHeight,
             startX + ageGroups.length * cellWidth,
-            tableStartY + headerHeight + subHeaderHeight + cellHeight
+            tableStartY + headerHeight + subHeaderHeight + cellHeight,
           );
 
           // Add gender sub-header lines
@@ -2786,7 +2830,7 @@ const ManageResidentsPage = () => {
               x + subCellWidth,
               tableStartY + headerHeight,
               x + subCellWidth,
-              tableStartY + headerHeight + subHeaderHeight
+              tableStartY + headerHeight + subHeaderHeight,
             );
           }
 
@@ -2795,7 +2839,7 @@ const ManageResidentsPage = () => {
 
         // Get table totals from the data
         const totalDataRow = ageDistributionData.find(
-          (row) => row.ageGroup === "Total"
+          (row) => row.ageGroup === "Total",
         );
         const tableTotals = totalDataRow?.tableTotals || {};
 
@@ -2803,7 +2847,7 @@ const ManageResidentsPage = () => {
         const firstTableEndY = drawTable(
           firstTableAgeGroups,
           startY,
-          tableTotals.firstTable
+          tableTotals.firstTable,
         );
 
         // Draw second table (11-22 years) below the first table
@@ -2811,7 +2855,7 @@ const ManageResidentsPage = () => {
         const secondTableEndY = drawTable(
           secondTableAgeGroups,
           secondTableStartY,
-          tableTotals.secondTable
+          tableTotals.secondTable,
         );
 
         // Draw third table (23-34 years) below the second table
@@ -2819,7 +2863,7 @@ const ManageResidentsPage = () => {
         const thirdTableEndY = drawTable(
           thirdTableAgeGroups,
           thirdTableStartY,
-          tableTotals.thirdTable
+          tableTotals.thirdTable,
         );
 
         // Draw fourth table (35-46 years) below the third table
@@ -2827,7 +2871,7 @@ const ManageResidentsPage = () => {
         const fourthTableEndY = drawTable(
           fourthTableAgeGroups,
           fourthTableStartY,
-          tableTotals.fourthTable
+          tableTotals.fourthTable,
         );
 
         // Draw fifth table (47-60+ years) below the fourth table
@@ -2835,7 +2879,7 @@ const ManageResidentsPage = () => {
         const fifthTableEndY = drawTable(
           fifthTableAgeGroups,
           fifthTableStartY,
-          tableTotals.fifthTable
+          tableTotals.fifthTable,
         );
 
         // Add summary section (clean and simple) - positioned after fifth table
@@ -2848,7 +2892,7 @@ const ManageResidentsPage = () => {
         doc.text("SUMMARY", startX, summaryY);
 
         const totalRow = ageDistributionData.find(
-          (row) => row.ageGroup === "Total"
+          (row) => row.ageGroup === "Total",
         );
         if (totalRow) {
           doc.setFontSize(10);
@@ -2870,35 +2914,35 @@ const ManageResidentsPage = () => {
                 totalRow.tableTotals.firstTable?.female || 0
               }F`,
               startX,
-              summaryY + 44
+              summaryY + 44,
             );
             doc.text(
               `11-22 Y.O: ${totalRow.tableTotals.secondTable?.male || 0}M, ${
                 totalRow.tableTotals.secondTable?.female || 0
               }F`,
               startX,
-              summaryY + 53
+              summaryY + 53,
             );
             doc.text(
               `23-34 Y.O: ${totalRow.tableTotals.thirdTable?.male || 0}M, ${
                 totalRow.tableTotals.thirdTable?.female || 0
               }F`,
               startX,
-              summaryY + 62
+              summaryY + 62,
             );
             doc.text(
               `35-46 Y.O: ${totalRow.tableTotals.fourthTable?.male || 0}M, ${
                 totalRow.tableTotals.fourthTable?.female || 0
               }F`,
               startX,
-              summaryY + 71
+              summaryY + 71,
             );
             doc.text(
               `47-60+ Y.O: ${totalRow.tableTotals.fifthTable?.male || 0}M, ${
                 totalRow.tableTotals.fifthTable?.female || 0
               }F`,
               startX,
-              summaryY + 80
+              summaryY + 80,
             );
           }
         }
@@ -2910,7 +2954,7 @@ const ManageResidentsPage = () => {
         doc.text(
           `Generated on: ${new Date().toLocaleDateString()}`,
           startX,
-          summaryY + 95
+          summaryY + 95,
         );
 
         // Save the PDF
@@ -2924,7 +2968,7 @@ const ManageResidentsPage = () => {
         addNotification(
           "error",
           "PDF Generation Failed",
-          "Failed to load PDF library. Please try again."
+          "Failed to load PDF library. Please try again.",
         );
       });
   };
@@ -2951,12 +2995,12 @@ const ManageResidentsPage = () => {
           // Generate detailed age distribution table PDF
           generateDetailedAgeDistributionPDF(
             response.detailedAgeDistribution,
-            filters
+            filters,
           );
           addNotification(
             "success",
             "Report Generated",
-            "Age grouping report has been generated successfully"
+            "Age grouping report has been generated successfully",
           );
         }
       }
@@ -2964,7 +3008,7 @@ const ManageResidentsPage = () => {
       addNotification(
         "error",
         "Report Failed",
-        error.message || "Failed to generate age grouping report"
+        error.message || "Failed to generate age grouping report",
       );
       throw error;
     }
@@ -2992,7 +3036,7 @@ const ManageResidentsPage = () => {
           addNotification(
             "success",
             "Report Generated",
-            "PWD members report has been generated successfully"
+            "PWD members report has been generated successfully",
           );
         }
       }
@@ -3000,7 +3044,7 @@ const ManageResidentsPage = () => {
       addNotification(
         "error",
         "Report Failed",
-        error.message || "Failed to generate 4Ps members report"
+        error.message || "Failed to generate 4Ps members report",
       );
       throw error;
     }
@@ -3027,7 +3071,7 @@ const ManageResidentsPage = () => {
           addNotification(
             "success",
             "Report Generated",
-            "4Ps members report has been generated successfully"
+            "4Ps members report has been generated successfully",
           );
         }
       }
@@ -3035,7 +3079,7 @@ const ManageResidentsPage = () => {
       addNotification(
         "error",
         "Report Failed",
-        error.message || "Failed to generate 4Ps members report"
+        error.message || "Failed to generate 4Ps members report",
       );
       throw error;
     }
@@ -3064,7 +3108,7 @@ const ManageResidentsPage = () => {
           addNotification(
             "success",
             "Report Generated",
-            "Total residents report has been generated successfully"
+            "Total residents report has been generated successfully",
           );
         }
       }
@@ -3072,7 +3116,7 @@ const ManageResidentsPage = () => {
       addNotification(
         "error",
         "Report Failed",
-        error.message || "Failed to generate total residents report"
+        error.message || "Failed to generate total residents report",
       );
       throw error;
     }
@@ -3099,7 +3143,7 @@ const ManageResidentsPage = () => {
           addNotification(
             "success",
             "Report Generated",
-            "Registered voters report has been generated successfully"
+            "Registered voters report has been generated successfully",
           );
         }
       }
@@ -3107,7 +3151,7 @@ const ManageResidentsPage = () => {
       addNotification(
         "error",
         "Report Failed",
-        error.message || "Failed to generate registered voters report"
+        error.message || "Failed to generate registered voters report",
       );
       throw error;
     }
@@ -3135,7 +3179,7 @@ const ManageResidentsPage = () => {
           addNotification(
             "success",
             "Report Generated",
-            "Senior citizens report has been generated successfully"
+            "Senior citizens report has been generated successfully",
           );
         }
       }
@@ -3143,7 +3187,7 @@ const ManageResidentsPage = () => {
       addNotification(
         "error",
         "Report Failed",
-        error.message || "Failed to generate senior citizens report"
+        error.message || "Failed to generate senior citizens report",
       );
       throw error;
     }
@@ -3191,7 +3235,7 @@ const ManageResidentsPage = () => {
             columns.map((col) => {
               const value = row[col.key] || "";
               return value.toString();
-            })
+            }),
           );
 
           // Add table
@@ -3223,7 +3267,7 @@ const ManageResidentsPage = () => {
         addNotification(
           "error",
           "PDF Error",
-          "Failed to generate PDF. Please try again."
+          "Failed to generate PDF. Please try again.",
         );
       });
   };
@@ -3241,7 +3285,7 @@ const ManageResidentsPage = () => {
         addNotification(
           "success",
           "Residents Restored",
-          `${response.count} resident(s) have been restored successfully`
+          `${response.count} resident(s) have been restored successfully`,
         );
         await fetchResidents(); // Refresh the main list
         return true;
@@ -3250,7 +3294,7 @@ const ManageResidentsPage = () => {
       addNotification(
         "error",
         "Restore Failed",
-        error.message || "Failed to restore residents"
+        error.message || "Failed to restore residents",
       );
       return false;
     }
@@ -3263,7 +3307,7 @@ const ManageResidentsPage = () => {
         addNotification(
           "success",
           "All Residents Restored",
-          `${response.count} resident(s) have been restored successfully`
+          `${response.count} resident(s) have been restored successfully`,
         );
         await fetchResidents(); // Refresh the main list
         return true;
@@ -3272,7 +3316,7 @@ const ManageResidentsPage = () => {
       addNotification(
         "error",
         "Restore Failed",
-        error.message || "Failed to restore all residents"
+        error.message || "Failed to restore all residents",
       );
       return false;
     }
@@ -3304,7 +3348,7 @@ const ManageResidentsPage = () => {
             newAddress
               ? `New address: ${newAddress}`
               : "No new address provided"
-          }`
+          }`,
         );
       }
 
@@ -3314,7 +3358,7 @@ const ManageResidentsPage = () => {
       addNotification(
         "error",
         "Deactivation Failed",
-        "Failed to deactivate resident. Please try again."
+        "Failed to deactivate resident. Please try again.",
       );
     }
   };
@@ -3807,6 +3851,8 @@ const ManageResidentsPage = () => {
           purokOptions={purokOptions}
           households={households}
           filteredResidents={filteredResidents}
+          duplicateError={duplicateError}
+          setDuplicateError={setDuplicateError}
         />
       )}
 
