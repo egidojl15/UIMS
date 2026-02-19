@@ -213,7 +213,7 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
 
   const modalContent = (
     <div
-      className="modal-backdrop fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+      className="modal-backdrop bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyan-500/20 border border-white/20 relative">
@@ -1575,7 +1575,10 @@ const BarangayInfo = () => {
           />
           <div className="flex justify-center">
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => {
+                setFormData({ title: "", content: "" });
+                setShowCreateModal(true);
+              }}
               className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-2xl hover:shadow-xl flex items-center gap-3 font-medium transform hover:scale-105"
             >
               <Plus size={20} /> Create Announcement
@@ -1635,7 +1638,10 @@ const BarangayInfo = () => {
       {/* Create Announcement Modal */}
       <Modal
         isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={() => {
+          setShowCreateModal(false);
+          setFormData({ title: "", content: "" });
+        }}
         title="Create New Announcement"
       >
         <div className="space-y-6">
@@ -1668,8 +1674,10 @@ const BarangayInfo = () => {
           </div>
           <div className="flex gap-3 justify-end pt-4 border-t">
             <button
-              onClick={() => setShowCreateModal(false)}
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50"
+              onClick={() => {
+                setShowCreateModal(false);
+                setFormData({ title: "", content: "" });
+              }}
             >
               Cancel
             </button>
