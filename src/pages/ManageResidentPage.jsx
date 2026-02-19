@@ -851,7 +851,6 @@ const EditResidentModal = ({
               {photoPreview ? (
                 <img
                   src={photoPreview}
-                  alt="Resident"
                   className="w-24 h-24 rounded-full object-cover mb-2"
                 />
               ) : (
@@ -1429,7 +1428,6 @@ const AddResidentModal = ({
               {photoPreview ? (
                 <img
                   src={photoPreview}
-                  alt="Resident"
                   className="w-24 h-24 rounded-full object-cover mb-2"
                 />
               ) : (
