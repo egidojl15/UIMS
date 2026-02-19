@@ -562,7 +562,6 @@ const ViewResidentModal = ({
               {selectedResident.photo_url ? (
                 <img
                   src={`https://uims-backend-production.up.railway.app${selectedResident.photo_url}`}
-                  alt="Resident"
                   className="w-48 h-48 rounded-full object-cover border-4 border-[#B3DEF8]"
                   onError={(e) => {
                     e.target.src = "/placeholder-avatar.png"; // Fallback image (add this asset to your public folder)
