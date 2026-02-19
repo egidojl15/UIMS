@@ -67,7 +67,7 @@ const navItems = [
   },
   { name: "Blotter", path: "/dashboard/councilor/blotter", icon: ShieldAlert },
   {
-    name: "Log Book",
+    name: "Log Books",
     path: "/dashboard/councilor/logbook",
     icon: BookCopyIcon,
   },
