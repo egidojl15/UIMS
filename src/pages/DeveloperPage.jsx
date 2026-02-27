@@ -4,7 +4,7 @@ import { Github, Facebook, Instagram, Disc, Users, X } from "lucide-react";
 const teamMembers = [
   {
     name: "Camille Tan Barola",
-    role: "Lead Developer/QA Tester/DevOps Expert",
+    role: "Lead Developer - QA Tester - DevOps Expert",
     contribution: "Oversees the full technical lifecycle as Lead Developer and DevOps Expert. Beyond architecting the core system, they implemented critical functionality while maintaining a double-layered QA framework to ensure seamless deployments and technical excellence across the board.",
     image: "/images/camille.jpg",
     github: "https://github.com/Xamilla",
@@ -14,7 +14,7 @@ const teamMembers = [
   },
   {
     name: "Jetler Egido",
-    role: "Frontend Specialist/ DevOps Expert/QA Tester",
+    role: "Frontend Specialist - DevOps Expert - QA Tester",
     contribution: "Bridging the gap between design and deployment, they crafted the intuitive UI/UX and high-performance React architecture. By managing the DevOps pipeline and rigorous QA testing, they ensure that every user interaction is not only visually stunning but also lightning-fast and bug-free.",
     image: "/images/jetler.jpg",
     github: "https://github.com/egidojl15",
@@ -34,9 +34,9 @@ const teamMembers = [
   },
   {
     name: "Marion Dave Montederamos",
-    role: "QA Tester/Backend Engineer",
+    role: "QA Tester - Backend Engineer",
     contribution: "Operates at the intersection of development and reliability, engineering high-performance backend logic while maintaining a comprehensive automated testing suite. By identifying edge cases and optimizing server-side performance, they ensure the platform remains secure, stable, and ready for enterprise-level traffic.",
-    image: "/images/marion.jpg",
+    image: "/images/marion.png",
     github: "https://github.com/member4",
     facebook: "https://www.facebook.com/warion.poortweny.420",
     instagram: "https://instagram.com/member4",
