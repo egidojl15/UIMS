@@ -13,6 +13,7 @@ import SpotMap from "./pages/SpotMap";
 import ProjectActivity from "./pages/ProjectActivity";
 import Officials from "./pages/Officials";
 import Request from "./pages/Request";
+import DeveloperPage from"./pages/DeveloperPage";
 import Login from "./pages/Login";
 
 // Dashboard component imports
@@ -65,6 +66,7 @@ function App() {
               <Route path="/officials" element={<Officials />} />
               <Route path="/request" element={<Request />} />
               <Route path="/about" element={<BarangayDayDoc />} />
+              <Route path="/developers" element={<DeveloperPage />} /> 
             </Route>
             {/* Private routes for BHW with nested routes */}
             <Route
