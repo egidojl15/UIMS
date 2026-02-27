@@ -4,8 +4,8 @@ import { Github, Facebook, Instagram, Disc, Users, X } from "lucide-react";
 const teamMembers = [
   {
     name: "Camille Tan Barola",
-    role: "Lead Developer",
-    contribution: "Architected the core system and implemented key features.",
+    role: "Lead Developer/QA Tester/DevOps Expert",
+    contribution: "Oversees the full technical lifecycle as Lead Developer and DevOps Expert. Beyond architecting the core system, they implemented critical functionality while maintaining a double-layered QA framework to ensure seamless deployments and technical excellence across the board.",
     image: "/images/camille.jpg",
     github: "https://github.com/Xamilla",
     facebook: "https://www.facebook.com/xamillatb",
@@ -14,29 +14,29 @@ const teamMembers = [
   },
   {
     name: "Jetler Egido",
-    role: "Frontend Specialist",
-    contribution: "Designed intuitive UI/UX and integrated React components.",
+    role: "Frontend Specialist/ DevOps Expert/QA Tester",
+    contribution: "Bridging the gap between design and deployment, they crafted the intuitive UI/UX and high-performance React architecture. By managing the DevOps pipeline and rigorous QA testing, they ensure that every user interaction is not only visually stunning but also lightning-fast and bug-free.",
     image: "/images/jetler.jpg",
-    github: "https://github.com/member2",
+    github: "https://github.com/egidojl15",
     facebook: "https://www.facebook.com/mr.potato15",
-    instagram: "https://instagram.com/member2",
+    instagram: "https://instagram.com/",
     discord: "member2#5678",
   },
   {
     name: "Joshua Anthony Cabales",
     role: "Backend Engineer",
-    contribution: "Built robust APIs and database integrations.",
+    contribution: "Engineered the high-performance server-side architecture and designed the complex database schemas that power our platform. By developing secure, scalable APIs and optimizing data retrieval, they ensure our application handles heavy traffic with absolute stability and speed.",
     image: "/images/tuwad.jpg",
-    github: "https://github.com/member3",
+    github: "https://github.com/",
     facebook: "https://www.facebook.com/sikee696",
-    instagram: "https://instagram.com/member3",
+    instagram: "https://instagram.com/",
     discord: "member3#9012",
   },
   {
     name: "Marion Dave Montederamos",
-    role: "QA Tester",
-    contribution: "Ensured system reliability through rigorous testing.",
-    image: "/images/marion.png",
+    role: "QA Tester/Backend Engineer",
+    contribution: "Operates at the intersection of development and reliability, engineering high-performance backend logic while maintaining a comprehensive automated testing suite. By identifying edge cases and optimizing server-side performance, they ensure the platform remains secure, stable, and ready for enterprise-level traffic.",
+    image: "/images/marion.jpg",
     github: "https://github.com/member4",
     facebook: "https://www.facebook.com/warion.poortweny.420",
     instagram: "https://instagram.com/member4",
@@ -44,19 +44,19 @@ const teamMembers = [
   },
   {
     name: "Samantha Kate P. Barola",
-    role: "DevOps Expert",
-    contribution: "Managed deployments and CI/CD pipelines.",
+    role: "UI Designer",
+    contribution: "Revolutionizing the workflow by bridging creative design with technical execution. Beyond crafting high-fidelity user interfaces, they architected the deployment infrastructure and CI/CD pipelines, ensuring that every design iteration moves from the canvas to the live environment with automated precision and speed.",
     image: "/images/sam.jpg",
-    github: "https://github.com/member5",
+    github: "https://github.com/",
     facebook: "https://www.facebook.com/samanthabarola.2003",
-    instagram: "https://instagram.com/member5",
+    instagram: "https://instagram.com/",
     discord: "member5#7890",
   },
   {
     name: "Harris Requiso",
     role: "UI Designer",
-    contribution: "Crafted visually appealing designs aligned with Oceanic Blueprint theme.",
-    image: "/images/harris.png",
+    contribution: "Revolutionizing the workflow by bridging creative design with technical execution. Beyond crafting high-fidelity user interfaces, they architected the deployment infrastructure and CI/CD pipelines, ensuring that every design iteration moves from the canvas to the live environment with automated precision and speed.",
+    image: "/images/harrish.png",
     github: "https://github.com/member6",
     facebook: "https://www.facebook.com/harris.requiso",
     instagram: "https://instagram.com/member6",
@@ -91,8 +91,8 @@ const DeveloperPage = () => {
   };
 
   const Modal = ({ onClose }) => (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl shadow-cyan-500/30 border border-white/20">
+    <div className="fixed inset-0 bg-black/65 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-5xl w-full max-h-[92vh] overflow-hidden shadow-2xl shadow-cyan-600/30 border border-white/30">
         <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-6 py-5 flex justify-between items-center z-10">
           <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
             <div className="w-2.5 h-2.5 bg-cyan-300 rounded-full animate-pulse"></div>
@@ -107,59 +107,61 @@ const DeveloperPage = () => {
         </div>
 
         <div className="grid md:grid-cols-2 h-full">
-          <div className="bg-gradient-to-br from-[#B3DEF8]/40 to-[#58A1D3]/30 flex items-center justify-center p-8 md:p-12 border-b md:border-b-0 md:border-r border-gray-200/60">
+          {/* Left: Full-size image */}
+          <div className="relative bg-gradient-to-br from-[#B3DEF8]/50 to-[#58A1D3]/40 overflow-hidden">
             <img
               src={selectedMember.image}
               alt={selectedMember.name}
-              className="w-56 h-56 md:w-72 md:h-72 rounded-2xl object-cover shadow-2xl ring-8 ring-white/60 transform hover:scale-105 transition-transform duration-500"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
             />
           </div>
 
-          <div className="p-6 md:p-10 overflow-y-auto flex flex-col">
+          {/* Right: Details */}
+          <div className="p-6 md:p-10 lg:p-12 overflow-y-auto flex flex-col bg-white/80">
             <div className="space-y-6">
               <div>
-                <h3 className="text-3xl font-bold text-[#0F4C81]">{selectedMember.name}</h3>
-                <p className="text-xl text-[#58A1D3] font-medium mt-2">{selectedMember.role}</p>
+                <h3 className="text-3xl md:text-4xl font-bold text-[#0F4C81]">{selectedMember.name}</h3>
+                <p className="text-xl md:text-2xl text-[#58A1D3] font-medium mt-2">{selectedMember.role}</p>
               </div>
 
-              <div className="prose prose-lg text-gray-700 leading-relaxed">
+              <div className="prose prose-lg md:prose-xl text-gray-800 leading-relaxed">
                 <p className="whitespace-pre-wrap">{selectedMember.contribution}</p>
               </div>
 
-              <div className="pt-8 border-t border-gray-200">
-                <p className="text-sm text-gray-500 mb-4 font-medium uppercase tracking-wide">Connect</p>
+              <div className="pt-8 border-t border-gray-300 mt-auto">
+                <p className="text-sm text-gray-600 mb-4 font-medium uppercase tracking-wider">Connect</p>
                 <div className="flex flex-wrap gap-5">
                   <a
                     href={selectedMember.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3.5 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:scale-110 transition-all duration-300"
+                    className="p-4 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-xl hover:scale-110 transition-all duration-300"
                   >
-                    <Github size={26} />
+                    <Github size={28} />
                   </a>
                   <a
                     href={selectedMember.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3.5 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:scale-110 transition-all duration-300"
+                    className="p-4 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-xl hover:scale-110 transition-all duration-300"
                   >
-                    <Facebook size={26} />
+                    <Facebook size={28} />
                   </a>
                   <a
                     href={selectedMember.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3.5 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:scale-110 transition-all duration-300"
+                    className="p-4 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-xl hover:scale-110 transition-all duration-300"
                   >
-                    <Instagram size={26} />
+                    <Instagram size={28} />
                   </a>
                   <a
                     href={`https://discord.com/users/${selectedMember.discord.split('#')[0] || ''}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3.5 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-lg hover:scale-110 transition-all duration-300"
+                    className="p-4 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-xl hover:scale-110 transition-all duration-300"
                   >
-                    <Disc size={26} />
+                    <Disc size={28} />
                   </a>
                 </div>
               </div>
@@ -201,7 +203,6 @@ const DeveloperPage = () => {
               <div className="w-3 h-3 bg-[#58A1D3] rounded-full animate-pulse"></div>
             </div>
 
-            {/* Logos below the title */}
             <div className="flex items-center justify-center gap-6 md:gap-12 flex-wrap">
               <img
                 src="/images/department-log.png"
@@ -226,7 +227,6 @@ const DeveloperPage = () => {
       <main className="relative z-10 px-6 sm:px-8 lg:px-12 pb-24">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 lg:gap-12 relative">
-            {/* Developers */}
             <div className="lg:col-span-3">
               <h2 className="text-3xl font-bold text-[#0F4C81] mb-10 flex items-center gap-4">
                 <Users size={32} className="text-[#58A1D3]" />
@@ -269,10 +269,8 @@ const DeveloperPage = () => {
               </div>
             </div>
 
-            {/* Divider */}
             <div className="hidden lg:block absolute top-0 bottom-0 left-3/4 w-px bg-gradient-to-b from-transparent via-[#58A1D3]/50 to-transparent pointer-events-none" />
 
-            {/* Adviser */}
             <div className="lg:col-span-1">
               <h2 className="text-3xl font-bold text-[#0F4C81] mb-10 flex items-center gap-4">
                 <Users size={32} className="text-[#58A1D3]" />
