@@ -36,7 +36,7 @@ const teamMembers = [
     name: "Marion Dave Montederamos",
     role: "QA Tester",
     contribution: "Ensured system reliability through rigorous testing.",
-    image: "/images/yorn.jpg",
+    image: "/images/marion.png",
     github: "https://github.com/member4",
     facebook: "https://www.facebook.com/warion.poortweny.420",
     instagram: "https://instagram.com/member4",
@@ -46,7 +46,7 @@ const teamMembers = [
     name: "Samantha Kate P. Barola",
     role: "DevOps Expert",
     contribution: "Managed deployments and CI/CD pipelines.",
-    image: "/images/member5.jpg",
+    image: "/images/sam.jpg",
     github: "https://github.com/member5",
     facebook: "https://www.facebook.com/samanthabarola.2003",
     instagram: "https://instagram.com/member5",
@@ -56,7 +56,7 @@ const teamMembers = [
     name: "Harris Requiso",
     role: "UI Designer",
     contribution: "Crafted visually appealing designs aligned with Oceanic Blueprint theme.",
-    image: "/images/member6.jpg",
+    image: "/images/harris.png",
     github: "https://github.com/member6",
     facebook: "https://www.facebook.com/harris.requiso",
     instagram: "https://instagram.com/member6",
@@ -93,7 +93,6 @@ const DeveloperPage = () => {
   const Modal = ({ onClose }) => (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl shadow-cyan-500/30 border border-white/20">
-        {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-6 py-5 flex justify-between items-center z-10">
           <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
             <div className="w-2.5 h-2.5 bg-cyan-300 rounded-full animate-pulse"></div>
@@ -107,18 +106,15 @@ const DeveloperPage = () => {
           </button>
         </div>
 
-        {/* Split layout: image left | content right */}
         <div className="grid md:grid-cols-2 h-full">
-          {/* Left - Image section */}
           <div className="bg-gradient-to-br from-[#B3DEF8]/40 to-[#58A1D3]/30 flex items-center justify-center p-8 md:p-12 border-b md:border-b-0 md:border-r border-gray-200/60">
             <img
               src={selectedMember.image}
               alt={selectedMember.name}
-              className="w-56 h-56 md:w-72 md:h-72 rounded-full object-cover shadow-2xl ring-8 ring-white/60 transform hover:scale-105 transition-transform duration-500"
+              className="w-56 h-56 md:w-72 md:h-72 rounded-2xl object-cover shadow-2xl ring-8 ring-white/60 transform hover:scale-105 transition-transform duration-500"
             />
           </div>
 
-          {/* Right - Details section */}
           <div className="p-6 md:p-10 overflow-y-auto flex flex-col">
             <div className="space-y-6">
               <div>
@@ -176,7 +172,7 @@ const DeveloperPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] relative overflow-hidden">
-      {/* Floating background bubbles */}
+      {/* Floating bubbles */}
       <div className="fixed inset-0 pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div
@@ -193,39 +189,44 @@ const DeveloperPage = () => {
         ))}
       </div>
 
-      {/* Hero Header with logos */}
+      {/* Hero Header */}
       <section className="relative pt-28 pb-16 px-6 sm:px-8 lg:px-12">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center gap-4 md:gap-8 mb-6 flex-wrap">
-            <img
-              src="/images/department-log.png"
-              alt="Department Logo"
-              className="h-16 md:h-20 w-auto object-contain drop-shadow-lg"
-            />
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col items-center mb-6">
+            <div className="flex items-center justify-center gap-4 mb-5">
               <div className="w-3 h-3 bg-[#0F4C81] rounded-full animate-pulse"></div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] bg-clip-text text-transparent">
                 Meet Our Oceanic Blueprint Team
               </h1>
               <div className="w-3 h-3 bg-[#58A1D3] rounded-full animate-pulse"></div>
             </div>
-            <img
-              src="/images/SJC-LOGO-NEWER.png"
-              alt="SJC Logo"
-              className="h-16 md:h-20 w-auto object-contain drop-shadow-lg"
-            />
+
+            {/* Logos below the title */}
+            <div className="flex items-center justify-center gap-6 md:gap-12 flex-wrap">
+              <img
+                src="/images/department-log.png"
+                alt="Department Logo"
+                className="h-16 md:h-20 w-auto object-contain drop-shadow-lg"
+              />
+              <img
+                src="/images/SJC-LOGO-NEWER.png"
+                alt="SJC Logo"
+                className="h-16 md:h-20 w-auto object-contain drop-shadow-lg"
+              />
+            </div>
           </div>
+
           <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto font-light">
             Dive into the depths of innovation with our team of dedicated developers and our esteemed adviser.
           </p>
         </div>
       </section>
 
-      {/* Main content with visual separation */}
+      {/* Main content */}
       <main className="relative z-10 px-6 sm:px-8 lg:px-12 pb-24">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 lg:gap-12 relative">
-            {/* Developers - left side */}
+            {/* Developers */}
             <div className="lg:col-span-3">
               <h2 className="text-3xl font-bold text-[#0F4C81] mb-10 flex items-center gap-4">
                 <Users size={32} className="text-[#58A1D3]" />
@@ -250,7 +251,7 @@ const DeveloperPage = () => {
                       <img
                         src={member.image}
                         alt={member.name}
-                        className="w-32 h-32 mx-auto rounded-full object-cover shadow-lg mb-5 group-hover:scale-110 transition-transform duration-400"
+                        className="w-32 h-32 mx-auto rounded-2xl object-cover shadow-lg mb-5 group-hover:scale-110 transition-transform duration-400"
                       />
                       <h3 className="text-xl font-bold text-[#06172E] group-hover:text-[#0F4C81] transition-colors">
                         {member.name}
@@ -268,10 +269,10 @@ const DeveloperPage = () => {
               </div>
             </div>
 
-            {/* Vertical divider - only visible on lg+ */}
+            {/* Divider */}
             <div className="hidden lg:block absolute top-0 bottom-0 left-3/4 w-px bg-gradient-to-b from-transparent via-[#58A1D3]/50 to-transparent pointer-events-none" />
 
-            {/* Adviser - right side */}
+            {/* Adviser */}
             <div className="lg:col-span-1">
               <h2 className="text-3xl font-bold text-[#0F4C81] mb-10 flex items-center gap-4">
                 <Users size={32} className="text-[#58A1D3]" />
@@ -289,7 +290,7 @@ const DeveloperPage = () => {
                   <img
                     src={adviser.image}
                     alt={adviser.name}
-                    className="w-32 h-32 mx-auto rounded-full object-cover shadow-lg mb-5 group-hover:scale-110 transition-transform duration-400"
+                    className="w-32 h-32 mx-auto rounded-2xl object-cover shadow-lg mb-5 group-hover:scale-110 transition-transform duration-400"
                   />
                   <h3 className="text-xl font-bold text-[#06172E] group-hover:text-[#0F4C81] transition-colors">
                     {adviser.name}
@@ -308,7 +309,6 @@ const DeveloperPage = () => {
         </div>
       </main>
 
-      {/* Modal */}
       {showDetailModal && selectedMember && <Modal onClose={closeDetailModal} />}
 
       <style jsx global>{`
