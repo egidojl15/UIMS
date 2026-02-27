@@ -11,6 +11,7 @@ import {
   Award,
   History,
   LogIn,
+  laptop,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { name: "Officials", to: "/officials", icon: Users },
   { name: "Requests", to: "/request", icon: Award },
   { name: "About", to: "/about", icon: BookAIcon },
+  { name: "Developers", to: "/developers", icon: laptop },
 ];
 
 const Navbar = () => {
