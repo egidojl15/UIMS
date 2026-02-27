@@ -1,28 +1,25 @@
 // src/components/Navbar.jsx
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BookAIcon, Menu, X, Activity } from "lucide-react";
+import { BookAIcon, Menu, X, Activity, Laptop } from "lucide-react"; // ← make sure Laptop is imported
 import {
   MapPin,
   Calendar,
   Users,
   FileText,
-  Phone,
   Award,
-  History,
   LogIn,
-  laptop,
 } from "lucide-react";
 
 const navItems = [
   { name: "Announcements", to: "/announcements", icon: FileText },
-  { name: "Events", to: "/events", icon: Calendar },
-  { name: "Spot Map", to: "/spotmap", icon: MapPin },
-  { name: "ProjectActivity", to: "/projectactivity", icon: Activity },
-  { name: "Officials", to: "/officials", icon: Users },
-  { name: "Requests", to: "/request", icon: Award },
-  { name: "About", to: "/about", icon: BookAIcon },
-  { name: "Developers", to: "/developerpage", icon: laptop },
+  { name: "Events",         to: "/events",         icon: Calendar },
+  { name: "Spot Map",       to: "/spotmap",        icon: MapPin },
+  { name: "Project Activity", to: "/projectactivity", icon: Activity },
+  { name: "Officials",      to: "/officials",      icon: Users },
+  { name: "Requests",       to: "/request",        icon: Award },
+  { name: "About",          to: "/about",          icon: BookAIcon },
+  { name: "Developers",     to: "/developerpage",  icon: Laptop },   // ← confirmed here
 ];
 
 const Navbar = () => {
@@ -47,7 +44,6 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* Upper Ichon (side by side) + Management System (below) */}
             <div className="flex flex-col justify-center">
               <h1 className="text-xl font-bold text-[#0F4C81] flex items-center gap-1">
                 <span>Upper</span>
@@ -57,7 +53,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* DESKTOP NAV */}
+          {/* DESKTOP NAV – visible on lg and up */}
           <nav className="hidden lg:flex items-center space-x-1">
             {navItems.map((item) => {
               const isActive = pathname === item.to;
@@ -78,7 +74,7 @@ const Navbar = () => {
               );
             })}
 
-            {/* Reserve space for Login button so nothing shifts */}
+            {/* Reserve space for Login button */}
             <div className="w-28 h-10 ml-1 flex items-center justify-center">
               {isLoginPage && (
                 <Link
@@ -91,7 +87,7 @@ const Navbar = () => {
             </div>
           </nav>
 
-          {/* MOBILE TOGGLE */}
+          {/* MOBILE HAMBURGER */}
           <button
             onClick={toggleMenu}
             className="lg:hidden p-2 text-[#0F4C81] hover:bg-[#B3DEF8] rounded-lg transition-colors"
@@ -101,10 +97,10 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* MOBILE NAV */}
+      {/* MOBILE MENU – now includes Developers */}
       {isMenuOpen && (
         <div className="lg:hidden bg-white border-t border-gray-200">
-          <div className="px-4 py-2 space-y-1">
+          <div className="px-4 py-3 space-y-2">
             {navItems.map((item) => {
               const isActive = pathname === item.to;
               return (
@@ -112,14 +108,14 @@ const Navbar = () => {
                   key={item.name}
                   to={item.to}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-full text-sm font-medium transition-all duration-300
+                  className={`flex items-center gap-3 px-4 py-3 rounded-full text-base font-medium transition-all
                     ${
                       isActive
-                        ? "bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white shadow-lg shadow-blue-500/30"
-                        : "text-[#0F4C81] hover:bg-[#B3DEF8]"
+                        ? "bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] text-white shadow-md"
+                        : "text-[#0F4C81] hover:bg-[#E6F3FF]"
                     }`}
                 >
-                  <item.icon size={16} />
+                  <item.icon size={20} />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -129,9 +125,9 @@ const Navbar = () => {
               <Link
                 to="/login"
                 onClick={() => setIsMenuOpen(false)}
-                className="flex items-center justify-center gap-2 w-full bg-[#06172E] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-colors mt-2"
+                className="flex items-center justify-center gap-2 w-full bg-[#06172E] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-colors mt-3 text-base font-medium"
               >
-                <LogIn size={16} />
+                <LogIn size={20} />
                 <span>Login</span>
               </Link>
             )}
