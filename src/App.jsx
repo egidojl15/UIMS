@@ -66,7 +66,7 @@ function App() {
               <Route path="/officials" element={<Officials />} />
               <Route path="/request" element={<Request />} />
               <Route path="/about" element={<BarangayDayDoc />} />
-              <Route path="/developers" element={<DeveloperPage />} /> 
+              <Route path="/developerpage" element={<DeveloperPage />} /> 
             </Route>
             {/* Private routes for BHW with nested routes */}
             <Route

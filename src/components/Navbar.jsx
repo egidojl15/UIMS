@@ -21,8 +21,8 @@ const navItems = [
   { name: "ProjectActivity", to: "/projectactivity", icon: Activity },
   { name: "Officials", to: "/officials", icon: Users },
   { name: "Requests", to: "/request", icon: Award },
-  { name: "developr", to: "/developer", icon: BookAIcon },
-  { name: "Developers", to: "/developer", icon: laptop },
+  { name: "About", to: "/about", icon: BookAIcon },
+  { name: "Developers", to: "/developerpage", icon: laptop },
 ];
 
 const Navbar = () => {
