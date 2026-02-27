@@ -5,7 +5,8 @@ const teamMembers = [
   {
     name: "Camille Tan Barola",
     role: "Lead Developer - QA Tester - DevOps Expert",
-    contribution: "Oversees the full technical lifecycle as Lead Developer and DevOps Expert. Beyond architecting the core system, they implemented critical functionality while maintaining a double-layered QA framework to ensure seamless deployments and technical excellence across the board.",
+    contribution:
+      "Oversees the full technical lifecycle as Lead Developer and DevOps Expert. Beyond architecting the core system, they implemented critical functionality while maintaining a double-layered QA framework to ensure seamless deployments and technical excellence across the board.",
     image: "/images/camille.jpg",
     github: "https://github.com/Xamilla",
     facebook: "https://www.facebook.com/xamillatb",
@@ -15,7 +16,8 @@ const teamMembers = [
   {
     name: "Jetler Egido",
     role: "Frontend Specialist - DevOps Expert - QA Tester",
-    contribution: "Bridging the gap between design and deployment, they crafted the intuitive UI/UX and high-performance React architecture. By managing the DevOps pipeline and rigorous QA testing, they ensure that every user interaction is not only visually stunning but also lightning-fast and bug-free.",
+    contribution:
+      "Bridging the gap between design and deployment, they crafted the intuitive UI/UX and high-performance React architecture. By managing the DevOps pipeline and rigorous QA testing, they ensure that every user interaction is not only visually stunning but also lightning-fast and bug-free.",
     image: "/images/jetler.jpg",
     github: "https://github.com/egidojl15",
     facebook: "https://www.facebook.com/mr.potato15",
@@ -25,7 +27,8 @@ const teamMembers = [
   {
     name: "Joshua Anthony Cabales",
     role: "Backend Engineer",
-    contribution: "Engineered the high-performance server-side architecture and designed the complex database schemas that power our platform. By developing secure, scalable APIs and optimizing data retrieval, they ensure our application handles heavy traffic with absolute stability and speed.",
+    contribution:
+      "Engineered the high-performance server-side architecture and designed the complex database schemas that power our platform. By developing secure, scalable APIs and optimizing data retrieval, they ensure our application handles heavy traffic with absolute stability and speed.",
     image: "/images/tuwad.jpg",
     github: "https://github.com/",
     facebook: "https://www.facebook.com/sikee696",
@@ -35,7 +38,8 @@ const teamMembers = [
   {
     name: "Marion Dave Montederamos",
     role: "QA Tester - Backend Engineer",
-    contribution: "Operates at the intersection of development and reliability, engineering high-performance backend logic while maintaining a comprehensive automated testing suite. By identifying edge cases and optimizing server-side performance, they ensure the platform remains secure, stable, and ready for enterprise-level traffic.",
+    contribution:
+      "Operates at the intersection of development and reliability, engineering high-performance backend logic while maintaining a comprehensive automated testing suite. By identifying edge cases and optimizing server-side performance, they ensure the platform remains secure, stable, and ready for enterprise-level traffic.",
     image: "/images/marion.png",
     github: "https://github.com/member4",
     facebook: "https://www.facebook.com/warion.poortweny.420",
@@ -45,7 +49,8 @@ const teamMembers = [
   {
     name: "Samantha Kate P. Barola",
     role: "UI Designer",
-    contribution: "Revolutionizing the workflow by bridging creative design with technical execution. Beyond crafting high-fidelity user interfaces, they architected the deployment infrastructure and CI/CD pipelines, ensuring that every design iteration moves from the canvas to the live environment with automated precision and speed.",
+    contribution:
+      "Revolutionizing the workflow by bridging creative design with technical execution. Beyond crafting high-fidelity user interfaces, they architected the deployment infrastructure and CI/CD pipelines, ensuring that every design iteration moves from the canvas to the live environment with automated precision and speed.",
     image: "/images/sam.jpg",
     github: "https://github.com/",
     facebook: "https://www.facebook.com/samanthabarola.2003",
@@ -55,7 +60,8 @@ const teamMembers = [
   {
     name: "Harris Requiso",
     role: "UI Designer",
-    contribution: "Revolutionizing the workflow by bridging creative design with technical execution. Beyond crafting high-fidelity user interfaces, they architected the deployment infrastructure and CI/CD pipelines, ensuring that every design iteration moves from the canvas to the live environment with automated precision and speed.",
+    contribution:
+      "Revolutionizing the workflow by bridging creative design with technical execution. Beyond crafting high-fidelity user interfaces, they architected the deployment infrastructure and CI/CD pipelines, ensuring that every design iteration moves from the canvas to the live environment with automated precision and speed.",
     image: "/images/harrish.png",
     github: "https://github.com/member6",
     facebook: "https://www.facebook.com/harris.requiso",
@@ -96,8 +102,8 @@ const DeveloperPage = () => {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl relative">
-          {/* Header bar */}
-          <div className="bg-gradient-to-r from-blue-700 to-blue-500 px-6 py-4 flex items-center justify-between">
+          {/* Updated header - dark navy blue to match graduation card style */}
+          <div className="bg-[#0F4C81] px-6 py-5 flex items-center justify-between shadow-md">
             <div className="flex items-center gap-3">
               <span className="text-white text-xl font-bold">•</span>
               <h2 className="text-xl md:text-2xl font-bold text-white">
@@ -114,7 +120,7 @@ const DeveloperPage = () => {
 
           <div className="grid md:grid-cols-2">
             {/* Left - Image */}
-            <div className="relative h-80 md:h-auto bg-gray-50 overflow-hidden">
+            <div className="relative h-80 md:h-auto bg-gray-100 overflow-hidden">
               <img
                 src={selectedMember.image}
                 alt={selectedMember.name}
@@ -124,12 +130,12 @@ const DeveloperPage = () => {
 
             {/* Right - Content */}
             <div className="p-6 md:p-8 lg:p-10 flex flex-col">
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <div>
-                  <h3 className="text-3xl font-bold text-blue-900">
+                  <h3 className="text-3xl font-bold text-[#0F4C81]">
                     {selectedMember.name}
                   </h3>
-                  <p className="text-xl text-blue-600 font-medium mt-1">
+                  <p className="text-xl text-[#1E40AF] font-medium mt-1">
                     {selectedMember.role}
                   </p>
                 </div>
@@ -148,7 +154,7 @@ const DeveloperPage = () => {
                       href={selectedMember.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors"
+                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-[#0F4C81] rounded-xl transition-colors"
                     >
                       <Github size={24} />
                     </a>
@@ -156,7 +162,7 @@ const DeveloperPage = () => {
                       href={selectedMember.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors"
+                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-[#0F4C81] rounded-xl transition-colors"
                     >
                       <Facebook size={24} />
                     </a>
@@ -164,15 +170,15 @@ const DeveloperPage = () => {
                       href={selectedMember.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors"
+                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-[#0F4C81] rounded-xl transition-colors"
                     >
                       <Instagram size={24} />
                     </a>
                     <a
-                      href={`https://discord.com/users/${selectedMember.discord?.split('#')[0] || ''}`}
+                      href={`https://discord.com/users/${selectedMember.discord?.split("#")[0] || ""}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors"
+                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-[#0F4C81] rounded-xl transition-colors"
                     >
                       <Disc size={24} />
                     </a>
@@ -211,8 +217,8 @@ const DeveloperPage = () => {
           <div className="flex flex-col items-center mb-6">
             <div className="flex items-center justify-center gap-4 mb-5">
               <div className="w-3 h-3 bg-[#0F4C81] rounded-full animate-pulse"></div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] bg-clip-text text-transparent">
-                Meet Our Oceanic Blueprint Team
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold bg-gradient-to-r from-[#0F4C81] to-[#3B82F6] bg-clip-text text-transparent">
+                Expert Minds: Inside Our Dream Team
               </h1>
               <div className="w-3 h-3 bg-[#58A1D3] rounded-full animate-pulse"></div>
             </div>
@@ -259,7 +265,7 @@ const DeveloperPage = () => {
                     onClick={() => openDetailModal(member)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="absolute top-5 right-5 w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse-slow"></div>
+                    <div className="absolute top-5 right-5 w-3 h-3 bg-gradient-to-r from-[#58A1D3] to-[#0F4C81] rounded-full animate-pulse-slow"></div>
 
                     <div className="relative z-10 text-center">
                       <img
@@ -272,7 +278,7 @@ const DeveloperPage = () => {
                       </h3>
                       <p className="text-sm text-gray-600 mt-1 mb-4">{member.role}</p>
 
-                      <div className="p-4 bg-gradient-to-r from-[#B3DEF8]/20 to-transparent rounded-2xl border-l-4 border-[#58A1D3] text-left">
+                      <div className="p-4 bg-gradient-to-r from-[#B3DEF8]/20 to-transparent rounded-2xl border-l-4 border-[#0F4C81] text-left">
                         <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
                           {member.contribution}
                         </p>
@@ -296,7 +302,7 @@ const DeveloperPage = () => {
                 onClick={() => openDetailModal(adviser)}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute top-5 right-5 w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse-slow"></div>
+                <div className="absolute top-5 right-5 w-3 h-3 bg-gradient-to-r from-[#58A1D3] to-[#0F4C81] rounded-full animate-pulse-slow"></div>
 
                 <div className="relative z-10 text-center">
                   <img
@@ -309,7 +315,7 @@ const DeveloperPage = () => {
                   </h3>
                   <p className="text-sm text-gray-600 mt-1 mb-4">{adviser.role}</p>
 
-                  <div className="p-4 bg-gradient-to-r from-[#B3DEF8]/20 to-transparent rounded-2xl border-l-4 border-[#58A1D3] text-left">
+                  <div className="p-4 bg-gradient-to-r from-[#B3DEF8]/20 to-transparent rounded-2xl border-l-4 border-[#0F4C81] text-left">
                     <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
                       {adviser.contribution}
                     </p>
@@ -325,24 +331,50 @@ const DeveloperPage = () => {
 
       <style jsx global>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.96); }
-          to   { opacity: 1; transform: scale(1); }
+          from {
+            opacity: 0;
+            transform: scale(0.96);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
 
         @keyframes bubble {
-          0%   { transform: translateY(0) scale(1); opacity: 0.7; }
-          50%  { transform: translateY(-60vh) translateX(${Math.random() * 30 - 15}px) scale(1.3); opacity: 1; }
-          100% { transform: translateY(-120vh) translateX(${Math.random() * 50 - 25}px) scale(0.7); opacity: 0; }
+          0% {
+            transform: translateY(0) scale(1);
+            opacity: 0.7;
+          }
+          50% {
+            transform: translateY(-60vh) translateX(${Math.random() * 30 - 15}px) scale(1.3);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-120vh) translateX(${Math.random() * 50 - 25}px) scale(0.7);
+            opacity: 0;
+          }
         }
 
         @keyframes pulse-slow {
-          0%, 100% { transform: scale(1); }
-          50%      { transform: scale(1.4); }
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.4);
+          }
         }
 
-        .animate-fadeIn     { animation: fadeIn 0.4s ease-out; }
-        .animate-bubble     { animation: bubble linear infinite; }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+        .animate-fadeIn {
+          animation: fadeIn 0.4s ease-out;
+        }
+        .animate-bubble {
+          animation: bubble linear infinite;
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 3s ease-in-out infinite;
+        }
 
         .line-clamp-3 {
           display: -webkit-box;
