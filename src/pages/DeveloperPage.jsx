@@ -113,6 +113,7 @@ const DeveloperPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2">
+            {/* Left - Image */}
             <div className="relative h-80 md:h-auto bg-gray-50 overflow-hidden">
               <img
                 src={selectedMember.image}
@@ -121,6 +122,7 @@ const DeveloperPage = () => {
               />
             </div>
 
+            {/* Right - Content */}
             <div className="p-6 md:p-8 lg:p-10 flex flex-col">
               <div className="space-y-5">
                 <div>
@@ -239,7 +241,6 @@ const DeveloperPage = () => {
       <main className="relative z-10 px-6 sm:px-8 lg:px-12 pb-24">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 lg:gap-12 relative">
-            {/* Developers Section */}
             <div className="lg:col-span-3">
               <h2 className="text-3xl font-bold text-[#0F4C81] mb-10 flex items-center gap-4">
                 <Users size={32} className="text-[#58A1D3]" />
@@ -250,32 +251,28 @@ const DeveloperPage = () => {
                 {teamMembers.map((member, i) => (
                   <div
                     key={i}
-                    className={`group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-6 transition-all duration-500 border border-white/20 cursor-pointer ${
-                      hoveredCard === i
-                        ? "transform scale-105 shadow-2xl shadow-blue-500/20 bg-white/95"
-                        : "hover:shadow-xl hover:shadow-blue-500/10"
+                    className={`group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-6 transition-all duration-500 border border-white/20 cursor-pointer hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.03] ${
+                      hoveredCard === i ? "scale-[1.03] shadow-2xl shadow-blue-500/30" : ""
                     }`}
                     onMouseEnter={() => setHoveredCard(i)}
                     onMouseLeave={() => setHoveredCard(null)}
                     onClick={() => openDetailModal(member)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="absolute top-4 right-4 w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-slow"></div>
+                    <div className="absolute top-5 right-5 w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse-slow"></div>
 
-                    <div className="relative z-10">
-                      <div className="flex flex-col items-center mb-4">
-                        <img
-                          src={member.image}
-                          alt={member.name}
-                          className="w-32 h-32 rounded-full object-cover shadow-lg group-hover:scale-110 transition-transform duration-300 mb-4"
-                        />
-                        <h3 className="text-lg font-bold text-[#06172E] group-hover:text-[#0F4C81] transition-colors duration-300 text-center">
-                          {member.name}
-                        </h3>
-                        <p className="text-sm text-gray-500">{member.role}</p>
-                      </div>
+                    <div className="relative z-10 text-center">
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        className="w-32 h-32 mx-auto rounded-2xl object-cover shadow-lg mb-5 group-hover:scale-110 transition-transform duration-400"
+                      />
+                      <h3 className="text-xl font-bold text-[#06172E] group-hover:text-[#0F4C81] transition-colors">
+                        {member.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1 mb-4">{member.role}</p>
 
-                      <div className="mt-3 p-4 bg-gradient-to-r from-[#B3DEF8]/10 to-transparent rounded-xl border-l-4 border-[#58A1D3] group-hover:from-[#B3DEF8]/20 group-hover:to-[#58A1D3]/10 transition-all duration-300">
+                      <div className="p-4 bg-gradient-to-r from-[#B3DEF8]/20 to-transparent rounded-2xl border-l-4 border-[#58A1D3] text-left">
                         <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
                           {member.contribution}
                         </p>
@@ -286,10 +283,8 @@ const DeveloperPage = () => {
               </div>
             </div>
 
-            {/* Vertical divider */}
-            <div className="hidden lg:block absolute top-0 bottom-0 left-3/4 w-px bg-gradient-to-b from-transparent via-[#58A1D3]/40 to-transparent pointer-events-none" />
+            <div className="hidden lg:block absolute top-0 bottom-0 left-3/4 w-px bg-gradient-to-b from-transparent via-[#58A1D3]/50 to-transparent pointer-events-none" />
 
-            {/* Adviser Section - now identical style to developers */}
             <div className="lg:col-span-1">
               <h2 className="text-3xl font-bold text-[#0F4C81] mb-10 flex items-center gap-4">
                 <Users size={32} className="text-[#58A1D3]" />
@@ -297,32 +292,24 @@ const DeveloperPage = () => {
               </h2>
 
               <div
-                className={`group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-6 transition-all duration-500 border border-white/20 cursor-pointer ${
-                  hoveredCard === "adviser"
-                    ? "transform scale-105 shadow-2xl shadow-blue-500/20 bg-white/95"
-                    : "hover:shadow-xl hover:shadow-blue-500/10"
-                }`}
-                onMouseEnter={() => setHoveredCard("adviser")}
-                onMouseLeave={() => setHoveredCard(null)}
+                className="group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-6 transition-all duration-500 border border-white/20 cursor-pointer hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.03] sticky top-24"
                 onClick={() => openDetailModal(adviser)}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute top-4 right-4 w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-slow"></div>
+                <div className="absolute top-5 right-5 w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse-slow"></div>
 
-                <div className="relative z-10">
-                  <div className="flex flex-col items-center mb-4">
-                    <img
-                      src={adviser.image}
-                      alt={adviser.name}
-                      className="w-32 h-32 rounded-full object-cover shadow-lg group-hover:scale-110 transition-transform duration-300 mb-4"
-                    />
-                    <h3 className="text-lg font-bold text-[#06172E] group-hover:text-[#0F4C81] transition-colors duration-300 text-center">
-                      {adviser.name}
-                    </h3>
-                    <p className="text-sm text-gray-500">{adviser.role}</p>
-                  </div>
+                <div className="relative z-10 text-center">
+                  <img
+                    src={adviser.image}
+                    alt={adviser.name}
+                    className="w-32 h-32 mx-auto rounded-2xl object-cover shadow-lg mb-5 group-hover:scale-110 transition-transform duration-400"
+                  />
+                  <h3 className="text-xl font-bold text-[#06172E] group-hover:text-[#0F4C81] transition-colors">
+                    {adviser.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1 mb-4">{adviser.role}</p>
 
-                  <div className="mt-3 p-4 bg-gradient-to-r from-[#B3DEF8]/10 to-transparent rounded-xl border-l-4 border-[#58A1D3] group-hover:from-[#B3DEF8]/20 group-hover:to-[#58A1D3]/10 transition-all duration-300">
+                  <div className="p-4 bg-gradient-to-r from-[#B3DEF8]/20 to-transparent rounded-2xl border-l-4 border-[#58A1D3] text-left">
                     <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
                       {adviser.contribution}
                     </p>
@@ -334,7 +321,7 @@ const DeveloperPage = () => {
         </div>
       </main>
 
-      {showDetailModal && selectedMember && <Modal />}
+      {showDetailModal && <Modal />}
 
       <style jsx global>{`
         @keyframes fadeIn {
