@@ -90,87 +90,101 @@ const DeveloperPage = () => {
     setSelectedMember(null);
   };
 
-  const Modal = ({ onClose }) => (
-    <div className="fixed inset-0 bg-black/65 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-5xl w-full max-h-[92vh] overflow-hidden shadow-2xl shadow-cyan-600/30 border border-white/30">
-        <div className="sticky top-0 bg-gradient-to-r from-[#0F4C81] to-[#58A1D3] px-6 py-5 flex justify-between items-center z-10">
-          <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
-            <div className="w-2.5 h-2.5 bg-cyan-300 rounded-full animate-pulse"></div>
-            {selectedMember.name}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300 group"
-          >
-            <X size={28} className="group-hover:rotate-90 transition-transform duration-300" />
-          </button>
-        </div>
+  const Modal = () => {
+    if (!selectedMember) return null;
 
-        <div className="grid md:grid-cols-2 h-full">
-          {/* Left: Full-size image */}
-          <div className="relative bg-gradient-to-br from-[#B3DEF8]/50 to-[#58A1D3]/40 overflow-hidden">
-            <img
-              src={selectedMember.image}
-              alt={selectedMember.name}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-            />
+    return (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl relative">
+          {/* Header bar */}
+          <div className="bg-gradient-to-r from-blue-700 to-blue-500 px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-white text-xl font-bold">•</span>
+              <h2 className="text-xl md:text-2xl font-bold text-white">
+                {selectedMember.name}
+              </h2>
+            </div>
+            <button
+              onClick={closeDetailModal}
+              className="text-white hover:bg-white/20 rounded-full p-1 transition-colors"
+            >
+              <X size={28} />
+            </button>
           </div>
 
-          {/* Right: Details */}
-          <div className="p-6 md:p-10 lg:p-12 overflow-y-auto flex flex-col bg-white/80">
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-3xl md:text-4xl font-bold text-[#0F4C81]">{selectedMember.name}</h3>
-                <p className="text-xl md:text-2xl text-[#58A1D3] font-medium mt-2">{selectedMember.role}</p>
-              </div>
+          <div className="grid md:grid-cols-2">
+            {/* Left - Image */}
+            <div className="relative h-80 md:h-auto bg-gray-50 overflow-hidden">
+              <img
+                src={selectedMember.image}
+                alt={selectedMember.name}
+                className="absolute inset-0 w-full h-full object-cover object-top"
+              />
+            </div>
 
-              <div className="prose prose-lg md:prose-xl text-gray-800 leading-relaxed">
-                <p className="whitespace-pre-wrap">{selectedMember.contribution}</p>
-              </div>
+            {/* Right - Content */}
+            <div className="p-6 md:p-8 lg:p-10 flex flex-col">
+              <div className="space-y-5">
+                <div>
+                  <h3 className="text-3xl font-bold text-blue-900">
+                    {selectedMember.name}
+                  </h3>
+                  <p className="text-xl text-blue-600 font-medium mt-1">
+                    {selectedMember.role}
+                  </p>
+                </div>
 
-              <div className="pt-8 border-t border-gray-300 mt-auto">
-                <p className="text-sm text-gray-600 mb-4 font-medium uppercase tracking-wider">Connect</p>
-                <div className="flex flex-wrap gap-5">
-                  <a
-                    href={selectedMember.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-4 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-xl hover:scale-110 transition-all duration-300"
-                  >
-                    <Github size={28} />
-                  </a>
-                  <a
-                    href={selectedMember.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-4 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-xl hover:scale-110 transition-all duration-300"
-                  >
-                    <Facebook size={28} />
-                  </a>
-                  <a
-                    href={selectedMember.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-4 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-xl hover:scale-110 transition-all duration-300"
-                  >
-                    <Instagram size={28} />
-                  </a>
-                  <a
-                    href={`https://discord.com/users/${selectedMember.discord.split('#')[0] || ''}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-4 bg-gradient-to-br from-[#0F4C81] to-[#58A1D3] text-white rounded-xl hover:shadow-xl hover:scale-110 transition-all duration-300"
-                  >
-                    <Disc size={28} />
-                  </a>
+                <p className="text-gray-700 leading-relaxed text-base md:text-lg whitespace-pre-wrap">
+                  {selectedMember.contribution}
+                </p>
+
+                <div className="pt-8 mt-auto">
+                  <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-4">
+                    CONNECT
+                  </p>
+
+                  <div className="flex flex-wrap gap-4">
+                    <a
+                      href={selectedMember.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors"
+                    >
+                      <Github size={24} />
+                    </a>
+                    <a
+                      href={selectedMember.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors"
+                    >
+                      <Facebook size={24} />
+                    </a>
+                    <a
+                      href={selectedMember.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors"
+                    >
+                      <Instagram size={24} />
+                    </a>
+                    <a
+                      href={`https://discord.com/users/${selectedMember.discord?.split('#')[0] || ''}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-14 h-14 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors"
+                    >
+                      <Disc size={24} />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#B3DEF8] via-white to-[#58A1D3] relative overflow-hidden">
@@ -307,7 +321,7 @@ const DeveloperPage = () => {
         </div>
       </main>
 
-      {showDetailModal && selectedMember && <Modal onClose={closeDetailModal} />}
+      {showDetailModal && <Modal />}
 
       <style jsx global>{`
         @keyframes fadeIn {
