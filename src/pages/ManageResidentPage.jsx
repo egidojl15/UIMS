@@ -3267,9 +3267,9 @@ const ManageResidentsPage = () => {
   ) => {
     Promise.all([
       import("jspdf").then(({ default: jsPDF }) => jsPDF),
-      import("jspdf-autotable"), // side-effect only — patches jsPDF.prototype
+      import("jspdf-autotable").then((mod) => mod.default || mod),
     ])
-      .then(([jsPDF]) => {
+      .then(([jsPDF, autoTable]) => {
         try {
           const doc = new jsPDF({
             orientation: "portrait",
@@ -3403,7 +3403,7 @@ const ManageResidentsPage = () => {
             }),
           ]);
 
-          doc.autoTable({
+          const tableResult = autoTable(doc, {
             head: [tableHeaders],
             body: tableRows,
             startY: 52,
@@ -3449,7 +3449,8 @@ const ManageResidentsPage = () => {
           });
 
           // ── Signature block ────────────────────────────────────────────
-          const sigY = (doc.lastAutoTable?.finalY || 52) + 14;
+          const sigY =
+            (tableResult?.finalY || doc.lastAutoTable?.finalY || 52) + 14;
           if (sigY < pageH - 35) {
             doc.setFont("times", "normal");
             doc.setFontSize(8);
