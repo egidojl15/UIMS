@@ -3013,74 +3013,86 @@ const ManageResidentsPage = () => {
 
   const handleGeneratePWDMembersReport = async (filters) => {
     try {
-      const response = await reportsAPI.generatePWDMembers(filters);
-      if (response.success) {
-        if (filters.preview) {
+      if (filters.preview) {
+        const response = await reportsAPI.generatePWDMembers(filters);
+        if (response.success) {
           return {
             data: response.data,
             total: response.total || response.data.length,
           };
-        } else {
-          // Generate actual report file
-          generateReportFile(
-            response.data,
-            "PWD Members Report",
-            [
-              { key: "full_name", label: "Full Name", type: "text" },
-              { key: "age", label: "Age", type: "number" },
-              { key: "gender", label: "Gender", type: "text" },
-              { key: "purok", label: "Purok", type: "text" },
-              { key: "household_number", label: "Household #", type: "text" },
-              { key: "contact_number", label: "Contact", type: "text" },
-            ],
-            filters,
-          );
-          addNotification(
-            "success",
-            "Report Generated",
-            "PWD members report has been generated successfully",
-          );
         }
+      } else {
+        const data = filters.cachedData;
+        if (!data || data.length === 0) {
+          addNotification(
+            "error",
+            "Report Failed",
+            "No data to generate report. Please preview first.",
+          );
+          return;
+        }
+        const columns = [
+          { key: "full_name", label: "Full Name", type: "text" },
+          { key: "age", label: "Age", type: "number" },
+          { key: "gender", label: "Gender", type: "text" },
+          { key: "purok", label: "Purok", type: "text" },
+          { key: "household_number", label: "Household #", type: "text" },
+          { key: "contact_number", label: "Contact", type: "text" },
+        ];
+        generateReportFile(data, "PWD Members Report", columns, filters, () =>
+          setCurrentReportType(null),
+        );
+        addNotification(
+          "success",
+          "Report Generated",
+          "PWD members report has been generated successfully",
+        );
       }
     } catch (error) {
       addNotification(
         "error",
         "Report Failed",
-        error.message || "Failed to generate 4Ps members report",
+        error.message || "Failed to generate PWD members report",
       );
       throw error;
     }
   };
   const handleGenerate4PsReport = async (filters) => {
     try {
-      const response = await reportsAPI.generate4PsMembers(filters);
-      if (response.success) {
-        if (filters.preview) {
+      if (filters.preview) {
+        const response = await reportsAPI.generate4PsMembers(filters);
+        if (response.success) {
           return {
             data: response.data,
             total: response.total || response.data.length,
           };
-        } else {
-          // Generate actual report file
-          generateReportFile(
-            response.data,
-            "4Ps Members Report",
-            [
-              { key: "full_name", label: "Full Name", type: "text" },
-              { key: "age", label: "Age", type: "number" },
-              { key: "gender", label: "Gender", type: "text" },
-              { key: "purok", label: "Purok", type: "text" },
-              { key: "household_number", label: "Household #", type: "text" },
-              { key: "contact_number", label: "Contact", type: "text" },
-            ],
-            filters,
-          );
-          addNotification(
-            "success",
-            "Report Generated",
-            "4Ps members report has been generated successfully",
-          );
         }
+      } else {
+        const data = filters.cachedData;
+        if (!data || data.length === 0) {
+          addNotification(
+            "error",
+            "Report Failed",
+            "No data to generate report. Please preview first.",
+          );
+          return;
+        }
+        const columns = [
+          { key: "full_name", label: "Full Name", type: "text" },
+          { key: "age", label: "Age", type: "number" },
+          { key: "gender", label: "Gender", type: "text" },
+          { key: "purok", label: "Purok", type: "text" },
+          { key: "household_number", label: "Household #", type: "text" },
+          { key: "contact_number", label: "Contact", type: "text" },
+        ];
+        generateReportFile(data, "4Ps Members Report", columns, filters, () =>
+          setCurrentReportType(null),
+        );
+        addNotification(
+          "success",
+          "Report Generated",
+          "4Ps members report has been generated successfully",
+        );
       }
     } catch (error) {
       addNotification(
@@ -3094,39 +3106,48 @@ const ManageResidentsPage = () => {
   const handleGenerateTotalResidentsReport = async (filters) => {
     try {
       console.log("Frontend - Total Residents Report filters:", filters);
-      const response = await reportsAPI.generateTotalResidents(filters);
-      if (response.success) {
-        if (filters.preview) {
+
+      if (filters.preview) {
+        // Preview: fetch from API
+        const response = await reportsAPI.generateTotalResidents(filters);
+        if (response.success) {
           return {
             data: response.data,
             total: response.total || response.data.length,
           };
-        } else {
-          // Generate actual report file
-          generateReportFile(
-            response.data,
-            "Total Residents Report",
-            [
-              { key: "full_name", label: "Full Name", type: "text" },
-              { key: "age", label: "Age", type: "number" },
-              { key: "gender", label: "Gender", type: "text" },
-              { key: "purok", label: "Purok", type: "text" },
-              { key: "civil_status", label: "Civil Status", type: "text" },
-              { key: "contact_number", label: "Contact", type: "text" },
-              {
-                key: "registered_date",
-                label: "Registered Date",
-                type: "date",
-              },
-            ],
-            filters,
-          );
-          addNotification(
-            "success",
-            "Report Generated",
-            "Total residents report has been generated successfully",
-          );
         }
+      } else {
+        // PDF: use cachedData from preview so output matches exactly
+        const data = filters.cachedData;
+        if (!data || data.length === 0) {
+          addNotification(
+            "error",
+            "Report Failed",
+            "No data to generate report. Please preview first.",
+          );
+          return;
+        }
+        const columns = [
+          { key: "full_name", label: "Full Name", type: "text" },
+          { key: "age", label: "Age", type: "number" },
+          { key: "gender", label: "Gender", type: "text" },
+          { key: "purok", label: "Purok", type: "text" },
+          { key: "civil_status", label: "Civil Status", type: "text" },
+          { key: "contact_number", label: "Contact", type: "text" },
+          { key: "registered_date", label: "Registered Date", type: "date" },
+        ];
+        generateReportFile(
+          data,
+          "Total Residents Report",
+          columns,
+          filters,
+          () => setCurrentReportType(null),
+        );
+        addNotification(
+          "success",
+          "Report Generated",
+          "Total residents report has been generated successfully",
+        );
       }
     } catch (error) {
       addNotification(
@@ -3139,34 +3160,44 @@ const ManageResidentsPage = () => {
   };
   const handleGenerateRegisteredVotersReport = async (filters) => {
     try {
-      const response = await reportsAPI.generateRegisteredVoters(filters);
-      if (response.success) {
-        if (filters.preview) {
+      if (filters.preview) {
+        const response = await reportsAPI.generateRegisteredVoters(filters);
+        if (response.success) {
           return {
             data: response.data,
             total: response.total || response.data.length,
           };
-        } else {
-          // Generate actual report file
-          generateReportFile(
-            response.data,
-            "Registered Voters Report",
-            [
-              { key: "full_name", label: "Full Name", type: "text" },
-              { key: "age", label: "Age", type: "number" },
-              { key: "gender", label: "Gender", type: "text" },
-              { key: "purok", label: "Purok", type: "text" },
-              { key: "civil_status", label: "Civil Status", type: "text" },
-              { key: "contact_number", label: "Contact", type: "text" },
-            ],
-            filters,
-          );
-          addNotification(
-            "success",
-            "Report Generated",
-            "Registered voters report has been generated successfully",
-          );
         }
+      } else {
+        const data = filters.cachedData;
+        if (!data || data.length === 0) {
+          addNotification(
+            "error",
+            "Report Failed",
+            "No data to generate report. Please preview first.",
+          );
+          return;
+        }
+        const columns = [
+          { key: "full_name", label: "Full Name", type: "text" },
+          { key: "age", label: "Age", type: "number" },
+          { key: "gender", label: "Gender", type: "text" },
+          { key: "purok", label: "Purok", type: "text" },
+          { key: "civil_status", label: "Civil Status", type: "text" },
+          { key: "contact_number", label: "Contact", type: "text" },
+        ];
+        generateReportFile(
+          data,
+          "Registered Voters Report",
+          columns,
+          filters,
+          () => setCurrentReportType(null),
+        );
+        addNotification(
+          "success",
+          "Report Generated",
+          "Registered voters report has been generated successfully",
+        );
       }
     } catch (error) {
       addNotification(
@@ -3179,35 +3210,44 @@ const ManageResidentsPage = () => {
   };
   const handleGenerateSeniorCitizensReport = async (filters) => {
     try {
-      const response = await reportsAPI.generateSeniorCitizens(filters);
-      if (response.success) {
-        if (filters.preview) {
+      if (filters.preview) {
+        const response = await reportsAPI.generateSeniorCitizens(filters);
+        if (response.success) {
           return {
             data: response.data,
             total: response.total || response.data.length,
           };
-        } else {
-          // Generate actual report file
-          generateReportFile(
-            response.data,
-            "Senior Citizens Report",
-            [
-              { key: "full_name", label: "Full Name", type: "text" },
-              { key: "age", label: "Age", type: "number" },
-              { key: "gender", label: "Gender", type: "text" },
-              { key: "purok", label: "Purok", type: "text" },
-              { key: "civil_status", label: "Civil Status", type: "text" },
-              { key: "contact_number", label: "Contact", type: "text" },
-              // { key: "is_pwd", label: "PWD", type: "text" },
-            ],
-            filters,
-          );
-          addNotification(
-            "success",
-            "Report Generated",
-            "Senior citizens report has been generated successfully",
-          );
         }
+      } else {
+        const data = filters.cachedData;
+        if (!data || data.length === 0) {
+          addNotification(
+            "error",
+            "Report Failed",
+            "No data to generate report. Please preview first.",
+          );
+          return;
+        }
+        const columns = [
+          { key: "full_name", label: "Full Name", type: "text" },
+          { key: "age", label: "Age", type: "number" },
+          { key: "gender", label: "Gender", type: "text" },
+          { key: "purok", label: "Purok", type: "text" },
+          { key: "civil_status", label: "Civil Status", type: "text" },
+          { key: "contact_number", label: "Contact", type: "text" },
+        ];
+        generateReportFile(
+          data,
+          "Senior Citizens Report",
+          columns,
+          filters,
+          () => setCurrentReportType(null),
+        );
+        addNotification(
+          "success",
+          "Report Generated",
+          "Senior citizens report has been generated successfully",
+        );
       }
     } catch (error) {
       addNotification(
@@ -3218,7 +3258,13 @@ const ManageResidentsPage = () => {
       throw error;
     }
   };
-  const generateReportFile = (data, title, columns, extraFilters = {}) => {
+  const generateReportFile = (
+    data,
+    title,
+    columns,
+    extraFilters = {},
+    onDone = null,
+  ) => {
     import("jspdf")
       .then(({ default: jsPDF }) => {
         // ✅ FIX: jspdf-autotable has NO default export.
@@ -3444,6 +3490,8 @@ const ManageResidentsPage = () => {
           // ── Save ───────────────────────────────────────────────────────
           const filename = `${title.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(filename);
+          // Close the modal AFTER save — not before, or the download gets killed
+          if (onDone) onDone();
         });
       })
       .catch((error) => {

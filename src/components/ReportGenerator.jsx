@@ -307,13 +307,20 @@ const ReportGenerator = ({
   const handleGenerateReport = async () => {
     setLoading(true);
     try {
+      // Pass cachedData so the PDF uses EXACTLY the same data shown in preview
+      // — no second API call, no mismatch between preview and PDF output.
       await onGenerate({
         ...filtersApplied,
         dateFrom: dateRange ? dateFrom : null,
         dateTo: dateRange ? dateTo : null,
         preview: false,
+        cachedData: previewData,
       });
-      onClose();
+      // NOTE: Do NOT call onClose() here.
+      // generateReportFile uses dynamic import() internally which is NOT awaited
+      // by the handler. If we close the modal here, React unmounts the component
+      // before doc.save() fires, killing the download silently.
+      // Each handler calls onClose() itself after doc.save() completes.
     } catch (error) {
       console.error("Error generating report:", error);
     } finally {
