@@ -3189,74 +3189,251 @@ const ManageResidentsPage = () => {
       throw error;
     }
   };
-  const generateReportFile = (data, title, columns) => {
-    // Import jsPDF dynamically
+  // ─────────────────────────────────────────────────────────────────────────────
+  // DROP-IN REPLACEMENT for generateReportFile() inside ManageResidentPage.jsx
+  //
+  // Replace the existing generateReportFile() function with this entire block.
+  // Requires: jspdf and jspdf-autotable (already in your project).
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const generateReportFile = (data, title, columns, extraFilters = {}) => {
     import("jspdf")
       .then(({ default: jsPDF }) => {
-        import("jspdf-autotable").then(({ default: autoTable }) => {
-          const doc = new jsPDF();
-
-          const pageWidth = doc.internal.pageSize.getWidth();
-          const pageHeight = doc.internal.pageSize.getHeight();
-
-          // Add Republic of the Philippines header
-          doc.setFontSize(10);
-          doc.setFont(undefined, "normal");
-          doc.text("Republic of the Philippines", pageWidth / 2, 12, {
-            align: "center",
-          });
-          doc.text("Province of Southern Leyte", pageWidth / 2, 17, {
-            align: "center",
-          });
-          doc.text("Municipality of Macrohon", pageWidth / 2, 22, {
-            align: "center",
+        import("jspdf-autotable").then(() => {
+          const doc = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "a4",
           });
 
-          // Add title
-          doc.setFontSize(11);
-          doc.setFont(undefined, "normal");
-          doc.text(title, pageWidth / 2, 36, { align: "center" });
+          const pageW = doc.internal.pageSize.getWidth(); // 210 mm
+          const pageH = doc.internal.pageSize.getHeight(); // 297 mm
+          const margin = 14;
 
-          // Add date
-          doc.setFontSize(9);
-          const dateStr = new Date().toLocaleDateString("en-US", {
+          // ── Color palette ──────────────────────────────────────────────────
+          const BLUE = [0, 56, 168]; // Philippine flag blue
+          const RED = [206, 17, 38]; // Philippine flag red
+          const GOLD = [252, 209, 22]; // Philippine flag yellow
+          const WHITE = [255, 255, 255];
+          const DARK = [17, 24, 39];
+          const GRAY = [107, 114, 128];
+
+          // ── Helpers ────────────────────────────────────────────────────────
+          const setColor = (r, g, b) => doc.setTextColor(r, g, b);
+          const centerText = (text, y, size, style = "normal") => {
+            doc.setFontSize(size);
+            doc.setFont("times", style);
+            doc.text(text, pageW / 2, y, { align: "center" });
+          };
+
+          // ── TOP stripe (blue) ──────────────────────────────────────────────
+          doc.setFillColor(...BLUE);
+          doc.rect(0, 0, pageW, 5, "F");
+
+          // ── Red accent below blue ──────────────────────────────────────────
+          doc.setFillColor(...RED);
+          doc.rect(0, 5, pageW, 2, "F");
+
+          // ── Left seal circle ───────────────────────────────────────────────
+          const sealY = 14;
+          const sealR = 12;
+
+          // Philippine seal (left)
+          doc.setFillColor(...GOLD);
+          doc.circle(margin + sealR, sealY, sealR, "F");
+          doc.setFillColor(...BLUE);
+          doc.circle(margin + sealR, sealY, sealR, "S");
+          doc.setFillColor(...WHITE);
+          doc.circle(margin + sealR, sealY, 8, "F");
+          doc.setFillColor(...RED);
+          doc.circle(margin + sealR, sealY, 4, "F");
+
+          // Simple sun rays
+          doc.setDrawColor(...GOLD);
+          doc.setLineWidth(0.5);
+          for (let i = 0; i < 8; i++) {
+            const angle = (i * Math.PI * 2) / 8;
+            const x1 = margin + sealR + Math.cos(angle) * 6;
+            const y1 = sealY + Math.sin(angle) * 6;
+            const x2 = margin + sealR + Math.cos(angle) * 9;
+            const y2 = sealY + Math.sin(angle) * 9;
+            doc.line(x1, y1, x2, y2);
+          }
+
+          // Stars on left seal
+          doc.setFontSize(4);
+          setColor(...BLUE);
+          doc.text("★", margin + sealR - 5, sealY - 9);
+          doc.text("★", margin + sealR + 4.5, sealY - 9);
+          doc.text("★", margin + sealR, sealY + 10);
+
+          // Barangay seal (right) – red circle
+          const rightSealX = pageW - margin - sealR;
+          doc.setFillColor(...RED);
+          doc.circle(rightSealX, sealY, sealR, "F");
+          doc.setFillColor(...WHITE);
+          doc.circle(rightSealX, sealY, 8, "F");
+          doc.setFontSize(5);
+          setColor(...RED);
+          doc.text("BRGY", rightSealX, sealY - 1, { align: "center" });
+          doc.text("SEAL", rightSealX, sealY + 3, { align: "center" });
+          doc.setFontSize(4);
+          doc.text("MACROHON", rightSealX, sealY + 6.5, { align: "center" });
+
+          // ── Center text header ─────────────────────────────────────────────
+          setColor(...DARK);
+          centerText("Republic of the Philippines", 10, 9, "normal");
+          centerText("Province of Southern Leyte", 15, 9, "normal");
+          centerText("Municipality of Macrohon", 20, 9, "normal");
+
+          // Thin blue divider
+          doc.setDrawColor(...BLUE);
+          doc.setLineWidth(0.4);
+          doc.line(margin + 30, 23, pageW - margin - 30, 23);
+
+          setColor(...BLUE);
+          centerText("OFFICE OF THE BARANGAY", 28, 10, "bold");
+
+          setColor(...DARK);
+          centerText(title.toUpperCase(), 35, 13, "bold");
+
+          // ── Sub-info row ───────────────────────────────────────────────────
+          const today = new Date().toLocaleDateString("en-PH", {
             year: "numeric",
             month: "long",
             day: "numeric",
           });
-          doc.text(`Generated on: ${dateStr}`, 14, 43);
 
-          // Prepare table data
-          const tableColumns = columns.map((col) => col.label);
-          const tableRows = data.map((row) =>
-            columns.map((col) => {
-              const value = row[col.key] || "";
-              return value.toString();
-            }),
-          );
+          const dateLabel =
+            extraFilters?.dateFrom && extraFilters?.dateTo
+              ? `${new Date(extraFilters.dateFrom).toLocaleDateString("en-PH")} – ${new Date(extraFilters.dateTo).toLocaleDateString("en-PH")}`
+              : today;
 
-          // Add table
-          autoTable(doc, {
-            head: [tableColumns],
-            body: tableRows,
-            startY: 48,
-            styles: {
-              fontSize: 8,
-              cellPadding: 3,
-            },
-            headStyles: {
-              fillColor: [15, 76, 129], // #0F4C81
-              textColor: 255,
-              fontStyle: "bold",
-            },
-            alternateRowStyles: {
-              fillColor: [248, 249, 250],
-            },
-            margin: { top: 35 },
+          const purokLabel = extraFilters?.purok
+            ? `Purok ${extraFilters.purok}`
+            : "All Puroks";
+
+          doc.setFillColor(239, 246, 255); // very light blue bg
+          doc.roundedRect(margin, 39, pageW - margin * 2, 9, 1, 1, "F");
+          doc.setDrawColor(...BLUE);
+          doc.setLineWidth(0.3);
+          doc.roundedRect(margin, 39, pageW - margin * 2, 9, 1, 1, "S");
+
+          doc.setFontSize(7.5);
+          doc.setFont("times", "normal");
+          setColor(...DARK);
+          doc.text(`Coverage: ${purokLabel}`, margin + 3, 44.5);
+          doc.text(`Total Records: ${data.length}`, pageW / 2, 44.5, {
+            align: "center",
+          });
+          doc.text(`Date Generated: ${today}`, pageW - margin - 3, 44.5, {
+            align: "right",
           });
 
-          // Save the PDF
-          doc.save(`${title}_${new Date().toISOString().split("T")[0]}.pdf`);
+          // ── Bottom red stripe of header ────────────────────────────────────
+          doc.setFillColor(...RED);
+          doc.rect(margin, 49, pageW - margin * 2, 1.5, "F");
+
+          // ── Table ──────────────────────────────────────────────────────────
+          const tableHeaders = ["#", ...columns.map((col) => col.label)];
+
+          const tableRows = data.map((row, idx) => [
+            String(idx + 1),
+            ...columns.map((col) => {
+              const value = row[col.key];
+              if (value === null || value === undefined) return "N/A";
+              if (col.type === "date") {
+                return new Date(value).toLocaleDateString("en-PH");
+              }
+              return value.toString();
+            }),
+          ]);
+
+          doc.autoTable({
+            head: [tableHeaders],
+            body: tableRows,
+            startY: 52,
+            margin: { left: margin, right: margin },
+            styles: {
+              font: "times",
+              fontSize: 8,
+              cellPadding: { top: 2.5, right: 3, bottom: 2.5, left: 3 },
+              lineColor: [229, 231, 235],
+              lineWidth: 0.2,
+            },
+            headStyles: {
+              fillColor: BLUE,
+              textColor: WHITE,
+              fontStyle: "bold",
+              fontSize: 8,
+              halign: "left",
+            },
+            columnStyles: {
+              0: {
+                halign: "center",
+                cellWidth: 8,
+                fontStyle: "bold",
+                textColor: GRAY,
+              },
+            },
+            alternateRowStyles: {
+              fillColor: [240, 245, 255],
+            },
+            didDrawPage: (hookData) => {
+              const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
+              const totalPages = doc.internal.getNumberOfPages();
+
+              // ── Page footer ──────────────────────────────────────────────
+              doc.setFillColor(...BLUE);
+              doc.rect(0, pageH - 8, pageW, 8, "F");
+
+              doc.setFont("times", "normal");
+              doc.setFontSize(7);
+              setColor(...WHITE);
+              doc.text(
+                "Barangay Management Information System  |  Municipality of Macrohon, Southern Leyte",
+                pageW / 2,
+                pageH - 3,
+                { align: "center" },
+              );
+              doc.text(
+                `Page ${pageNum} of ${totalPages}`,
+                pageW - margin,
+                pageH - 3,
+                { align: "right" },
+              );
+
+              // ── Signature block (last page only) ─────────────────────────
+              if (pageNum === totalPages) {
+                const sigY = hookData.cursor.y + 12;
+                if (sigY < pageH - 30) {
+                  doc.setFont("times", "normal");
+                  doc.setFontSize(8);
+                  setColor(...DARK);
+
+                  doc.text("Prepared by:", margin, sigY);
+                  doc.line(margin, sigY + 10, margin + 55, sigY + 10);
+                  doc.setFont("times", "bold");
+                  doc.text("Barangay Secretary", margin, sigY + 14);
+
+                  doc.setFont("times", "normal");
+                  doc.text("Certified correct:", pageW - margin - 55, sigY);
+                  doc.line(
+                    pageW - margin - 55,
+                    sigY + 10,
+                    pageW - margin,
+                    sigY + 10,
+                  );
+                  doc.setFont("times", "bold");
+                  doc.text("Barangay Captain", pageW - margin - 55, sigY + 14);
+                }
+              }
+            },
+          });
+
+          // ── Save ───────────────────────────────────────────────────────────
+          const filename = `${title.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`;
+          doc.save(filename);
         });
       })
       .catch((error) => {
