@@ -3022,14 +3022,19 @@ const ManageResidentsPage = () => {
           };
         } else {
           // Generate actual report file
-          generateReportFile(response.data, "PWD Members Report", [
-            { key: "full_name", label: "Full Name", type: "text" },
-            { key: "age", label: "Age", type: "number" },
-            { key: "gender", label: "Gender", type: "text" },
-            { key: "purok", label: "Purok", type: "text" },
-            { key: "household_number", label: "Household #", type: "text" },
-            { key: "contact_number", label: "Contact", type: "text" },
-          ]);
+          generateReportFile(
+            response.data,
+            "PWD Members Report",
+            [
+              { key: "full_name", label: "Full Name", type: "text" },
+              { key: "age", label: "Age", type: "number" },
+              { key: "gender", label: "Gender", type: "text" },
+              { key: "purok", label: "Purok", type: "text" },
+              { key: "household_number", label: "Household #", type: "text" },
+              { key: "contact_number", label: "Contact", type: "text" },
+            ],
+            filters,
+          );
           addNotification(
             "success",
             "Report Generated",
@@ -3057,14 +3062,19 @@ const ManageResidentsPage = () => {
           };
         } else {
           // Generate actual report file
-          generateReportFile(response.data, "4Ps Members Report", [
-            { key: "full_name", label: "Full Name", type: "text" },
-            { key: "age", label: "Age", type: "number" },
-            { key: "gender", label: "Gender", type: "text" },
-            { key: "purok", label: "Purok", type: "text" },
-            { key: "household_number", label: "Household #", type: "text" },
-            { key: "contact_number", label: "Contact", type: "text" },
-          ]);
+          generateReportFile(
+            response.data,
+            "4Ps Members Report",
+            [
+              { key: "full_name", label: "Full Name", type: "text" },
+              { key: "age", label: "Age", type: "number" },
+              { key: "gender", label: "Gender", type: "text" },
+              { key: "purok", label: "Purok", type: "text" },
+              { key: "household_number", label: "Household #", type: "text" },
+              { key: "contact_number", label: "Contact", type: "text" },
+            ],
+            filters,
+          );
           addNotification(
             "success",
             "Report Generated",
@@ -3093,15 +3103,24 @@ const ManageResidentsPage = () => {
           };
         } else {
           // Generate actual report file
-          generateReportFile(response.data, "Total Residents Report", [
-            { key: "full_name", label: "Full Name", type: "text" },
-            { key: "age", label: "Age", type: "number" },
-            { key: "gender", label: "Gender", type: "text" },
-            { key: "purok", label: "Purok", type: "text" },
-            { key: "civil_status", label: "Civil Status", type: "text" },
-            { key: "contact_number", label: "Contact", type: "text" },
-            { key: "registered_date", label: "Registered Date", type: "date" },
-          ]);
+          generateReportFile(
+            response.data,
+            "Total Residents Report",
+            [
+              { key: "full_name", label: "Full Name", type: "text" },
+              { key: "age", label: "Age", type: "number" },
+              { key: "gender", label: "Gender", type: "text" },
+              { key: "purok", label: "Purok", type: "text" },
+              { key: "civil_status", label: "Civil Status", type: "text" },
+              { key: "contact_number", label: "Contact", type: "text" },
+              {
+                key: "registered_date",
+                label: "Registered Date",
+                type: "date",
+              },
+            ],
+            filters,
+          );
           addNotification(
             "success",
             "Report Generated",
@@ -3129,14 +3148,19 @@ const ManageResidentsPage = () => {
           };
         } else {
           // Generate actual report file
-          generateReportFile(response.data, "Registered Voters Report", [
-            { key: "full_name", label: "Full Name", type: "text" },
-            { key: "age", label: "Age", type: "number" },
-            { key: "gender", label: "Gender", type: "text" },
-            { key: "purok", label: "Purok", type: "text" },
-            { key: "civil_status", label: "Civil Status", type: "text" },
-            { key: "contact_number", label: "Contact", type: "text" },
-          ]);
+          generateReportFile(
+            response.data,
+            "Registered Voters Report",
+            [
+              { key: "full_name", label: "Full Name", type: "text" },
+              { key: "age", label: "Age", type: "number" },
+              { key: "gender", label: "Gender", type: "text" },
+              { key: "purok", label: "Purok", type: "text" },
+              { key: "civil_status", label: "Civil Status", type: "text" },
+              { key: "contact_number", label: "Contact", type: "text" },
+            ],
+            filters,
+          );
           addNotification(
             "success",
             "Report Generated",
@@ -3164,15 +3188,20 @@ const ManageResidentsPage = () => {
           };
         } else {
           // Generate actual report file
-          generateReportFile(response.data, "Senior Citizens Report", [
-            { key: "full_name", label: "Full Name", type: "text" },
-            { key: "age", label: "Age", type: "number" },
-            { key: "gender", label: "Gender", type: "text" },
-            { key: "purok", label: "Purok", type: "text" },
-            { key: "civil_status", label: "Civil Status", type: "text" },
-            { key: "contact_number", label: "Contact", type: "text" },
-            // { key: "is_pwd", label: "PWD", type: "text" },
-          ]);
+          generateReportFile(
+            response.data,
+            "Senior Citizens Report",
+            [
+              { key: "full_name", label: "Full Name", type: "text" },
+              { key: "age", label: "Age", type: "number" },
+              { key: "gender", label: "Gender", type: "text" },
+              { key: "purok", label: "Purok", type: "text" },
+              { key: "civil_status", label: "Civil Status", type: "text" },
+              { key: "contact_number", label: "Contact", type: "text" },
+              // { key: "is_pwd", label: "PWD", type: "text" },
+            ],
+            filters,
+          );
           addNotification(
             "success",
             "Report Generated",
@@ -3189,11 +3218,11 @@ const ManageResidentsPage = () => {
       throw error;
     }
   };
-
   const generateReportFile = (data, title, columns, extraFilters = {}) => {
     import("jspdf")
       .then(({ default: jsPDF }) => {
-        // ✅ Side-effect import — patches doc.autoTable onto jsPDF.prototype
+        // ✅ FIX: jspdf-autotable has NO default export.
+        // It patches jsPDF.prototype as a side-effect — use doc.autoTable(), NOT autoTable(doc, ...)
         import("jspdf-autotable").then(() => {
           const doc = new jsPDF({
             orientation: "portrait",
@@ -3205,7 +3234,7 @@ const ManageResidentsPage = () => {
           const pageH = doc.internal.pageSize.getHeight();
           const margin = 14;
 
-          // ── Colors ──────────────────────────────────────────────────────────
+          // ── Color palette (Philippine flag) ────────────────────────────
           const BLUE = [0, 56, 168];
           const RED = [206, 17, 38];
           const GOLD = [252, 209, 22];
@@ -3226,13 +3255,13 @@ const ManageResidentsPage = () => {
             doc.text(text, pageW / 2, y, { align: "center" });
           };
 
-          // ── Blue top stripe ──────────────────────────────────────────────────
+          // ── Blue top stripe ──────────────────────────────────────────
           doc.setFillColor(...BLUE);
           doc.rect(0, 0, pageW, 5, "F");
           doc.setFillColor(...RED);
           doc.rect(0, 5, pageW, 2, "F");
 
-          // ── Left seal (Philippine) ───────────────────────────────────────────
+          // ── Left seal (Philippine) ────────────────────────────────────
           const sealCX = margin + 13;
           const sealCY = 16;
           doc.setFillColor(...GOLD);
@@ -3263,7 +3292,7 @@ const ManageResidentsPage = () => {
           doc.text("★", sealCX + 4, sealCY - 8.5);
           doc.text("★", sealCX - 0.5, sealCY + 10);
 
-          // ── Right seal (Barangay) ────────────────────────────────────────────
+          // ── Right seal (Barangay) ─────────────────────────────────────
           const rSealCX = pageW - margin - 13;
           doc.setFillColor(...RED);
           doc.circle(rSealCX, sealCY, 12, "F");
@@ -3278,7 +3307,7 @@ const ManageResidentsPage = () => {
             align: "center",
           });
 
-          // ── Center header text ───────────────────────────────────────────────
+          // ── Center header text ────────────────────────────────────────
           centerText("Republic of the Philippines", 10, 9, "normal", DARK);
           centerText("Province of Southern Leyte", 15, 9, "normal", DARK);
           centerText("Municipality of Macrohon", 20, 9, "normal", DARK);
@@ -3290,7 +3319,7 @@ const ManageResidentsPage = () => {
           centerText("OFFICE OF THE BARANGAY", 28.5, 10, "bold", BLUE);
           centerText(title.toUpperCase(), 36, 13, "bold", DARK);
 
-          // ── Info strip ───────────────────────────────────────────────────────
+          // ── Info strip ────────────────────────────────────────────────
           const today = new Date().toLocaleDateString("en-PH", {
             year: "numeric",
             month: "long",
@@ -3321,7 +3350,7 @@ const ManageResidentsPage = () => {
           doc.setFillColor(...RED);
           doc.rect(margin, 49.5, pageW - margin * 2, 1, "F");
 
-          // ── Table ─────────────────────────────────────────────────────────────
+          // ── Table ──────────────────────────────────────────────────────
           const tableHeaders = ["#", ...columns.map((col) => col.label)];
 
           const tableRows = data.map((row, idx) => [
@@ -3335,7 +3364,7 @@ const ManageResidentsPage = () => {
             }),
           ]);
 
-          // ✅ Call as doc.autoTable (NOT autoTable(doc, ...))
+          // ✅ Call as doc.autoTable (side-effect patched method)
           doc.autoTable({
             head: [tableHeaders],
             body: tableRows,
@@ -3390,7 +3419,7 @@ const ManageResidentsPage = () => {
             },
           });
 
-          // Signature block after table
+          // ── Signature block ────────────────────────────────────────────
           const finalY = doc.lastAutoTable.finalY + 14;
           if (finalY < pageH - 35) {
             doc.setFont("times", "normal");
@@ -3408,12 +3437,11 @@ const ManageResidentsPage = () => {
               finalY + 10,
             );
             doc.setFont("times", "bold");
-            doc.setFontSize(8);
             doc.text("Barangay Secretary", margin, finalY + 14);
             doc.text("Barangay Captain", pageW - margin - 55, finalY + 14);
           }
 
-          // ── Save ──────────────────────────────────────────────────────────────
+          // ── Save ───────────────────────────────────────────────────────
           const filename = `${title.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(filename);
         });
