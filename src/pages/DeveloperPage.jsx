@@ -43,7 +43,7 @@ const teamMembers = [
     image: "/images/yornamel.jpg",
     github: "https://github.com/member4",
     facebook: "https://www.facebook.com/warion.poortweny.420",
-    instagram: "https://instagram.com/member4",
+    instagram: "https://www.instagram.com/_9yown/?next=%2F",
     discord: "member4#3456",
   },
   {
