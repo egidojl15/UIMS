@@ -40,7 +40,7 @@ const teamMembers = [
     role: "QA Tester - Backend Engineer",
     contribution:
       "Operates at the intersection of development and reliability, engineering high-performance backend logic while maintaining a comprehensive automated testing suite. By identifying edge cases and optimizing server-side performance, they ensure the platform remains secure, stable, and ready for enterprise-level traffic.",
-    image: "/images/marion.png",
+    image: "/images/yornamel.jpg",
     github: "https://github.com/member4",
     facebook: "https://www.facebook.com/warion.poortweny.420",
     instagram: "https://instagram.com/member4",
