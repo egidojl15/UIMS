@@ -29,7 +29,7 @@ const teamMembers = [
     role: "Backend Engineer",
     contribution:
       "Engineered the high-performance server-side architecture and designed the complex database schemas that power our platform. By developing secure, scalable APIs and optimizing data retrieval, they ensure our application handles heavy traffic with absolute stability and speed.",
-    image: "/images/tuwad.jpg",
+    image: "/images/sykes.jpg",
     github: "https://github.com/",
     facebook: "https://www.facebook.com/sikee696",
     instagram: "https://instagram.com/",
@@ -238,7 +238,8 @@ const DeveloperPage = () => {
           </div>
 
           <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto font-light">
-            Dive into the depths of innovation with our team of dedicated developers and our esteemed adviser.
+            Dive into the depths of innovation with our team of dedicated
+            developers and our esteemed adviser.
           </p>
         </div>
       </section>
@@ -258,7 +259,9 @@ const DeveloperPage = () => {
                   <div
                     key={i}
                     className={`group relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-6 transition-all duration-500 border border-white/20 cursor-pointer hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.03] ${
-                      hoveredCard === i ? "scale-[1.03] shadow-2xl shadow-blue-500/30" : ""
+                      hoveredCard === i
+                        ? "scale-[1.03] shadow-2xl shadow-blue-500/30"
+                        : ""
                     }`}
                     onMouseEnter={() => setHoveredCard(i)}
                     onMouseLeave={() => setHoveredCard(null)}
@@ -276,7 +279,9 @@ const DeveloperPage = () => {
                       <h3 className="text-xl font-bold text-[#06172E] group-hover:text-[#0F4C81] transition-colors">
                         {member.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mt-1 mb-4">{member.role}</p>
+                      <p className="text-sm text-gray-600 mt-1 mb-4">
+                        {member.role}
+                      </p>
 
                       <div className="p-4 bg-gradient-to-r from-[#B3DEF8]/20 to-transparent rounded-2xl border-l-4 border-[#0F4C81] text-left">
                         <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
@@ -313,7 +318,9 @@ const DeveloperPage = () => {
                   <h3 className="text-xl font-bold text-[#06172E] group-hover:text-[#0F4C81] transition-colors">
                     {adviser.name}
                   </h3>
-                  <p className="text-sm text-gray-600 mt-1 mb-4">{adviser.role}</p>
+                  <p className="text-sm text-gray-600 mt-1 mb-4">
+                    {adviser.role}
+                  </p>
 
                   <div className="p-4 bg-gradient-to-r from-[#B3DEF8]/20 to-transparent rounded-2xl border-l-4 border-[#0F4C81] text-left">
                     <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
@@ -347,11 +354,13 @@ const DeveloperPage = () => {
             opacity: 0.7;
           }
           50% {
-            transform: translateY(-60vh) translateX(${Math.random() * 30 - 15}px) scale(1.3);
+            transform: translateY(-60vh)
+              translateX(${Math.random() * 30 - 15}px) scale(1.3);
             opacity: 1;
           }
           100% {
-            transform: translateY(-120vh) translateX(${Math.random() * 50 - 25}px) scale(0.7);
+            transform: translateY(-120vh)
+              translateX(${Math.random() * 50 - 25}px) scale(0.7);
             opacity: 0;
           }
         }
